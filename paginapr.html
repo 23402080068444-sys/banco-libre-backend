@@ -266,7 +266,8 @@ function depositar(){
   localStorage.setItem("cuentas", JSON.stringify(cuentas));
   alert("Depósito realizado");
 
-  fetch("http://localhost:3000/enviar-correo", {
+  // 👉 Cambiado a la URL pública de Render
+  fetch("https://banco-libre-backend.onrender.com/enviar-correo", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -277,7 +278,7 @@ function depositar(){
       hora: hora
     })
   })
-  .then(res => res.text())
+  .then(res => res.json())
   .then(data => console.log("Respuesta del servidor:", data))
   .catch(err => console.error("Error al enviar correo:", err));
 }
@@ -342,7 +343,8 @@ function enviarPin(){
   pinTemporal = Math.floor(100000 + Math.random() * 900000);
   correoTemporal = correo;
 
-  fetch("http://localhost:3000/enviar-pin", {
+  // 👉 Cambiado a la URL pública de Render
+  fetch("https://banco-libre-backend.onrender.com/enviar-pin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -351,7 +353,7 @@ function enviarPin(){
       cuenta: cuenta
     })
   })
-  .then(res => res.text())
+  .then(res => res.json())
   .then(data => console.log("Respuesta del servidor:", data))
   .catch(err => console.error("Error al enviar PIN:", err));
 
