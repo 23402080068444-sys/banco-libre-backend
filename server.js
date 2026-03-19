@@ -2,11 +2,20 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config(); // Cargar variables de entorno desde .env
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+
+// Servir archivos estáticos (HTML, CSS, imágenes, etc.)
+app.use(express.static(path.join(__dirname)));
+
+// Ruta raíz que abre 1pag.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "1pag.html"));
+});
 
 // Configuración de transporte SMTP con Gmail usando variables de entorno
 let transporter = nodemailer.createTransport({
