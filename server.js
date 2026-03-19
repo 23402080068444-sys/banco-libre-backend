@@ -9,10 +9,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Servir archivos estáticos (HTML, CSS, imágenes, etc.)
+// 👉 Servir archivos estáticos (HTML, CSS, imágenes, etc.)
 app.use(express.static(path.join(__dirname)));
 
-// Ruta raíz que abre 1pag.html
+// 👉 Ruta raíz que abre 1pag.html como principal
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
 });
@@ -40,12 +40,7 @@ app.post("/enviar-correo", (req, res) => {
     from: process.env.GMAIL_USER,
     to: correo,
     subject: "Ticket de depósito - Banco Libre",
-    text: `Se ha realizado un depósito:\n\n
-Origen: ${origen}\n
-Destino: ${destino}\n
-Monto: $${monto}\n
-Hora: ${hora}\n\n
-Gracias por usar Banco Libre.`
+    text: `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}\n\nGracias por usar Banco Libre.`
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -72,10 +67,7 @@ app.post("/enviar-pin", (req, res) => {
     from: process.env.GMAIL_USER,
     to: correo,
     subject: "PIN de restablecimiento - Banco Libre",
-    text: `Hola, se solicitó un restablecimiento de contraseña.\n\n
-Cuenta: ${cuenta}\n
-PIN de verificación: ${pin}\n\n
-Ingresa este PIN en la aplicación para cambiar tu contraseña.`
+    text: `Hola, se solicitó un restablecimiento de contraseña.\n\nCuenta: ${cuenta}\nPIN de verificación: ${pin}\n\nIngresa este PIN en la aplicación para cambiar tu contraseña.`
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -88,7 +80,7 @@ Ingresa este PIN en la aplicación para cambiar tu contraseña.`
   });
 });
 
-// Puerto dinámico para despliegue en la nube
+// Puerto dinámico para despliegue en la nube (Render)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
