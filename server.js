@@ -21,12 +21,17 @@ app.get("/paginapr.html", (req, res) => {
   res.sendFile(path.join(__dirname, "paginapr.html"));
 });
 
-// ⚠️ Configuración de transporte SMTP con Gmail (credenciales directas)
+// ⚠️ Configuración de transporte SMTP con Gmail (usando puerto 587 y TLS)
 let transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // STARTTLS
   auth: {
-    user: "mg307966@gmail.com",              // tu correo
-    pass: "accz fvzd yqwx aekg"              // tu contraseña de aplicación
+    user: process.env.GMAIL_USER,   // tu correo desde variables de entorno
+    pass: process.env.GMAIL_PASS    // tu App Password de 16 dígitos
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
@@ -41,7 +46,7 @@ app.post("/enviar-correo", (req, res) => {
   }
 
   let mailOptions = {
-    from: "mg307966@gmail.com",
+    from: process.env.GMAIL_USER,
     to: correo,
     subject: "Ticket de depósito - Banco Libre",
     text: `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}\n\nGracias por usar Banco Libre.`
@@ -68,7 +73,7 @@ app.post("/enviar-pin", (req, res) => {
   }
 
   let mailOptions = {
-    from: "mg307966@gmail.com",
+    from: process.env.GMAIL_USER,
     to: correo,
     subject: "PIN de restablecimiento - Banco Libre",
     text: `Hola, se solicitó un restablecimiento de contraseña.\n\nCuenta: ${cuenta}\nPIN de verificación: ${pin}\n\nIngresa este PIN en la aplicación para cambiar tu contraseña.`
