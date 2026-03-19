@@ -3,7 +3,6 @@ const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config(); // Cargar variables de entorno desde .env
 
 const app = express();
 app.use(cors());
@@ -22,15 +21,14 @@ app.get("/paginapr.html", (req, res) => {
   res.sendFile(path.join(__dirname, "paginapr.html"));
 });
 
-// Configuración de transporte SMTP con Gmail usando variables de entorno
+// ⚠️ Configuración de transporte SMTP con Gmail (credenciales directas)
 let transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
+    user: "mg307966@gmail.com",              // tu correo
+    pass: "vmuc blcu yczg wjyd"              // tu contraseña de aplicación
   }
 });
-
 
 // Endpoint para enviar ticket de depósito
 app.post("/enviar-correo", (req, res) => {
@@ -43,7 +41,7 @@ app.post("/enviar-correo", (req, res) => {
   }
 
   let mailOptions = {
-    from: process.env.GMAIL_USER,
+    from: "mg307966@gmail.com",
     to: correo,
     subject: "Ticket de depósito - Banco Libre",
     text: `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}\n\nGracias por usar Banco Libre.`
@@ -70,7 +68,7 @@ app.post("/enviar-pin", (req, res) => {
   }
 
   let mailOptions = {
-    from: process.env.GMAIL_USER,
+    from: "mg307966@gmail.com",
     to: correo,
     subject: "PIN de restablecimiento - Banco Libre",
     text: `Hola, se solicitó un restablecimiento de contraseña.\n\nCuenta: ${cuenta}\nPIN de verificación: ${pin}\n\nIngresa este PIN en la aplicación para cambiar tu contraseña.`
