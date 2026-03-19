@@ -27,8 +27,8 @@ let transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // STARTTLS
   auth: {
-    user: .env.GMAIL_USER,
-    pass: .env.GMAIL_PASS
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
   },
   tls: {
     rejectUnauthorized: false,
