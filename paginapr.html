@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banco Libre</title>
+<style>
+/* estilos iguales a los que ya tenías */
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+.app {
+  width: 390px;
+  height: 667px;
+  background: #fff;
+  border-radius: 40px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.pantalla { display: none; padding: 20px; text-align: center; flex: 1; }
+.pantalla.activa { display: block; }
+h1,h2 { color: #007aff; }
+input {
+  width: 80%; padding: 12px; margin: 10px 0;
+  border: 1px solid #ccc; border-radius: 12px; font-size: 16px;
+}
+button {
+  background: #007aff; color: white; border: none; border-radius: 12px;
+  padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer;
+}
+button:hover { background: #005bb5; }
+ul { list-style: none; padding: 0; }
+ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
+.logo {
+  width: 90%; max-width: 300px; height: auto; border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.logo:hover { transform: scale(1.05); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
+.logo:active { transform: scale(0.95); opacity: 0.85; }
+.header {
+  position:absolute; top:0; left:0; width:100%; height:60px;
+  background:#007aff; color:white; display:flex; align-items:center;
+  padding:0 15px; z-index:1000;
+}
+.menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; }
+.title { font-weight: bold; }
+.drawer {
+  position: absolute; top: 0; left: -250px; width: 250px; height: 100%;
+  background: white; box-shadow: 2px 0 10px rgba(0,0,0,.3);
+  transition: .3s; padding-top: 60px; z-index: 20;
+}
+.drawer.active { left: 0; }
+.drawer a {
+  display: block; padding: 15px; text-decoration: none; color: #333;
+  border-bottom: 1px solid #ddd;
+}
+.overlay {
+  position: absolute; width: 100%; height: 100%;
+  background: rgba(0,0,0,.4); display: none; z-index: 15;
+}
+.overlay.active { display: block; }
+.contenido { padding-top: 80px; }
+</style>
+</head>
+
+<body><div class="app">
+
+  <!-- drawer -->
+  <div class="drawer" id="drawer">
+    <a onclick="cambiarPantalla('inicio');toggleMenu()">Inicio</a>
+    <a onclick="cambiarPantalla('balance');toggleMenu()">Balance</a>
+    <a onclick="cambiarPantalla('depositos');toggleMenu()">Depósitos</a>
+    <a onclick="cambiarPantalla('perfil');toggleMenu()">Perfil</a>
+    <a onclick="logout();toggleMenu()">Cerrar sesión</a>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <!-- login -->
+  <div id="login" class="pantalla activa">
+    <img src="bancolibre.jpg.jpeg" class="logo">
+    <h1>Inicio de Sesión</h1>
+    <input id="usuario" placeholder="Número de cuenta">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button onclick="login()">Ingresar</button>
+    <button onclick="cambiarPantalla('registro')">Crear cuenta</button>
+    <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
+  </div>
+
+  <!-- registro -->
+  <div id="registro" class="pantalla">
+    <h2>Crear cuenta</h2>
+    <input id="nuevaCuenta" placeholder="Número de cuenta">
+    <input id="nuevaPassword" type="password" placeholder="Contraseña">
+    <input id="nuevoCorreo" type="email" placeholder="Correo electrónico">
+    <button onclick="crearCuenta()">Registrar</button>
+    <button onclick="cambiarPantalla('login')">Volver</button>
+  </div>
+
+  <!-- inicio -->
+  <div id="inicio" class="pantalla">
+    <div class="header">
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <div class="title">Banco Libre</div>
+    </div>
+    <div class="contenido">
+      <h2>Bienvenido</h2>
+      <p>Cuenta: <span id="cuentaActual"></span></p>
+    </div>
+  </div>
+
+  <!-- depositos -->
+  <div id="depositos" class="pantalla">
+    <div class="header">
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <div class="title">Banco Libre</div>
+    </div>
+    <div class="contenido">
+      <h2>Depósitos</h2>
+      <input id="cuentaDestino" placeholder="Cuenta destino">
+      <input id="monto" type="number" placeholder="Monto">
+      <button onclick="depositar()">Depositar</button>
+    </div>
+  </div>
+
+  <!-- balance -->
+<!-- balance -->
+<div id="balance" class="pantalla">
+  <div class="header">
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    <div class="title">Banco Libre</div>
+  </div>
+  <div class="contenido">
+    <h2>Saldo: $<span id="saldo">0</span></h2>
+    <h3>Movimientos</h3>
+    <ul id="movimientos"></ul>
+    <!-- Botón para imprimir ticket -->
+    
+  </div>
+</div>
+
+  <!-- perfil -->
+  <div id="perfil" class="pantalla">
+    <div class="header">
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <div class="title">Banco Libre</div>
+    </div>
+    <div class="contenido">
+      <h2>Perfil</h2>
+      <p>Cuenta actual: <span id="cuentaPerfil"></span></p>
+    </div>
+  </div>
+
+  <!-- reset -->
+  <div id="reset" class="pantalla">
+    <h2>Restablecer contraseña</h2>
+    <input id="correoReset" placeholder="Correo registrado">
+    <button onclick="enviarPin()">Enviar PIN</button>
+    <input id="pinIngresado" placeholder="PIN">
+    <input id="nuevaPasswordReset" type="password" placeholder="Nueva contraseña">
+    <button onclick="cambiarPassword()">Cambiar contraseña</button>
+    <button onclick="cambiarPantalla('login')">Volver</button>
+  </div>
+<script>
+let cuentas = JSON.parse(localStorage.getItem("cuentas")) || {};
+let cuentaActual = null;
+let pinTemporal = null;
+let correoTemporal = null;
+
+/* menu */
+function toggleMenu(){
+  drawer.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
+
+/* crear cuenta */
+function crearCuenta(){
+  let c = nuevaCuenta.value.trim();
+  let p = nuevaPassword.value.trim();
+  let correo = nuevoCorreo.value.trim().toLowerCase();
+
+  if(!c || !p || !correo){
+    alert("Completa todos los campos");
+    return;
+  }
+
+  let regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!regexCorreo.test(correo)){
+    alert("Correo inválido");
+    return;
+  }
+
+  if(cuentas[c]){
+    alert("La cuenta ya existe");
+    return;
+  }
+
+  cuentas[c] = {password:p, correo:correo, saldo:10000, movimientos:[]};
+  localStorage.setItem("cuentas", JSON.stringify(cuentas));
+  alert("Cuenta creada con saldo inicial de $10000");
+  cambiarPantalla("login");
+}
+
+/* login */
+function login(){
+  let u = usuario.value;
+  let p = password.value;
+
+  if(cuentas[u] && cuentas[u].password === p){
+    cuentaActual = u;
+    cuentaActualSpan();
+    cambiarPantalla("inicio");
+  } else {
+    alert("Datos incorrectos");
+  }
+}
+
+/* logout */
+function logout(){
+  cuentaActual = null;
+  cambiarPantalla("login");
+}
+
+/* deposito */
+function depositar(){
+  let montoDeposito = parseFloat(monto.value);
+  let destino = cuentaDestino.value.trim();
+
+  if(!cuentas[destino]){
+    alert("Cuenta destino no existe");
+    return;
+  }
+
+  if(montoDeposito <= 0){
+    alert("Monto inválido");
+    return;
+  }
+
+  if(cuentas[cuentaActual].saldo < montoDeposito){
+    alert("Saldo insuficiente");
+    return;
+  }
+
+  cuentas[cuentaActual].saldo -= montoDeposito;
+  let hora = new Date().toLocaleString();
+
+  cuentas[cuentaActual].movimientos.push(
+    `Depósito enviado a ${destino} | $${montoDeposito} | ${hora}`
+  );
+
+  cuentas[destino].saldo += montoDeposito;
+  cuentas[destino].movimientos.push(
+    `Depósito recibido de ${cuentaActual} | $${montoDeposito} | ${hora}`
+  );
+
+  localStorage.setItem("cuentas", JSON.stringify(cuentas));
+  alert("Depósito realizado");
+
+  fetch("http://localhost:3000/enviar-correo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      destino: destino,
+      monto: montoDeposito,
+      correo: cuentas[destino].correo,
+      origen: cuentaActual,
+      hora: hora
+    })
+  })
+  .then(res => res.text())
+  .then(data => console.log("Respuesta del servidor:", data))
+  .catch(err => console.error("Error al enviar correo:", err));
+}
+
+/* cambiar pantalla */
+function cambiarPantalla(id){
+  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
+  document.getElementById(id).classList.add("activa");
+
+  if(cuentaActual){
+    cuentaActualSpan();
+    if(id === "balance"){
+      saldo.textContent = cuentas[cuentaActual].saldo;
+      movimientos.innerHTML = "";
+      cuentas[cuentaActual].movimientos.forEach(m => {
+        let li = document.createElement("li");
+        li.textContent = m;
+
+        // Botón imprimir al lado de cada movimiento
+        let btn = document.createElement("button");
+        btn.textContent = "Imprimir Ticket";
+        btn.style.marginLeft = "10px";
+        btn.onclick = () => imprimirTicketMovimiento(m);
+
+        li.appendChild(btn);
+        movimientos.appendChild(li);
+      });
+    }
+  }
+}
+
+/* actualizar cuenta */
+function cuentaActualSpan(){
+  document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e => {
+    e.textContent = cuentaActual;
+  });
+}
+
+/* imprimir ticket de un movimiento */
+function imprimirTicketMovimiento(movimiento){
+  let contenido = "<h2>Ticket de Movimiento</h2>";
+  contenido += "<p><strong>Cuenta:</strong> " + cuentaActual + "</p>";
+  contenido += "<p><strong>Saldo actual:</strong> $" + cuentas[cuentaActual].saldo + "</p>";
+  contenido += "<p><strong>Detalle:</strong> " + movimiento + "</p>";
+
+  let ventana = window.open("", "Ticket", "width=600,height=400");
+  ventana.document.write(contenido);
+  ventana.document.close();
+  ventana.print();
+}
+
+/* reset */
+function enviarPin(){
+  let correo = correoReset.value.trim().toLowerCase();
+  let cuenta = Object.keys(cuentas).find(c => cuentas[c].correo === correo);
+
+  if(!cuenta){
+    alert("Correo no registrado");
+    return;
+  }
+
+  pinTemporal = Math.floor(100000 + Math.random() * 900000);
+  correoTemporal = correo;
+
+  fetch("http://localhost:3000/enviar-pin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      correo: correo,
+      pin: pinTemporal,
+      cuenta: cuenta
+    })
+  })
+  .then(res => res.text())
+  .then(data => console.log("Respuesta del servidor:", data))
+  .catch(err => console.error("Error al enviar PIN:", err));
+
+  alert("PIN enviado al correo registrado");
+}
+
+function cambiarPassword(){
+  if(parseInt(pinIngresado.value) === pinTemporal){
+    let cuenta = Object.keys(cuentas).find(c => cuentas[c].correo === correoTemporal);
+    cuentas[cuenta].password = nuevaPasswordReset.value;
+    localStorage.setItem("cuentas", JSON.stringify(cuentas));
+    alert("Contraseña cambiada");
+    cambiarPantalla("login");
+  } else {
+    alert("PIN incorrecto");
+  }
+}
+</script>
+
+
+
+</body>
+</html>

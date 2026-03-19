@@ -1,0 +1,86 @@
+const express = require("express");
+const nodemailer = require("nodemailer");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+require("dotenv").config(); // Cargar variables de entorno desde .env
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// Configuración de transporte SMTP con Gmail usando variables de entorno
+let transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER, // tu correo Gmail
+    pass: process.env.GMAIL_PASS  // tu contraseña de aplicación
+  }
+});
+
+// Endpoint para enviar ticket de depósito
+app.post("/enviar-correo", (req, res) => {
+  console.log("Datos recibidos en /enviar-correo:", req.body);
+  const { destino, monto, correo, origen, hora } = req.body;
+
+  if (!correo) {
+    console.error("Error: correo destino vacío o inválido");
+    return res.status(400).json({ success: false, message: "Correo destino inválido" });
+  }
+
+  let mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: correo,
+    subject: "Ticket de depósito - Banco Libre",
+    text: `Se ha realizado un depósito:\n\n
+Origen: ${origen}\n
+Destino: ${destino}\n
+Monto: $${monto}\n
+Hora: ${hora}\n\n
+Gracias por usar Banco Libre.`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error al enviar correo:", error);
+      return res.status(500).json({ success: false, message: error.toString() });
+    }
+    console.log("Correo enviado:", info.response);
+    res.json({ success: true, message: "Correo enviado", data: info.response });
+  });
+});
+
+// Endpoint para enviar PIN de restablecimiento
+app.post("/enviar-pin", (req, res) => {
+  console.log("Datos recibidos en /enviar-pin:", req.body);
+  const { correo, pin, cuenta } = req.body;
+
+  if (!correo) {
+    console.error("Error: correo vacío o inválido");
+    return res.status(400).json({ success: false, message: "Correo inválido" });
+  }
+
+  let mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: correo,
+    subject: "PIN de restablecimiento - Banco Libre",
+    text: `Hola, se solicitó un restablecimiento de contraseña.\n\n
+Cuenta: ${cuenta}\n
+PIN de verificación: ${pin}\n\n
+Ingresa este PIN en la aplicación para cambiar tu contraseña.`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error al enviar PIN:", error);
+      return res.status(500).json({ success: false, message: error.toString() });
+    }
+    console.log("PIN enviado:", info.response);
+    res.json({ success: true, message: "PIN enviado", data: info.response });
+  });
+});
+
+// Puerto dinámico para despliegue en la nube
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
