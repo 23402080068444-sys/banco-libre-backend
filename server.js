@@ -17,6 +17,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
 });
 
+// 👉 Ruta para paginapr.html
+app.get("/paginapr.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "paginapr.html"));
+});
+
 // Configuración de transporte SMTP con Gmail usando variables de entorno
 let transporter = nodemailer.createTransport({
   service: "gmail",
