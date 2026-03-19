@@ -21,17 +21,18 @@ app.get("/paginapr.html", (req, res) => {
   res.sendFile(path.join(__dirname, "paginapr.html"));
 });
 
-// ⚠️ Configuración de transporte SMTP con Gmail (usando puerto 587 y TLS)
+// ⚠️ Configuración de transporte SMTP con Gmail (puerto 587 + STARTTLS)
 let transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false, // STARTTLS
   auth: {
-    user: process.env.GMAIL_USER,   // tu correo desde variables de entorno
-    pass: process.env.GMAIL_PASS    // tu App Password de 16 dígitos
+    user: process.env.GMAIL_USER,   // definido en Render Dashboard
+    pass: process.env.GMAIL_PASS    // App Password de 16 dígitos
   },
   tls: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    minVersion: "TLSv1.2"           // fuerza TLS moderno
   }
 });
 
@@ -94,3 +95,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
