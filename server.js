@@ -26,10 +26,11 @@ app.get("/paginapr.html", (req, res) => {
 let transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.GMAIL_USER, // tu correo Gmail
-    pass: process.env.GMAIL_PASS  // tu contraseña de aplicación
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
   }
 });
+
 
 // Endpoint para enviar ticket de depósito
 app.post("/enviar-correo", (req, res) => {
