@@ -344,7 +344,7 @@ function enviarPin(){
   correoTemporal = correo;
 
   // 👉 Cambiado a la URL pública de Render
-  fetch("https://banco-libre-backend.onrender.com/enviar-pin", {
+fetch("https://banco-libre-backend.onrender.com/enviar-pin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
