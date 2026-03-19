@@ -27,14 +27,17 @@ let transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // STARTTLS
   auth: {
-    user: process.env.GMAIL_USER,   // definido en Render Dashboard
-    pass: process.env.GMAIL_PASS    // App Password de 16 dígitos
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
   },
   tls: {
     rejectUnauthorized: false,
-    minVersion: "TLSv1.2"           // fuerza TLS moderno
-  }
+    minVersion: "TLSv1.2"
+  },
+  family: 4 // fuerza IPv4 en lugar de IPv6
 });
+
+
 
 // Endpoint para enviar ticket de depósito
 app.post("/enviar-correo", (req, res) => {
