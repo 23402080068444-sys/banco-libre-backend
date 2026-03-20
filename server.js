@@ -202,13 +202,14 @@ app.post("/cambiar-password", async (req, res) => {
 // Carritos por usuario (clave = correo)
 let carritos = {};
 
-// Agregar al carrito
+// Agregar al carrito con precioUnitario
 app.post("/carrito/add", (req, res) => {
-  const { userEmail, crypto, cantidad } = req.body;
+  const { userEmail, crypto, cantidad, precioUnitario } = req.body;
   if (!carritos[userEmail]) carritos[userEmail] = [];
-  carritos[userEmail].push({ crypto, cantidad });
-  res.json({ ok: true, mensaje: `${crypto} agregado al carrito` });
+  carritos[userEmail].push({ crypto, cantidad, precioUnitario });
+  res.json({ ok: true, mensaje: `${crypto} agregado al carrito por $${precioUnitario}` });
 });
+
 
 // Ver carrito del usuario
 app.get("/carrito/:userEmail", (req, res) => {
