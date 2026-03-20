@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Usuario = require("./models/Usuario");
 const Compra = require("./models/Compra"); // nuevo modelo para compras
+const Carrito = require("./models/Carrito");
 
 const app = express();
 app.use(cors());
