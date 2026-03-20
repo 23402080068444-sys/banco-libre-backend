@@ -17,13 +17,15 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB conectado"))
   .catch(err => console.error("Error MongoDB:", err));
 
-// Servir archivos estáticos desde la raíz
-app.use(express.static(path.join(__dirname)));
+// Servir archivos estáticos desde la carpeta views
+app.use(express.static(path.join(__dirname, "views")));
+
 
 // Ruta principal (login)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
 });
+
 
 
 
