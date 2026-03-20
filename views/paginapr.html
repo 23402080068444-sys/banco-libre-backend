@@ -34,6 +34,14 @@ input {
   width: 80%; padding: 12px; margin: 10px 0;
   border: 1px solid #ccc; border-radius: 12px; font-size: 16px;
 }
+#movimientos {
+  max-height: 400px;   /* límite de altura visible */
+  overflow-y: auto;    /* activa scroll vertical */
+  padding: 10px;       /* espacio interno */
+  background: #f9f9f9; /* fondo suave */
+  border-radius: 12px; /* esquinas redondeadas */
+}
+
 button {
   background: #007aff; color: white; border: none; border-radius: 12px;
   padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer;
@@ -145,11 +153,13 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
   <div class="contenido">
     <h2>Saldo: $<span id="saldo">0</span></h2>
     <h3>Movimientos</h3>
-    <ul id="movimientos"></ul>
+    <div id="movimientos">
+      <ul id="listaMovimientos"></ul>
+    </div>
     <!-- Botón para imprimir ticket -->
-    
   </div>
 </div>
+
 
   <!-- perfil -->
   <div id="perfil" class="pantalla">

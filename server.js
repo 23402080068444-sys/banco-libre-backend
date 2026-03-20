@@ -196,40 +196,66 @@ app.post("/cambiar-password", async (req, res) => {
   res.json({ ok: true, mensaje: "Contraseña cambiada" });
 }); 
 // ===============================
+// ===============================
 //   CRIPTOMONEDAS: Carrito y Compras
 // ===============================
-let carrito = [];
 
+// Carritos por usuario (clave = correo)
+let carritos = {};
+
+// Agregar al carrito
 app.post("/carrito/add", (req, res) => {
-  const { crypto } = req.body;
-  carrito.push(crypto);
+  const { userEmail, crypto, cantidad } = req.body;
+  if (!carritos[userEmail]) carritos[userEmail] = [];
+  carritos[userEmail].push({ crypto, cantidad });
   res.json({ ok: true, mensaje: `${crypto} agregado al carrito` });
 });
 
+// Ver carrito del usuario
+app.get("/carrito/:userEmail", (req, res) => {
+  const { userEmail } = req.params;
+  res.json({ ok: true, carrito: carritos[userEmail] || [] });
+});
+
+// Eliminar del carrito
+app.post("/carrito/remove", (req, res) => {
+  const { userEmail, crypto } = req.body;
+  if (carritos[userEmail]) {
+    carritos[userEmail] = carritos[userEmail].filter(item => item.crypto !== crypto);
+  }
+  res.json({ ok: true, mensaje: `${crypto} eliminado del carrito` });
+});
+
+// Checkout del carrito
 app.post("/carrito/checkout", async (req, res) => {
   const { userEmail } = req.body;
 
   const ticketId = Date.now().toString();
   const fecha = new Date().toLocaleString();
-  const items = [...carrito];
+  const items = [...(carritos[userEmail] || [])];
 
   // Guardar en MongoDB
   await Compra.create({ ticketId, fecha, items, userEmail });
 
-  // Ticket por correo
-  let ticket = new SibApiV3Sdk.SendSmtpEmail();
-  ticket.sender = { email: "mg307966@gmail.com" };
-  ticket.to = [{ email: userEmail }];
-  ticket.subject = `Ticket de compra #${ticketId} - Banco Libre`;
-  ticket.textContent = `Gracias por tu compra.\n\nTicket: ${ticketId}\nFecha: ${fecha}\nCriptomonedas:\n${items.join(", ")}\n\nBanco Libre`;
-
-  try {
-    await apiInstance.sendTransacEmail(ticket);
-    carrito = []; // vaciar carrito después de la compra
-    res.json({ ok: true, mensaje: "Compra registrada y ticket enviado al correo." });
-  } catch (error) {
-    res.json({ ok: false, mensaje: "Error al enviar ticket: " + error.toString() });
+  // Registrar movimiento en balance
+  const user = await Usuario.findOne({ correo: userEmail });
+  if (user) {
+    user.movimientos.push(`Compra de ${items.map(i => i.crypto).join(", ")} | ${fecha}`);
+    await user.save();
   }
+
+  // Vaciar carrito después de la compra
+  carritos[userEmail] = [];
+
+  res.json({ ok: true, mensaje: "Compra registrada correctamente." });
+});
+
+// ===============================
+//   MIS CRIPTOS (solo compras)
+// ===============================
+app.get("/mis-criptos/:userEmail", async (req, res) => {
+  const compras = await Compra.find({ userEmail: req.params.userEmail });
+  res.json({ ok: true, compras });
 });
 
 // ===============================
