@@ -21,23 +21,16 @@ app.get("/paginapr.html", (req, res) => {
   res.sendFile(path.join(__dirname, "paginapr.html"));
 });
 
-// ⚠️ Configuración de transporte SMTP con Gmail (puerto 587 + STARTTLS)
+// ⚠️ Configuración de transporte SMTP con Brevo
 let transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false, // STARTTLS
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false,
-    minVersion: "TLSv1.2"
-  },
-  family: 4 // fuerza IPv4 en lugar de IPv6
+    user: process.env.BREVO_USER, // tu usuario SMTP de Brevo
+    pass: process.env.BREVO_PASS  // tu contraseña SMTP de Brevo
+  }
 });
-
-
 
 // Endpoint para enviar ticket de depósito
 app.post("/enviar-correo", (req, res) => {
@@ -50,7 +43,7 @@ app.post("/enviar-correo", (req, res) => {
   }
 
   let mailOptions = {
-    from: process.env.GMAIL_USER,
+    from: process.env.BREVO_USER,
     to: correo,
     subject: "Ticket de depósito - Banco Libre",
     text: `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}\n\nGracias por usar Banco Libre.`
@@ -77,7 +70,7 @@ app.post("/enviar-pin", (req, res) => {
   }
 
   let mailOptions = {
-    from: process.env.GMAIL_USER,
+    from: process.env.BREVO_USER,
     to: correo,
     subject: "PIN de restablecimiento - Banco Libre",
     text: `Hola, se solicitó un restablecimiento de contraseña.\n\nCuenta: ${cuenta}\nPIN de verificación: ${pin}\n\nIngresa este PIN en la aplicación para cambiar tu contraseña.`
@@ -98,4 +91,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
