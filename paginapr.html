@@ -176,13 +176,29 @@ let cuentaActual = null;
 let pinTemporal = null;
 let correoTemporal = null;
 
+// referencias al menú
+const drawer = document.getElementById("drawer");
+const overlay = document.getElementById("overlay");
+
+/* menu */
+function toggleMenu(){
+  drawer.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
+
 /* crear cuenta */
 function crearCuenta(){
+  let cuenta = nuevaCuenta.value.trim();
   let p = nuevaPassword.value.trim();
   let correo = nuevoCorreo.value.trim().toLowerCase();
 
-  if(!p || !correo){
+  if(!cuenta || !p || !correo){
     alert("Completa todos los campos");
+    return;
+  }
+
+  if(cuenta.length !== 10 || !/^\d+$/.test(cuenta)){
+    alert("El número de cuenta debe tener exactamente 10 dígitos");
     return;
   }
 
@@ -195,7 +211,7 @@ function crearCuenta(){
   fetch("https://banco-libre-backend.onrender.com/crear-cuenta", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo, password:p })
+    body: JSON.stringify({ correo, password:p, cuenta })
   })
   .then(res => res.json())
   .then(data => {
@@ -206,18 +222,18 @@ function crearCuenta(){
 
 /* login */
 function login(){
-  let correo = usuario.value.trim().toLowerCase();
+  let cuenta = usuario.value.trim(); // ahora login con número de cuenta
   let p = password.value.trim();
 
   fetch("https://banco-libre-backend.onrender.com/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo, password:p })
+    body: JSON.stringify({ cuenta, password:p })
   })
   .then(res => res.json())
   .then(data => {
     if(data.ok){
-      cuentaActual = data.cuenta; // guardamos el número de cuenta
+      cuentaActual = data.cuenta;
       cuentaActualSpan();
       cambiarPantalla("inicio");
     } else {
@@ -345,7 +361,6 @@ function cambiarPassword(){
   }
 }
 </script>
-
 
 
 

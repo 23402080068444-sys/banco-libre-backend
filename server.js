@@ -36,22 +36,30 @@ let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
 
 // ===============================
-//   CREAR CUENTA
+//   CREAR CUENTA (usuario elige número)
 // ===============================
 app.post("/crear-cuenta", async (req, res) => {
-  const { correo, password } = req.body;
+  const { correo, password, cuenta } = req.body;
 
-  const existe = await Usuario.findOne({ correo });
-  if (existe) return res.json({ ok: false, mensaje: "Correo ya registrado" });
+  // Validar número de cuenta: exactamente 10 dígitos
+  if (!/^\d{10}$/.test(cuenta)) {
+    return res.json({ ok: false, mensaje: "El número de cuenta debe tener exactamente 10 dígitos" });
+  }
 
-  const cuenta = Math.floor(100000 + Math.random() * 900000).toString();
+  // Validar que no exista ese correo ni esa cuenta
+  const existeCorreo = await Usuario.findOne({ correo });
+  if (existeCorreo) return res.json({ ok: false, mensaje: "Correo ya registrado" });
+
+  const existeCuenta = await Usuario.findOne({ cuenta });
+  if (existeCuenta) return res.json({ ok: false, mensaje: "Número de cuenta ya registrado" });
+
   const hash = await bcrypt.hash(password, 10);
 
   const nuevo = new Usuario({
     correo,
     password: hash,
     cuenta,
-    saldo: 10000,   // saldo inicial
+    saldo: 10000,
     movimientos: []
   });
 
@@ -68,13 +76,13 @@ app.post("/crear-cuenta", async (req, res) => {
 
 
 // ===============================
-//   LOGIN
+//   LOGIN (por número de cuenta)
 // ===============================
 app.post("/login", async (req, res) => {
-  const { correo, password } = req.body;
+  const { cuenta, password } = req.body;
 
-  const user = await Usuario.findOne({ correo });
-  if (!user) return res.json({ ok: false, mensaje: "Correo no encontrado" });
+  const user = await Usuario.findOne({ cuenta });
+  if (!user) return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
 
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) return res.json({ ok: false, mensaje: "Contraseña incorrecta" });
