@@ -296,6 +296,10 @@ function depositar(){
     }
   });
 }
+function irACriptomonedas() {
+  const correo = localStorage.getItem("correo");
+  window.location.href = `criptomonedas.html?correo=${correo}`;
+}
 
 /* cambiar pantalla */
 function cambiarPantalla(id){
