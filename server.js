@@ -199,6 +199,19 @@ app.post("/cambiar-password", async (req, res) => {
 // ===============================
 //   CRIPTOMONEDAS: Carrito y Compras
 // ===============================
+const Carrito = require("./models/Carrito");
+
+app.post("/carrito/add", async (req, res) => {
+  const { userEmail, crypto, cantidad, precioUnitario } = req.body;
+
+  let carrito = await Carrito.findOne({ userEmail });
+  if (!carrito) carrito = new Carrito({ userEmail, items: [] });
+
+  carrito.items.push({ crypto, cantidad, precioUnitario });
+  await carrito.save();
+
+  res.json({ ok: true, mensaje: `${crypto} agregado al carrito por $${precioUnitario}` });
+});
 
 // Carritos por usuario (clave = correo)
 let carritos = {};
