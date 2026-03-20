@@ -34,32 +34,79 @@
       <div class="menu-icon" onclick="history.back()">☰</div>
       <div class="title">Banco Libre</div>
     </div>
-    <div class="contenido">
-      <h1>Criptomonedas disponibles</h1>
-      <button id="btn-Bitcoin" onclick="addToCart('Bitcoin')">Agregar al carrito</button>
-      <button id="btn-Ethereum" onclick="addToCart('Ethereum')">Agregar al carrito</button>
-      <button id="btn-Solana" onclick="addToCart('Solana')">Agregar al carrito</button>
-      <button id="btn-Cardano" onclick="addToCart('Cardano')">Agregar al carrito</button>
-      <button id="btn-Polkadot" onclick="addToCart('Polkadot')">Agregar al carrito</button>
-      <button id="btn-Litecoin" onclick="addToCart('Litecoin')">Agregar al carrito</button>
-      <button id="btn-Ripple" onclick="addToCart('Ripple')">Agregar al carrito</button>
-      <button id="btn-Dogecoin" onclick="addToCart('Dogecoin')">Agregar al carrito</button>
-      <br>
-      <a href="carrito.html">Abrir carrito</a>
-    </div>
+   <div class="contenido">
+  <h1>Criptomonedas disponibles</h1>
+  
+  <div>
+    <h3>Bitcoin</h3>
+    <button id="btn-Bitcoin" onclick="addToCart('Bitcoin')">Agregar al carrito</button>
   </div>
+
+  <div>
+    <h3>Ethereum</h3>
+    <button id="btn-Ethereum" onclick="addToCart('Ethereum')">Agregar al carrito</button>
+  </div>
+
+  <div>
+    <h3>Solana</h3>
+    <button id="btn-Solana" onclick="addToCart('Solana')">Agregar al carrito</button>
+  </div>
+
+  <div>
+    <h3>Cardano</h3>
+    <button id="btn-Cardano" onclick="addToCart('Cardano')">Agregar al carrito</button>
+  </div>
+
+  <div>
+    <h3>Polkadot</h3>
+    <button id="btn-Polkadot" onclick="addToCart('Polkadot')">Agregar al carrito</button>
+  </div>
+
+  <div>
+    <h3>Litecoin</h3>
+    <button id="btn-Litecoin" onclick="addToCart('Litecoin')">Agregar al carrito</button>
+  </div>
+
+  <div>
+    <h3>Ripple</h3>
+    <button id="btn-Ripple" onclick="addToCart('Ripple')">Agregar al carrito</button>
+  </div>
+
+  <div>
+    <h3>Dogecoin</h3>
+    <button id="btn-Dogecoin" onclick="addToCart('Dogecoin')">Agregar al carrito</button>
+  </div>
+
+   
+  <br>
+  <a href="carrito.html">Abrir carrito</a>
+</div>
+
+</div>
 </body>
 <script>
-  // El backend debe enviarnos el correo del usuario al hacer login
-  // Aquí lo recibimos desde la URL o sesión en DB
+  // Aquí va tu script 👇
+
   const params = new URLSearchParams(window.location.search);
   const userEmail = params.get("correo"); // viene del login
 
+  const precios = {
+    "Bitcoin": 800,
+    "Ethereum": 500,
+    "Solana": 300,
+    "Cardano": 200,
+    "Polkadot": 250,
+    "Litecoin": 150,
+    "Ripple": 100,
+    "Dogecoin": 50
+  };
+
   function addToCart(crypto) {
+    const precioUnitario = precios[crypto];
     fetch('/carrito/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userEmail, crypto, cantidad: 1 })
+      body: JSON.stringify({ userEmail, crypto, cantidad: 1, precioUnitario })
     })
     .then(r => r.json())
     .then(data => {

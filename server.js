@@ -234,13 +234,22 @@ app.post("/carrito/checkout", async (req, res) => {
   const fecha = new Date().toLocaleString();
   const items = [...(carritos[userEmail] || [])];
 
-  // Guardar en MongoDB
-  await Compra.create({ ticketId, fecha, items, userEmail });
+  // Calcular total de la compra
+  let total = 0;
+  items.forEach(i => {
+    total += i.cantidad * i.precioUnitario;
+  });
 
-  // Registrar movimiento en balance
+  // Guardar en MongoDB
+  await Compra.create({ ticketId, fecha, items, userEmail, total });
+
+  // Registrar movimiento en balance y descontar saldo
   const user = await Usuario.findOne({ correo: userEmail });
   if (user) {
-    user.movimientos.push(`Compra de ${items.map(i => i.crypto).join(", ")} | ${fecha}`);
+    user.saldo -= total;
+    user.movimientos.push(
+      `Compra de ${items.map(i => `${i.crypto} x${i.cantidad}`).join(", ")} | $${total} | ${fecha}`
+    );
     await user.save();
   }
 

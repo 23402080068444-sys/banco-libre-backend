@@ -37,11 +37,21 @@
     const data = await res.json();
     const lista = document.getElementById('listaMisCriptos');
     lista.innerHTML = "";
+
+    if (!data.compras || data.compras.length === 0) {
+      lista.innerHTML = "<li>No tienes criptos compradas</li>";
+      return;
+    }
+
     data.compras.forEach(c => {
-      const li = document.createElement("li");
-      li.innerHTML = `${c.items.map(i => i.crypto).join(", ")} - ${c.fecha}`;
-      lista.appendChild(li);
+      c.items.forEach(i => {
+        // Mostrar cripto, cantidad y valor total
+        const li = document.createElement("li");
+        li.innerHTML = `${i.crypto} x${i.cantidad} - $${i.cantidad * i.precioUnitario}`;
+        lista.appendChild(li);
+      });
     });
   }
 </script>
+
 </html>
