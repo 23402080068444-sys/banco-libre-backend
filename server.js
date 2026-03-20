@@ -196,7 +196,6 @@ app.post("/cambiar-password", async (req, res) => {
   res.json({ ok: true, mensaje: "Contraseña cambiada" });
 }); 
 // ===============================
-// ===============================
 //   CRIPTOMONEDAS: Carrito y Compras
 // ===============================
 
@@ -234,16 +233,14 @@ app.post("/carrito/checkout", async (req, res) => {
   const fecha = new Date().toLocaleString();
   const items = [...(carritos[userEmail] || [])];
 
-  // Calcular total de la compra
+  // Calcular total
   let total = 0;
-  items.forEach(i => {
-    total += i.cantidad * i.precioUnitario;
-  });
+  items.forEach(i => total += i.cantidad * i.precioUnitario);
 
-  // Guardar en MongoDB
+  // Guardar compra en DB
   await Compra.create({ ticketId, fecha, items, userEmail, total });
 
-  // Registrar movimiento en balance y descontar saldo
+  // Actualizar saldo y movimientos
   const user = await Usuario.findOne({ correo: userEmail });
   if (user) {
     user.saldo -= total;
@@ -253,11 +250,12 @@ app.post("/carrito/checkout", async (req, res) => {
     await user.save();
   }
 
-  // Vaciar carrito después de la compra
+  // Vaciar carrito
   carritos[userEmail] = [];
 
   res.json({ ok: true, mensaje: "Compra registrada correctamente." });
 });
+
 
 // ===============================
 //   MIS CRIPTOS (solo compras)

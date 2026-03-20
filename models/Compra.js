@@ -1,10 +1,17 @@
 const mongoose = require("mongoose");
 
-const compraSchema = new mongoose.Schema({
+const CompraSchema = new mongoose.Schema({
   ticketId: String,
   fecha: String,
-  items: [String],
-  userEmail: String
+  userEmail: String,
+  total: Number,
+  items: [
+    {
+      crypto: String,
+      cantidad: Number,
+      precioUnitario: Number
+    }
+  ]
 });
 
-module.exports = mongoose.model("Compra", compraSchema);
+module.exports = mongoose.model("Compra", CompraSchema);
