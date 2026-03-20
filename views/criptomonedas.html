@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Criptomonedas</title>
+  <style>
+    /* aquí va el CSS que compartiste */
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .app { width: 390px; height: 667px; background: #fff; border-radius: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; position: relative;
+      display: flex; flex-direction: column; }
+    .pantalla { display: none; padding: 20px; text-align: center; flex: 1; }
+    .pantalla.activa { display: block; }
+    h1,h2 { color: #007aff; }
+    input { width: 80%; padding: 12px; margin: 10px 0; border: 1px solid #ccc;
+      border-radius: 12px; font-size: 16px; }
+    button { background: #007aff; color: white; border: none; border-radius: 12px;
+      padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer; }
+    button:hover { background: #005bb5; }
+    ul { list-style: none; padding: 0; }
+    ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
+    .header { position:absolute; top:0; left:0; width:100%; height:60px;
+      background:#007aff; color:white; display:flex; align-items:center;
+      padding:0 15px; z-index:1000; }
+    .menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; }
+    .title { font-weight: bold; }
+    .contenido { padding-top: 80px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="menu-icon" onclick="history.back()">☰</div>
+      <div class="title">Banco Libre</div>
+    </div>
+    <div class="contenido">
+      <h1>Criptomonedas disponibles</h1>
+      <button onclick="addToCart('Bitcoin')">Bitcoin</button>
+      <button onclick="addToCart('Ethereum')">Ethereum</button>
+      <button onclick="addToCart('Solana')">Solana</button>
+      <button onclick="addToCart('Cardano')">Cardano</button>
+      <button onclick="addToCart('Polkadot')">Polkadot</button>
+      <button onclick="addToCart('Litecoin')">Litecoin</button>
+      <button onclick="addToCart('Ripple')">Ripple</button>
+      <button onclick="addToCart('Dogecoin')">Dogecoin</button>
+      <br>
+      <a href="carrito.html">Abrir carrito</a>
+    </div>
+  </div>
+</body>
+<script>
+  function addToCart(crypto) {
+    fetch('/carrito/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ crypto })
+    });
+    alert(crypto + " agregado al carrito");
+  }
+</script>
+</html>

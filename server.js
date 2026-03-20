@@ -6,6 +6,7 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Usuario = require("./models/Usuario");
+const Compra = require("./models/Compra"); // nuevo modelo para compras
 
 const app = express();
 app.use(cors());
@@ -23,9 +24,17 @@ app.use(express.static(path.join(__dirname)));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
 });
-
 app.get("/paginapr.html", (req, res) => {
   res.sendFile(path.join(__dirname, "paginapr.html"));
+});
+app.get("/criptomonedas", (req, res) => {
+  res.sendFile(path.join(__dirname, "views/criptomonedas.html"));
+});
+app.get("/carrito", (req, res) => {
+  res.sendFile(path.join(__dirname, "views/carrito.html"));
+});
+app.get("/mis-criptomonedas", (req, res) => {
+  res.sendFile(path.join(__dirname, "views/misCriptomonedas.html"));
 });
 
 // Configuración Brevo API
@@ -33,7 +42,6 @@ let defaultClient = SibApiV3Sdk.ApiClient.instance;
 let apiKey = defaultClient.authentications["api-key"];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
 
 // ===============================
 //   CREAR CUENTA
@@ -72,7 +80,6 @@ app.post("/crear-cuenta", async (req, res) => {
   });
 });
 
-
 // ===============================
 //   LOGIN
 // ===============================
@@ -94,7 +101,7 @@ app.post("/login", async (req, res) => {
 });
 
 // ===============================
-//   DEPOSITAR ENTRE CUENTAS + Ticket a ambas partes
+//   DEPOSITAR ENTRE CUENTAS + Ticket
 // ===============================
 app.post("/depositar", async (req, res) => {
   const { origen, destino, monto } = req.body;
@@ -118,14 +125,13 @@ app.post("/depositar", async (req, res) => {
   await userOrigen.save();
   await userDestino.save();
 
-  // Ticket para el que envía
+  // Ticket para ambos
   let ticketOrigen = new SibApiV3Sdk.SendSmtpEmail();
   ticketOrigen.sender = { email: "mg307966@gmail.com" };
   ticketOrigen.to = [{ email: userOrigen.correo }];
   ticketOrigen.subject = "Ticket de depósito enviado - Banco Libre";
   ticketOrigen.textContent = `Has realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
 
-  // Ticket para el que recibe
   let ticketDestino = new SibApiV3Sdk.SendSmtpEmail();
   ticketDestino.sender = { email: "mg307966@gmail.com" };
   ticketDestino.to = [{ email: userDestino.correo }];
@@ -141,9 +147,8 @@ app.post("/depositar", async (req, res) => {
   }
 });
 
-
 // ===============================
-//   CONSULTAR CUENTA COMPLETA
+//   CONSULTAR CUENTA
 // ===============================
 app.get("/cuenta/:cuenta", async (req, res) => {
   const user = await Usuario.findOne({ cuenta: req.params.cuenta });
@@ -157,7 +162,6 @@ app.get("/cuenta/:cuenta", async (req, res) => {
     movimientos: user.movimientos
   });
 });
-
 
 // ===============================
 //   ENVIAR PIN
@@ -184,7 +188,6 @@ app.post("/enviar-pin", async (req, res) => {
   }
 });
 
-
 // ===============================
 //   CAMBIAR PASSWORD
 // ===============================
@@ -199,9 +202,51 @@ app.post("/cambiar-password", async (req, res) => {
   await user.save();
 
   res.json({ ok: true, mensaje: "Contraseña cambiada" });
+}); 
+// ===============================
+//   CRIPTOMONEDAS: Carrito y Compras
+// ===============================
+let carrito = [];
+
+app.post("/carrito/add", (req, res) => {
+  const { crypto } = req.body;
+  carrito.push(crypto);
+  res.json({ ok: true, mensaje: `${crypto} agregado al carrito` });
 });
 
+app.post("/carrito/checkout", async (req, res) => {
+  const { userEmail } = req.body;
 
+  const ticketId = Date.now().toString();
+  const fecha = new Date().toLocaleString();
+  const items = [...carrito];
+
+  // Guardar en MongoDB
+  await Compra.create({ ticketId, fecha, items, userEmail });
+
+  // Ticket por correo
+  let ticket = new SibApiV3Sdk.SendSmtpEmail();
+  ticket.sender = { email: "mg307966@gmail.com" };
+  ticket.to = [{ email: userEmail }];
+  ticket.subject = `Ticket de compra #${ticketId} - Banco Libre`;
+  ticket.textContent = `Gracias por tu compra.\n\nTicket: ${ticketId}\nFecha: ${fecha}\nCriptomonedas:\n${items.join(", ")}\n\nBanco Libre`;
+
+  try {
+    await apiInstance.sendTransacEmail(ticket);
+    carrito = []; // vaciar carrito después de la compra
+    res.json({ ok: true, mensaje: "Compra registrada y ticket enviado al correo." });
+  } catch (error) {
+    res.json({ ok: false, mensaje: "Error al enviar ticket: " + error.toString() });
+  }
+});
+
+// ===============================
+//   API Historial de Compras
+// ===============================
+app.get("/api/compras", async (req, res) => {
+  const compras = await Compra.find();
+  res.json(compras);
+});
 // Puerto Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

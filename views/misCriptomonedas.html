@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mis Criptomonedas</title>
+  <style>
+    /* CSS integrado */
+    body { margin:0; padding:20px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      background-color:#e5e5e5; display:flex; align-items:center; justify-content:center; height:100vh; }
+    .app { width:390px; height:667px; background:#fff; border-radius:40px; box-shadow:0 10px 30px rgba(0,0,0,0.3);
+      overflow:hidden; position:relative; display:flex; flex-direction:column; }
+    h1,h2 { color:#007aff; }
+    .header { position:absolute; top:0; left:0; width:100%; height:60px; background:#007aff; color:white;
+      display:flex; align-items:center; padding:0 15px; z-index:1000; }
+    .title { font-weight:bold; }
+    .contenido { padding-top:80px; text-align:center; }
+    ul { list-style:none; padding:0; }
+    ul li { background:#f2f2f7; margin:5px 0; padding:10px; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header"><div class="title">Banco Libre</div></div>
+    <div class="contenido">
+      <h1>Historial de Compras</h1>
+      <div id="compras"></div>
+    </div>
+  </div>
+</body>
+<script>
+  async function cargarCompras() {
+    const res = await fetch('/api/compras');
+    const compras = await res.json();
+    document.getElementById('compras').innerHTML = compras.map(c => `
+      <div>
+        <p><strong>Ticket:</strong> ${c.ticketId}</p>
+        <p><strong>Fecha:</strong> ${c.fecha}</p>
+        <ul>${c.items.map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>
+    `).join('');
+  }
+  cargarCompras();
+</script>
+</html>
