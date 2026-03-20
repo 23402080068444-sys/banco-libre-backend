@@ -19,7 +19,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
-
 // Rutas HTML
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
