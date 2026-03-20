@@ -27,15 +27,16 @@ app.get("/", (req, res) => {
 app.get("/paginapr.html", (req, res) => {
   res.sendFile(path.join(__dirname, "paginapr.html"));
 });
-app.get("/criptomonedas", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/criptomonedas.html"));
+app.get("/criptomonedas.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "criptomonedas.html"));
 });
-app.get("/carrito", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/carrito.html"));
+app.get("/carrito.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "carrito.html"));
 });
-app.get("/mis-criptomonedas", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/misCriptomonedas.html"));
+app.get("/misCriptomonedas.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "misCriptomonedas.html"));
 });
+
 
 // Configuración Brevo API
 let defaultClient = SibApiV3Sdk.ApiClient.instance;
