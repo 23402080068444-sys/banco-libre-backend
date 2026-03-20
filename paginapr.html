@@ -176,19 +176,12 @@ let cuentaActual = null;
 let pinTemporal = null;
 let correoTemporal = null;
 
-/* menu */
-function toggleMenu(){
-  drawer.classList.toggle("active");
-  overlay.classList.toggle("active");
-}
-
 /* crear cuenta */
 function crearCuenta(){
-  let c = nuevaCuenta.value.trim();
   let p = nuevaPassword.value.trim();
   let correo = nuevoCorreo.value.trim().toLowerCase();
 
-  if(!c || !p || !correo){
+  if(!p || !correo){
     alert("Completa todos los campos");
     return;
   }
@@ -202,7 +195,7 @@ function crearCuenta(){
   fetch("https://banco-libre-backend.onrender.com/crear-cuenta", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ usuario:c, password:p, correo })
+    body: JSON.stringify({ correo, password:p })
   })
   .then(res => res.json())
   .then(data => {
@@ -213,22 +206,22 @@ function crearCuenta(){
 
 /* login */
 function login(){
-  let u = usuario.value.trim();
+  let correo = usuario.value.trim().toLowerCase();
   let p = password.value.trim();
 
   fetch("https://banco-libre-backend.onrender.com/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ usuario:u, password:p })
+    body: JSON.stringify({ correo, password:p })
   })
   .then(res => res.json())
   .then(data => {
     if(data.ok){
-      cuentaActual = u;
+      cuentaActual = data.cuenta; // guardamos el número de cuenta
       cuentaActualSpan();
       cambiarPantalla("inicio");
     } else {
-      alert("Datos incorrectos");
+      alert(data.mensaje);
     }
   });
 }
@@ -325,7 +318,7 @@ function enviarPin(){
     if(data.ok){
       pinTemporal = data.pin;
       correoTemporal = correo;
-      alert("PIN enviado al correo registrado");
+      alert("PIN enviado al correo registrado (Cuenta: " + data.cuenta + ")");
     } else {
       alert(data.mensaje);
     }
@@ -352,6 +345,7 @@ function cambiarPassword(){
   }
 }
 </script>
+
 
 
 

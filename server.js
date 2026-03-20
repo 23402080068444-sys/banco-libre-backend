@@ -39,7 +39,7 @@ let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 //   CREAR CUENTA
 // ===============================
 app.post("/crear-cuenta", async (req, res) => {
-  const { usuario, correo, password } = req.body;
+  const { correo, password } = req.body;
 
   const existe = await Usuario.findOne({ correo });
   if (existe) return res.json({ ok: false, mensaje: "Correo ya registrado" });
@@ -48,17 +48,22 @@ app.post("/crear-cuenta", async (req, res) => {
   const hash = await bcrypt.hash(password, 10);
 
   const nuevo = new Usuario({
-    nombre: usuario,
     correo,
     password: hash,
     cuenta,
-    saldo: 10000,
+    saldo: 10000,   // saldo inicial
     movimientos: []
   });
 
   await nuevo.save();
 
-  res.json({ ok: true, cuenta, mensaje: "Cuenta creada con saldo inicial de $10000" });
+  res.json({
+    ok: true,
+    correo: nuevo.correo,
+    cuenta: nuevo.cuenta,
+    saldo: nuevo.saldo,
+    mensaje: "Cuenta creada con saldo inicial de $10000"
+  });
 });
 
 
@@ -66,20 +71,19 @@ app.post("/crear-cuenta", async (req, res) => {
 //   LOGIN
 // ===============================
 app.post("/login", async (req, res) => {
-  const { usuario, password } = req.body;
+  const { correo, password } = req.body;
 
-  const user = await Usuario.findOne({ nombre: usuario });
-  if (!user) return res.json({ ok: false, mensaje: "Usuario no encontrado" });
+  const user = await Usuario.findOne({ correo });
+  if (!user) return res.json({ ok: false, mensaje: "Correo no encontrado" });
 
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) return res.json({ ok: false, mensaje: "Contraseña incorrecta" });
 
   res.json({
     ok: true,
-    nombre: user.nombre,
+    correo: user.correo,
     cuenta: user.cuenta,
-    saldo: user.saldo,
-    movimientos: user.movimientos
+    saldo: user.saldo
   });
 });
 
@@ -116,36 +120,17 @@ app.post("/depositar", async (req, res) => {
 // ===============================
 //   CONSULTAR CUENTA COMPLETA
 // ===============================
-app.get("/cuenta/:usuario", async (req, res) => {
-  const user = await Usuario.findOne({ nombre: req.params.usuario });
+app.get("/cuenta/:cuenta", async (req, res) => {
+  const user = await Usuario.findOne({ cuenta: req.params.cuenta });
   if (!user) return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
 
   res.json({
     ok: true,
+    correo: user.correo,
+    cuenta: user.cuenta,
     saldo: user.saldo,
     movimientos: user.movimientos
   });
-});
-
-
-// ===============================
-//   ENVIAR CORREO DE DEPÓSITO
-// ===============================
-app.post("/enviar-correo", async (req, res) => {
-  const { destino, monto, correo, origen, hora } = req.body;
-
-  let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-  sendSmtpEmail.sender = { email: "mg307966@gmail.com" };
-  sendSmtpEmail.to = [{ email: correo }];
-  sendSmtpEmail.subject = "Ticket de depósito - Banco Libre";
-  sendSmtpEmail.textContent = `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
-
-  try {
-    let data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    res.json({ ok: true, mensaje: "Correo enviado", data });
-  } catch (error) {
-    res.status(500).json({ ok: false, mensaje: error.toString() });
-  }
 });
 
 
@@ -168,7 +153,7 @@ app.post("/enviar-pin", async (req, res) => {
 
   try {
     await apiInstance.sendTransacEmail(sendSmtpEmail);
-    res.json({ ok: true, mensaje: "PIN enviado", pin });
+    res.json({ ok: true, mensaje: "PIN enviado", pin, cuenta: user.cuenta });
   } catch (error) {
     res.status(500).json({ ok: false, mensaje: error.toString() });
   }
