@@ -13,28 +13,37 @@
       justify-content: center;
       height: 100vh;
     }
-	#listaCriptos {
-  max-height: 400px;   /* límite de altura visible */
-  overflow-y: auto;    /* activa scroll vertical */
-  padding: 10px;
-  background: #f9f9f9;
-  border-radius: 12px;
-}
-#listaCriptos h3 {
-  margin: 5px 0;
-  color: #007aff;
-}
 
-    .app { width: 390px; height: 667px; background: #fff; border-radius: 40px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; position: relative;
-      display: flex; flex-direction: column; }
+    /* Scroll en lista de criptos */
+    #listaCriptos {
+      max-height: 400px;   /* límite de altura visible */
+      overflow-y: auto;    /* activa scroll vertical */
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 12px;
+    }
+    #listaCriptos h3 {
+      margin: 5px 0;
+      color: #007aff;
+    }
+
+    .app {
+      width: 390px; height: 667px; background: #fff;
+      border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      overflow: hidden; position: relative;
+      display: flex; flex-direction: column;
+    }
     h1 { color: #007aff; }
-    button { background: #007aff; color: white; border: none; border-radius: 12px;
-      padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer; }
+    button {
+      background: #007aff; color: white; border: none; border-radius: 12px;
+      padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer;
+    }
     button:hover { background: #005bb5; }
-    .header { position:absolute; top:0; left:0; width:100%; height:60px;
+    .header {
+      position:absolute; top:0; left:0; width:100%; height:60px;
       background:#007aff; color:white; display:flex; align-items:center;
-      padding:0 15px; z-index:1000; }
+      padding:0 15px; z-index:1000;
+    }
     .menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; }
     .title { font-weight: bold; }
     .contenido { padding-top: 80px; text-align:center; }
@@ -46,41 +55,55 @@
       <div class="menu-icon" onclick="history.back()">☰</div>
       <div class="title">Banco Libre</div>
     </div>
-   <div class="contenido">
-  <h1>Criptomonedas disponibles</h1>
-  
-  <div id="listaCriptos">
-    <div>
-      <h3>Bitcoin</h3>
-      <button id="btn-Bitcoin" onclick="addToCart('Bitcoin')">Agregar al carrito</button>
-    </div>
+    <div class="contenido">
+      <h1>Criptomonedas disponibles</h1>
+      
+      <div id="listaCriptos">
+        <div>
+          <h3>Bitcoin - $800</h3>
+          <button id="btn-Bitcoin" onclick="addToCart('Bitcoin')">Agregar</button>
+        </div>
+        <div>
+          <h3>Ethereum - $500</h3>
+          <button id="btn-Ethereum" onclick="addToCart('Ethereum')">Agregar</button>
+        </div>
+        <div>
+          <h3>Solana - $300</h3>
+          <button id="btn-Solana" onclick="addToCart('Solana')">Agregar</button>
+        </div>
+        <div>
+          <h3>Cardano - $200</h3>
+          <button id="btn-Cardano" onclick="addToCart('Cardano')">Agregar</button>
+        </div>
+        <div>
+          <h3>Polkadot - $250</h3>
+          <button id="btn-Polkadot" onclick="addToCart('Polkadot')">Agregar</button>
+        </div>
+        <div>
+          <h3>Litecoin - $150</h3>
+          <button id="btn-Litecoin" onclick="addToCart('Litecoin')">Agregar</button>
+        </div>
+        <div>
+          <h3>Ripple - $100</h3>
+          <button id="btn-Ripple" onclick="addToCart('Ripple')">Agregar</button>
+        </div>
+        <div>
+          <h3>Dogecoin - $50</h3>
+          <button id="btn-Dogecoin" onclick="addToCart('Dogecoin')">Agregar</button>
+        </div>
+      </div>
 
-    <div>
-      <h3>Ethereum</h3>
-      <button id="btn-Ethereum" onclick="addToCart('Ethereum')">Agregar al carrito</button>
+      <br>
+      <a href="carrito.html">Abrir carrito</a>
     </div>
-
-    <div>
-      <h3>Solana</h3>
-      <button id="btn-Solana" onclick="addToCart('Solana')">Agregar al carrito</button>
-    </div>
-
-    <!-- ... resto de criptos ... -->
   </div>
-
-  <br>
-  <a href="carrito.html">Abrir carrito</a>
-</div>
-
-
-</div>
 </body>
 <script>
-  // Aquí va tu script 👇
-
+  // Obtener correo desde la URL (login)
   const params = new URLSearchParams(window.location.search);
-  const userEmail = params.get("correo"); // viene del login
+  const userEmail = params.get("correo"); 
 
+  // Mapa de precios unitarios
   const precios = {
     "Bitcoin": 800,
     "Ethereum": 500,
@@ -101,7 +124,7 @@
     })
     .then(r => r.json())
     .then(data => {
-      alert(data.mensaje);
+      alert(`${crypto} agregado al carrito por $${precioUnitario}`);
       document.getElementById("btn-" + crypto).innerText = "Agregar más";
     });
   }
