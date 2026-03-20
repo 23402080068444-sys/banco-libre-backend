@@ -39,15 +39,29 @@
 </body>
 <script>
   async function cargarCarrito() {
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      alert("Ingresa tu correo electrónico");
+      return;
+    }
+
     const res = await fetch(`/carrito/${email}`);
     const data = await res.json();
     const lista = document.getElementById('listaCarrito');
     lista.innerHTML = "";
+
+    if (!data.carrito || data.carrito.length === 0) {
+      lista.innerHTML = "<li>Tu carrito está vacío</li>";
+      return;
+    }
+
     data.carrito.forEach(item => {
       const li = document.createElement("li");
-      li.innerHTML = `${item.crypto} (x${item.cantidad}) 
-        <button onclick="eliminar('${email}','${item.crypto}')">Eliminar</button>`;
+      const total = item.cantidad * item.precioUnitario;
+      li.innerHTML = `
+        ${item.crypto} x${item.cantidad} - $${total}
+        <button onclick="eliminar('${email}','${item.crypto}')">Eliminar</button>
+      `;
       lista.appendChild(li);
     });
   }
@@ -64,7 +78,12 @@
   }
 
   async function checkout() {
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      alert("Ingresa tu correo electrónico");
+      return;
+    }
+
     const res = await fetch('/carrito/checkout', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -75,4 +94,5 @@
     cargarCarrito();
   }
 </script>
+
 </html>

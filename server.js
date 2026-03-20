@@ -202,46 +202,39 @@ app.post("/cambiar-password", async (req, res) => {
 // Carritos por usuario (clave = correo)
 let carritos = {};
 
-// Agregar al carrito con precioUnitario
-app.post("/carrito/add", (req, res) => {
+// Agregar al carrito en DB
+app.post("/carrito/add", async (req, res) => {
   const { userEmail, crypto, cantidad, precioUnitario } = req.body;
-  if (!carritos[userEmail]) carritos[userEmail] = [];
-  carritos[userEmail].push({ crypto, cantidad, precioUnitario });
+  let carrito = await Carrito.findOne({ userEmail });
+  if (!carrito) carrito = new Carrito({ userEmail, items: [] });
+  carrito.items.push({ crypto, cantidad, precioUnitario });
+  await carrito.save();
   res.json({ ok: true, mensaje: `${crypto} agregado al carrito por $${precioUnitario}` });
 });
 
-
-// Ver carrito del usuario
-app.get("/carrito/:userEmail", (req, res) => {
-  const { userEmail } = req.params;
-  res.json({ ok: true, carrito: carritos[userEmail] || [] });
+// Ver carrito
+app.get("/carrito/:userEmail", async (req, res) => {
+  const carrito = await Carrito.findOne({ userEmail: req.params.userEmail });
+  res.json({ ok: true, carrito: carrito ? carrito.items : [] });
 });
 
-// Eliminar del carrito
-app.post("/carrito/remove", (req, res) => {
-  const { userEmail, crypto } = req.body;
-  if (carritos[userEmail]) {
-    carritos[userEmail] = carritos[userEmail].filter(item => item.crypto !== crypto);
-  }
-  res.json({ ok: true, mensaje: `${crypto} eliminado del carrito` });
-});
-
-// Checkout del carrito
+// Checkout
 app.post("/carrito/checkout", async (req, res) => {
   const { userEmail } = req.body;
+  const carrito = await Carrito.findOne({ userEmail });
+  if (!carrito || carrito.items.length === 0) {
+    return res.json({ ok: false, mensaje: "Carrito vacío" });
+  }
 
   const ticketId = Date.now().toString();
   const fecha = new Date().toLocaleString();
-  const items = [...(carritos[userEmail] || [])];
+  const items = carrito.items;
 
-  // Calcular total
   let total = 0;
   items.forEach(i => total += i.cantidad * i.precioUnitario);
 
-  // Guardar compra en DB
   await Compra.create({ ticketId, fecha, items, userEmail, total });
 
-  // Actualizar saldo y movimientos
   const user = await Usuario.findOne({ correo: userEmail });
   if (user) {
     user.saldo -= total;
@@ -251,8 +244,9 @@ app.post("/carrito/checkout", async (req, res) => {
     await user.save();
   }
 
-  // Vaciar carrito
-  carritos[userEmail] = [];
+  // Vaciar carrito en DB
+  carrito.items = [];
+  await carrito.save();
 
   res.json({ ok: true, mensaje: "Compra registrada correctamente." });
 });
