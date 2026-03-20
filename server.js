@@ -6,7 +6,7 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Usuario = require("./models/Usuario");
-const Compra = require("./models/Compra"); // nuevo modelo para compras
+const Compra = require("./models/Compra"); 
 const Carrito = require("./models/Carrito");
 
 const app = express();
@@ -21,14 +21,10 @@ mongoose.connect(process.env.MONGO_URI)
 // Servir archivos estáticos desde la carpeta views
 app.use(express.static(path.join(__dirname, "views")));
 
-
 // Ruta principal (login)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
 });
-
-
-
 
 // Configuración Brevo API
 let defaultClient = SibApiV3Sdk.ApiClient.instance;
@@ -199,30 +195,17 @@ app.post("/cambiar-password", async (req, res) => {
 // ===============================
 //   CRIPTOMONEDAS: Carrito y Compras
 // ===============================
-const Carrito = require("./models/Carrito");
-
-app.post("/carrito/add", async (req, res) => {
-  const { userEmail, crypto, cantidad, precioUnitario } = req.body;
-
-  let carrito = await Carrito.findOne({ userEmail });
-  if (!carrito) carrito = new Carrito({ userEmail, items: [] });
-
-  carrito.items.push({ crypto, cantidad, precioUnitario });
-  await carrito.save();
-
-  res.json({ ok: true, mensaje: `${crypto} agregado al carrito por $${precioUnitario}` });
-});
-
-// Carritos por usuario (clave = correo)
-let carritos = {};
 
 // Agregar al carrito en DB
 app.post("/carrito/add", async (req, res) => {
   const { userEmail, crypto, cantidad, precioUnitario } = req.body;
+
   let carrito = await Carrito.findOne({ userEmail });
   if (!carrito) carrito = new Carrito({ userEmail, items: [] });
+
   carrito.items.push({ crypto, cantidad, precioUnitario });
   await carrito.save();
+
   res.json({ ok: true, mensaje: `${crypto} agregado al carrito por $${precioUnitario}` });
 });
 
@@ -247,8 +230,10 @@ app.post("/carrito/checkout", async (req, res) => {
   let total = 0;
   items.forEach(i => total += i.cantidad * i.precioUnitario);
 
+  // Guardar compra en DB
   await Compra.create({ ticketId, fecha, items, userEmail, total });
 
+  // Actualizar saldo y movimientos del usuario
   const user = await Usuario.findOne({ correo: userEmail });
   if (user) {
     user.saldo -= total;
@@ -265,7 +250,6 @@ app.post("/carrito/checkout", async (req, res) => {
   res.json({ ok: true, mensaje: "Compra registrada correctamente." });
 });
 
-
 // ===============================
 //   MIS CRIPTOS (solo compras)
 // ===============================
@@ -281,7 +265,6 @@ app.get("/api/compras", async (req, res) => {
   const compras = await Compra.find();
   res.json(compras);
 });
-// Puerto Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
