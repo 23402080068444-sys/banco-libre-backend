@@ -90,8 +90,8 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
     <a onclick="cambiarPantalla('balance');toggleMenu()">Balance</a>
     <a onclick="cambiarPantalla('depositos');toggleMenu()">Depósitos</a>
     <a onclick="cambiarPantalla('perfil');toggleMenu()">Perfil</a>
-	<a href="criptomonedas.html" onclick="toggleMenu()">Criptomonedas</a>
-<a href="misCriptomonedas.html" onclick="toggleMenu()">Mis Criptomonedas</a>
+	<a href="irACriptomonedas.html" onclick="toggleMenu()">Criptomonedas</a>
+<a href="irAMisCriptos.html" onclick="toggleMenu()">Mis Criptomonedas</a>
     <a onclick="logout();toggleMenu()">Cerrar sesión</a>
   </div>
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -371,6 +371,25 @@ function cambiarPassword(){
   } else {
     alert("PIN incorrecto");
   }
+}
+</script>
+<script>
+function irACriptomonedas() {
+  const correo = localStorage.getItem("correo");
+  if (!correo) {
+    alert("No hay sesión activa");
+    return;
+  }
+  window.location.href = `criptomonedas.html?correo=${correo}`;
+}
+
+function irAMisCriptos() {
+  const correo = localStorage.getItem("correo");
+  if (!correo) {
+    alert("No hay sesión activa");
+    return;
+  }
+  window.location.href = `misCriptomonedas.html?correo=${correo}`;
 }
 </script>
 

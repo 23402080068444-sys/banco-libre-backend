@@ -99,8 +99,9 @@
   </div>
 </body>
 <script>
-  const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
 const userEmail = params.get("correo");
+
  
 
   // Mapa de precios unitarios
@@ -117,11 +118,12 @@ const userEmail = params.get("correo");
 
   function addToCart(crypto) {
   const precioUnitario = precios[crypto];
-  fetch('/carrito/add', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userEmail, crypto, cantidad: 1, precioUnitario })
-  })
+ fetch('/carrito/add', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ userEmail, crypto, cantidad: 1, precioUnitario })
+})
+
   .then(r => r.json())
   .then(data => {
     alert(data.mensaje);
