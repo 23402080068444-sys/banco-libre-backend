@@ -116,17 +116,18 @@
   };
 
   function addToCart(crypto) {
-    const precioUnitario = precios[crypto];
-    fetch('/carrito/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userEmail, crypto, cantidad: 1, precioUnitario })
-    })
-    .then(r => r.json())
-    .then(data => {
-      alert(`${crypto} agregado al carrito por $${precioUnitario}`);
-      document.getElementById("btn-" + crypto).innerText = "Agregar más";
-    });
-  }
+  const precioUnitario = precios[crypto];
+  fetch('/carrito/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userEmail, crypto, cantidad: 1, precioUnitario })
+  })
+  .then(r => r.json())
+  .then(data => {
+    alert(data.mensaje);
+    document.getElementById("btn-" + crypto).innerText = "Agregar más";
+  });
+}
+
 </script>
 </html>
