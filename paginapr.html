@@ -172,204 +172,148 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
 <script>
-let cuentas = JSON.parse(localStorage.getItem("cuentas")) || {};
 let cuentaActual = null;
 let pinTemporal = null;
 let correoTemporal = null;
 
-/* menu */
-function toggleMenu(){
-  drawer.classList.toggle("active");
-  overlay.classList.toggle("active");
+/* Cambiar pantalla */
+function cambiarPantalla(id){
+  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
+  document.getElementById(id).classList.add("activa");
+
+  if(cuentaActual && id === "balance"){
+    cargarSaldo();
+    cargarMovimientos();
+  }
 }
 
-/* crear cuenta */
+/* Crear cuenta */
 function crearCuenta(){
-  let c = nuevaCuenta.value.trim();
-  let p = nuevaPassword.value.trim();
+  let nombre = nuevaCuenta.value.trim();
   let correo = nuevoCorreo.value.trim().toLowerCase();
+  let password = nuevaPassword.value.trim();
 
-  if(!c || !p || !correo){
+  if(!nombre || !correo || !password){
     alert("Completa todos los campos");
     return;
   }
 
-  let regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if(!regexCorreo.test(correo)){
-    alert("Correo inválido");
-    return;
-  }
-
-  if(cuentas[c]){
-    alert("La cuenta ya existe");
-    return;
-  }
-
-  cuentas[c] = {password:p, correo:correo, saldo:10000, movimientos:[]};
-  localStorage.setItem("cuentas", JSON.stringify(cuentas));
-  alert("Cuenta creada con saldo inicial de $10000");
-  cambiarPantalla("login");
+  fetch("https://banco-libre-backend.onrender.com/crear-cuenta", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ nombre, correo, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      alert("Cuenta creada. Tu número es: " + data.cuenta);
+      cambiarPantalla("login");
+    } else {
+      alert(data.message);
+    }
+  });
 }
 
-/* login */
+/* Login */
 function login(){
-  let u = usuario.value;
-  let p = password.value;
+  let correo = usuario.value.trim().toLowerCase();
+  let password = password.value.trim();
 
-  if(cuentas[u] && cuentas[u].password === p){
-    cuentaActual = u;
-    cuentaActualSpan();
-    cambiarPantalla("inicio");
-  } else {
-    alert("Datos incorrectos");
-  }
+  fetch("https://banco-libre-backend.onrender.com/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ correo, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      cuentaActual = data.cuenta;
+      document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e => e.textContent = cuentaActual);
+      cambiarPantalla("inicio");
+    } else {
+      alert(data.message);
+    }
+  });
 }
 
-/* logout */
+/* Logout */
 function logout(){
   cuentaActual = null;
   cambiarPantalla("login");
 }
 
-/* deposito */
+/* Depositar */
 function depositar(){
-  let montoDeposito = parseFloat(monto.value);
   let destino = cuentaDestino.value.trim();
+  let monto = parseFloat(monto.value);
 
-  if(!cuentas[destino]){
-    alert("Cuenta destino no existe");
+  if(!destino || monto <= 0){
+    alert("Datos inválidos");
     return;
   }
 
-  if(montoDeposito <= 0){
-    alert("Monto inválido");
-    return;
-  }
-
-  if(cuentas[cuentaActual].saldo < montoDeposito){
-    alert("Saldo insuficiente");
-    return;
-  }
-
-  cuentas[cuentaActual].saldo -= montoDeposito;
-  let hora = new Date().toLocaleString();
-
-  cuentas[cuentaActual].movimientos.push(
-    `Depósito enviado a ${destino} | $${montoDeposito} | ${hora}`
-  );
-
-  cuentas[destino].saldo += montoDeposito;
-  cuentas[destino].movimientos.push(
-    `Depósito recibido de ${cuentaActual} | $${montoDeposito} | ${hora}`
-  );
-
-  localStorage.setItem("cuentas", JSON.stringify(cuentas));
-  alert("Depósito realizado");
-
-  // 👉 Cambiado a la URL pública de Render
-  fetch("https://banco-libre-backend.onrender.com/enviar-correo", {
+  fetch("https://banco-libre-backend.onrender.com/depositar", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      destino: destino,
-      monto: montoDeposito,
-      correo: cuentas[destino].correo,
-      origen: cuentaActual,
-      hora: hora
-    })
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ origen: cuentaActual, destino, monto })
   })
   .then(res => res.json())
-  .then(data => console.log("Respuesta del servidor:", data))
-  .catch(err => console.error("Error al enviar correo:", err));
-}
-
-/* cambiar pantalla */
-function cambiarPantalla(id){
-  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
-  document.getElementById(id).classList.add("activa");
-
-  if(cuentaActual){
-    cuentaActualSpan();
-    if(id === "balance"){
-      saldo.textContent = cuentas[cuentaActual].saldo;
-      movimientos.innerHTML = "";
-      cuentas[cuentaActual].movimientos.forEach(m => {
-        let li = document.createElement("li");
-        li.textContent = m;
-
-        // Botón imprimir al lado de cada movimiento
-        let btn = document.createElement("button");
-        btn.textContent = "Imprimir Ticket";
-        btn.style.marginLeft = "10px";
-        btn.onclick = () => imprimirTicketMovimiento(m);
-
-        li.appendChild(btn);
-        movimientos.appendChild(li);
-      });
+  .then(data => {
+    if(data.success){
+      alert("Depósito realizado");
+      cargarSaldo();
+    } else {
+      alert(data.message);
     }
-  }
-}
-
-/* actualizar cuenta */
-function cuentaActualSpan(){
-  document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e => {
-    e.textContent = cuentaActual;
   });
 }
 
-/* imprimir ticket de un movimiento */
-function imprimirTicketMovimiento(movimiento){
-  let contenido = "<h2>Ticket de Movimiento</h2>";
-  contenido += "<p><strong>Cuenta:</strong> " + cuentaActual + "</p>";
-  contenido += "<p><strong>Saldo actual:</strong> $" + cuentas[cuentaActual].saldo + "</p>";
-  contenido += "<p><strong>Detalle:</strong> " + movimiento + "</p>";
-
-  let ventana = window.open("", "Ticket", "width=600,height=400");
-  ventana.document.write(contenido);
-  ventana.document.close();
-  ventana.print();
+/* Cargar saldo */
+function cargarSaldo(){
+  fetch(`https://banco-libre-backend.onrender.com/saldo/${cuentaActual}`)
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      saldo.textContent = data.saldo;
+    }
+  });
 }
 
-/* reset */
+/* Movimientos (por ahora vacíos, se agregan si quieres historial real) */
+function cargarMovimientos(){
+  movimientos.innerHTML = "<li>No hay historial aún</li>";
+}
+
+/* Enviar PIN */
 function enviarPin(){
   let correo = correoReset.value.trim().toLowerCase();
-  let cuenta = Object.keys(cuentas).find(c => cuentas[c].correo === correo);
 
-  if(!cuenta){
-    alert("Correo no registrado");
-    return;
-  }
-
-  pinTemporal = Math.floor(100000 + Math.random() * 900000);
-  correoTemporal = correo;
-
-  // 👉 Cambiado a la URL pública de Render
-fetch("https://banco-libre-backend.onrender.com/enviar-pin", {
+  fetch("https://banco-libre-backend.onrender.com/enviar-pin", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      correo: correo,
-      pin: pinTemporal,
-      cuenta: cuenta
-    })
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ correo })
   })
   .then(res => res.json())
-  .then(data => console.log("Respuesta del servidor:", data))
-  .catch(err => console.error("Error al enviar PIN:", err));
-
-  alert("PIN enviado al correo registrado");
+  .then(data => {
+    alert("Si el correo existe, se envió un PIN");
+  });
 }
 
+/* Cambiar contraseña */
 function cambiarPassword(){
-  if(parseInt(pinIngresado.value) === pinTemporal){
-    let cuenta = Object.keys(cuentas).find(c => cuentas[c].correo === correoTemporal);
-    cuentas[cuenta].password = nuevaPasswordReset.value;
-    localStorage.setItem("cuentas", JSON.stringify(cuentas));
-    alert("Contraseña cambiada");
-    cambiarPantalla("login");
-  } else {
-    alert("PIN incorrecto");
-  }
+  let pin = pinIngresado.value.trim();
+  let nueva = nuevaPasswordReset.value.trim();
+
+  fetch("https://banco-libre-backend.onrender.com/cambiar-password", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ pin, nueva })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    if(data.success) cambiarPantalla("login");
+  });
 }
 </script>
 
