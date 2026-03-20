@@ -233,26 +233,40 @@ function crearCuenta(){
 }
 
 /* login */
-function login(){
-  let cuenta = usuario.value.trim(); // ahora login con número de cuenta
+function login() {
+  let cuenta = usuario.value.trim();
   let p = password.value.trim();
 
   fetch("https://banco-libre-backend.onrender.com/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cuenta, password:p })
+    body: JSON.stringify({ cuenta, password: p })
   })
   .then(res => res.json())
   .then(data => {
-    if(data.ok){
-      cuentaActual = data.cuenta;
-      cuentaActualSpan();
-      cambiarPantalla("inicio");
+    if (data.ok) {
+      // Guardar en localStorage
+      localStorage.setItem("correo", data.correo);
+
+      // Guardar también en DB (ejemplo: actualizar último login)
+      fetch("https://banco-libre-backend.onrender.com/guardar-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo: data.correo, fecha: new Date().toLocaleString() })
+      });
+
+      // Redirigir a inicio
+      window.location.href = "inicio.html";
     } else {
       alert(data.mensaje);
     }
+  })
+  .catch(err => {
+    console.error("Error en login:", err);
+    alert("Error al iniciar sesión");
   });
 }
+
 
 /* logout */
 function logout(){
