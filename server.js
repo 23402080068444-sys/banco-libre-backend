@@ -37,7 +37,7 @@ app.post("/enviar-correo", async (req, res) => {
   }
 
   let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-  sendSmtpEmail.sender = { email: "tu-correo-verificado@dominio.com" }; // remitente verificado en Brevo
+  sendSmtpEmail.sender = { email: "mg307966@gmail.com" }; // remitente verificado en Brevo
   sendSmtpEmail.to = [{ email: correo }];
   sendSmtpEmail.subject = "Ticket de depósito - Banco Libre";
   sendSmtpEmail.textContent = `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}\n\nGracias por usar Banco Libre.`;
@@ -62,7 +62,7 @@ app.post("/enviar-pin", async (req, res) => {
   }
 
   let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-  sendSmtpEmail.sender = { email: "tu-correo-verificado@dominio.com" }; // remitente verificado en Brevo
+  sendSmtpEmail.sender = { email: "mg307966@gmail.com" }; // remitente verificado en Brevo
   sendSmtpEmail.to = [{ email: correo }];
   sendSmtpEmail.subject = "PIN de restablecimiento - Banco Libre";
   sendSmtpEmail.textContent = `Hola, se solicitó un restablecimiento de contraseña.\n\nCuenta: ${cuenta}\nPIN de verificación: ${pin}\n\nIngresa este PIN en la aplicación para cambiar tu contraseña.`;
