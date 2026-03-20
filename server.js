@@ -17,24 +17,14 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB conectado"))
   .catch(err => console.error("Error MongoDB:", err));
 
-// Servir archivos estáticos
+// Servir archivos estáticos desde la raíz
 app.use(express.static(path.join(__dirname)));
-// Rutas HTML
+
+// Ruta principal (login)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "1pag.html"));
 });
-app.get("/paginapr.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "paginapr.html"));
-});
-app.get("/criptomonedas.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "criptomonedas.html"));
-});
-app.get("/carrito.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "carrito.html"));
-});
-app.get("/misCriptomonedas.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "misCriptomonedas.html"));
-});
+
 
 
 // Configuración Brevo API
