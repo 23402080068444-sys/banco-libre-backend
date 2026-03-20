@@ -93,9 +93,8 @@ app.post("/login", async (req, res) => {
   });
 });
 
-
 // ===============================
-//   DEPOSITAR ENTRE CUENTAS + Ticket
+//   DEPOSITAR ENTRE CUENTAS + Ticket a ambas partes
 // ===============================
 app.post("/depositar", async (req, res) => {
   const { origen, destino, monto } = req.body;
@@ -119,18 +118,26 @@ app.post("/depositar", async (req, res) => {
   await userOrigen.save();
   await userDestino.save();
 
-  // Enviar ticket al correo asociado a la cuenta destino
-  let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-  sendSmtpEmail.sender = { email: "mg307966@gmail.com" }; // remitente validado en Brevo
-  sendSmtpEmail.to = [{ email: userDestino.correo }];
-  sendSmtpEmail.subject = "Ticket de depósito - Banco Libre";
-  sendSmtpEmail.textContent = `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
+  // Ticket para el que envía
+  let ticketOrigen = new SibApiV3Sdk.SendSmtpEmail();
+  ticketOrigen.sender = { email: "mg307966@gmail.com" };
+  ticketOrigen.to = [{ email: userOrigen.correo }];
+  ticketOrigen.subject = "Ticket de depósito enviado - Banco Libre";
+  ticketOrigen.textContent = `Has realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
+
+  // Ticket para el que recibe
+  let ticketDestino = new SibApiV3Sdk.SendSmtpEmail();
+  ticketDestino.sender = { email: "mg307966@gmail.com" };
+  ticketDestino.to = [{ email: userDestino.correo }];
+  ticketDestino.subject = "Ticket de depósito recibido - Banco Libre";
+  ticketDestino.textContent = `Has recibido un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
 
   try {
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-    res.json({ ok: true, mensaje: "Depósito realizado y ticket enviado al correo destino" });
+    await apiInstance.sendTransacEmail(ticketOrigen);
+    await apiInstance.sendTransacEmail(ticketDestino);
+    res.json({ ok: true, mensaje: "Depósito realizado y tickets enviados a ambas cuentas" });
   } catch (error) {
-    res.json({ ok: true, mensaje: "Depósito realizado, pero error al enviar ticket: " + error.toString() });
+    res.json({ ok: true, mensaje: "Depósito realizado, pero error al enviar tickets: " + error.toString() });
   }
 });
 
