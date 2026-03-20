@@ -135,7 +135,7 @@ app.post("/depositar", async (req, res) => {
   try {
     await apiInstance.sendTransacEmail(ticketOrigen);
     await apiInstance.sendTransacEmail(ticketDestino);
-    res.json({ ok: true, mensaje: "Depósito realizado y tickets enviados a ambas cuentas" });
+    res.json({ ok: true, mensaje: "Depósito realizado " });
   } catch (error) {
     res.json({ ok: true, mensaje: "Depósito realizado, pero error al enviar tickets: " + error.toString() });
   }
