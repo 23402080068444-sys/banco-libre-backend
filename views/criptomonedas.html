@@ -114,7 +114,6 @@
     "Dogecoin": 50
   };
 
-// Recuperar correo de la URL
 const params = new URLSearchParams(window.location.search);
 const userEmail = params.get("correo");
 
@@ -123,19 +122,14 @@ function addToCart(crypto) {
   fetch('/carrito/add', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userEmail: userEmail,   // 👈 aquí se envía el correo correcto
-      crypto: crypto,
-      cantidad: 1,
-      precioUnitario: precioUnitario
-    })
+    body: JSON.stringify({ userEmail, crypto, cantidad: 1, precioUnitario })
   })
   .then(r => r.json())
   .then(data => {
     alert(data.mensaje);
-    document.getElementById("btn-" + crypto).innerText = "Agregar más";
   });
 }
+
 
 </script>
 </html>

@@ -38,14 +38,17 @@
   </div>
 </body>
 <script>
+  // Recuperar correo automáticamente
+  const userEmail = localStorage.getItem("correo") || 
+                    new URLSearchParams(window.location.search).get("correo");
+
   async function cargarCarrito() {
-    const email = document.getElementById('email').value.trim();
-    if (!email) {
-      alert("Ingresa tu correo electrónico");
+    if (!userEmail) {
+      alert("No hay sesión activa");
       return;
     }
 
-    const res = await fetch(`/carrito/${email}`);
+    const res = await fetch(`/carrito/${userEmail}`);
     const data = await res.json();
     const lista = document.getElementById('listaCarrito');
     lista.innerHTML = "";
@@ -60,17 +63,17 @@
       const total = item.cantidad * item.precioUnitario;
       li.innerHTML = `
         ${item.crypto} x${item.cantidad} - $${total}
-        <button onclick="eliminar('${email}','${item.crypto}')">Eliminar</button>
+        <button onclick="eliminar('${item.crypto}')">Eliminar</button>
       `;
       lista.appendChild(li);
     });
   }
 
-  async function eliminar(email, crypto) {
+  async function eliminar(crypto) {
     const res = await fetch('/carrito/remove', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ userEmail: email, crypto })
+      body:JSON.stringify({ userEmail, crypto })
     });
     const data = await res.json();
     alert(data.mensaje);
@@ -78,21 +81,24 @@
   }
 
   async function checkout() {
-    const email = document.getElementById('email').value.trim();
-    if (!email) {
-      alert("Ingresa tu correo electrónico");
+    if (!userEmail) {
+      alert("No hay sesión activa");
       return;
     }
 
     const res = await fetch('/carrito/checkout', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ userEmail: email })
+      body:JSON.stringify({ userEmail })
     });
     const data = await res.json();
     alert(data.mensaje);
     cargarCarrito();
   }
+
+  // Cargar carrito al abrir la página
+  window.onload = cargarCarrito;
 </script>
+
 
 </html>

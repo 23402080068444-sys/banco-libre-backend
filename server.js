@@ -200,6 +200,10 @@ app.post("/cambiar-password", async (req, res) => {
 app.post("/carrito/add", async (req, res) => {
   const { userEmail, crypto, cantidad, precioUnitario } = req.body;
 
+  if (!userEmail) {
+    return res.json({ ok: false, mensaje: "Correo no recibido" });
+  }
+
   let carrito = await Carrito.findOne({ userEmail });
   if (!carrito) {
     carrito = new Carrito({ userEmail, items: [] });
@@ -210,6 +214,7 @@ app.post("/carrito/add", async (req, res) => {
 
   res.json({ ok: true, mensaje: "Cripto agregada al carrito" });
 });
+
 
 // Ver carrito
 app.get("/carrito/:userEmail", async (req, res) => {
