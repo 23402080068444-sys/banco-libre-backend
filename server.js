@@ -36,17 +36,15 @@ let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
 
 // ===============================
-//   CREAR CUENTA (usuario elige número)
+//   CREAR CUENTA
 // ===============================
 app.post("/crear-cuenta", async (req, res) => {
   const { correo, password, cuenta } = req.body;
 
-  // Validar número de cuenta: exactamente 10 dígitos
   if (!/^\d{10}$/.test(cuenta)) {
     return res.json({ ok: false, mensaje: "El número de cuenta debe tener exactamente 10 dígitos" });
   }
 
-  // Validar que no exista ese correo ni esa cuenta
   const existeCorreo = await Usuario.findOne({ correo });
   if (existeCorreo) return res.json({ ok: false, mensaje: "Correo ya registrado" });
 
@@ -76,7 +74,7 @@ app.post("/crear-cuenta", async (req, res) => {
 
 
 // ===============================
-//   LOGIN (por número de cuenta)
+//   LOGIN
 // ===============================
 app.post("/login", async (req, res) => {
   const { cuenta, password } = req.body;
@@ -97,7 +95,7 @@ app.post("/login", async (req, res) => {
 
 
 // ===============================
-//   DEPOSITAR ENTRE CUENTAS
+//   DEPOSITAR ENTRE CUENTAS + Ticket
 // ===============================
 app.post("/depositar", async (req, res) => {
   const { origen, destino, monto } = req.body;
@@ -121,7 +119,19 @@ app.post("/depositar", async (req, res) => {
   await userOrigen.save();
   await userDestino.save();
 
-  res.json({ ok: true, mensaje: "Depósito realizado" });
+  // Enviar ticket al correo asociado a la cuenta destino
+  let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  sendSmtpEmail.sender = { email: "mg307966@gmail.com" }; // remitente validado en Brevo
+  sendSmtpEmail.to = [{ email: userDestino.correo }];
+  sendSmtpEmail.subject = "Ticket de depósito - Banco Libre";
+  sendSmtpEmail.textContent = `Se ha realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
+
+  try {
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    res.json({ ok: true, mensaje: "Depósito realizado y ticket enviado al correo destino" });
+  } catch (error) {
+    res.json({ ok: true, mensaje: "Depósito realizado, pero error al enviar ticket: " + error.toString() });
+  }
 });
 
 
@@ -143,7 +153,7 @@ app.get("/cuenta/:cuenta", async (req, res) => {
 
 
 // ===============================
-//   ENVIAR PIN (generado en backend)
+//   ENVIAR PIN
 // ===============================
 app.post("/enviar-pin", async (req, res) => {
   const { correo } = req.body;
