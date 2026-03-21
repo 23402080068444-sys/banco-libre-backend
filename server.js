@@ -72,7 +72,7 @@ app.post("/crear-cuenta", async (req, res) => {
   // Enviar correo de bienvenida
   try {
     let sendEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendEmail.sender = { email: "tu-correo-verificado@dominio.com", name: "Banco Libre" }; // 👈 usa un remitente verificado en Brevo
+    sendEmail.sender = { email: "mg307966@gmail.com", name: "Banco Libre" }; // 👈 remitente verificado en Brevo
     sendEmail.to = [{ email: correo }];
     sendEmail.subject = "Bienvenido a Banco Libre";
     sendEmail.htmlContent = `<h1>Bienvenido</h1><p>Tu cuenta ${cuenta} ha sido creada exitosamente con saldo inicial de $10000.</p>`;
@@ -126,7 +126,7 @@ app.post("/depositar", async (req, res) => {
   // Ticket por correo
   try {
     let ticketOrigen = new SibApiV3Sdk.SendSmtpEmail();
-    ticketOrigen.sender = { email: "tu-correo-verificado@dominio.com", name: "Banco Libre" }; // 👈 remitente verificado
+    ticketOrigen.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
     ticketOrigen.to = [{ email: userOrigen.correo }];
     ticketOrigen.subject = "Ticket de depósito enviado";
     ticketOrigen.htmlContent = `<p>Has realizado un depósito:</p>
@@ -137,7 +137,7 @@ app.post("/depositar", async (req, res) => {
     await apiInstance.sendTransacEmail(ticketOrigen);
 
     let ticketDestino = new SibApiV3Sdk.SendSmtpEmail();
-    ticketDestino.sender = { email: "tu-correo-verificado@dominio.com", name: "Banco Libre" };
+    ticketDestino.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
     ticketDestino.to = [{ email: userDestino.correo }];
     ticketDestino.subject = "Ticket de depósito recibido";
     ticketDestino.htmlContent = `<p>Has recibido un depósito:</p>
@@ -176,7 +176,7 @@ app.post("/enviar-pin", async (req, res) => {
 
   try {
     let sendEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendEmail.sender = { email: "tu-correo-verificado@dominio.com", name: "Banco Libre" }; // 👈 remitente verificado
+    sendEmail.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
     sendEmail.to = [{ email: correo }];
     sendEmail.subject = "PIN de recuperación";
     sendEmail.htmlContent = `<p>Cuenta: ${user.cuenta}</p><p>PIN: <strong>${pin}</strong></p>`;
