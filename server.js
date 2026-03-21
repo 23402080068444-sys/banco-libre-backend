@@ -2,7 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const SibApiV3Sdk = require("sib-api-v3-sdk"); // 👈 usamos el SDK correcto
+const path = require("path");
+const SibApiV3Sdk = require("sib-api-v3-sdk"); // usamos el SDK correcto
 
 const app = express();
 app.use(cors());
@@ -33,6 +34,30 @@ let defaultClient = SibApiV3Sdk.ApiClient.instance;
 let apiKey = defaultClient.authentications["api-key"];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// ===============================
+//   Rutas Frontend (HTML)
+// ===============================
+app.use(express.static(__dirname));
+
+// Ruta principal → 1pag.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "1pag.html"));
+});
+
+// Ruta para paginapr.html
+app.get("/paginapr", (req, res) => {
+  res.sendFile(path.join(__dirname, "paginapr.html"));
+});
+
+// (Opcional) rutas para cripto si las usas
+app.get("/criptomonedas", (req, res) => {
+  res.sendFile(path.join(__dirname, "criptomonedas.html"));
+});
+
+app.get("/misCriptomonedas", (req, res) => {
+  res.sendFile(path.join(__dirname, "misCriptomonedas.html"));
+});
 
 // ===============================
 //   CREAR CUENTA
