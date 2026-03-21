@@ -1,36 +1,36 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const path = require("path");
-const SibApiV3Sdk = require("sib-api-v3-sdk");
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const Usuario = require("./models/Usuario");
-const Compra = require("./models/Compra"); 
-const Carrito = require("./models/Carrito");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const brevo = require("@getbrevo/brevo");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Conexión MongoDB
+// ===============================
+//   Conexión a MongoDB
+// ===============================
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB conectado"))
   .catch(err => console.error("Error MongoDB:", err));
 
-// Servir archivos estáticos desde la carpeta views
-app.use(express.static(path.join(__dirname, "views")));
+// ===============================
+//   Modelo de Usuario
+// ===============================
+const Usuario = mongoose.model("Usuario", new mongoose.Schema({
+  correo: String,
+  password: String,
+  cuenta: String,
+  saldo: { type: Number, default: 0 },
+  movimientos: [String]
+}));
 
-// Ruta principal (login)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "1pag.html"));
-});
-
-// Configuración Brevo API
-let defaultClient = SibApiV3Sdk.ApiClient.instance;
-let apiKey = defaultClient.authentications["api-key"];
-apiKey.apiKey = process.env.BREVO_API_KEY;
-let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+// ===============================
+//   Configuración Brevo
+// ===============================
+let apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 // ===============================
 //   CREAR CUENTA
@@ -38,35 +38,31 @@ let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 app.post("/crear-cuenta", async (req, res) => {
   const { correo, password, cuenta } = req.body;
 
+  // Validar cuenta
   if (!/^\d{10}$/.test(cuenta)) {
     return res.json({ ok: false, mensaje: "El número de cuenta debe tener exactamente 10 dígitos" });
   }
 
+  // Validar duplicados
   const existeCorreo = await Usuario.findOne({ correo });
   if (existeCorreo) return res.json({ ok: false, mensaje: "Correo ya registrado" });
 
   const existeCuenta = await Usuario.findOne({ cuenta });
   if (existeCuenta) return res.json({ ok: false, mensaje: "Número de cuenta ya registrado" });
 
-  const hash = await bcrypt.hash(password, 10);
-
-  const nuevo = new Usuario({
-    correo,
-    password: hash,
-    cuenta,
-    saldo: 10000,
-    movimientos: []
-  });
-
+  // Crear usuario
+  const nuevo = new Usuario({ correo, password, cuenta, saldo: 10000, movimientos: [] });
   await nuevo.save();
 
-  res.json({
-    ok: true,
-    correo: nuevo.correo,
-    cuenta: nuevo.cuenta,
-    saldo: nuevo.saldo,
-    mensaje: "Cuenta creada con saldo inicial de $10000"
+  // Enviar correo de bienvenida
+  await apiInstance.sendTransacEmail({
+    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
+    to: [{ email: correo }],
+    subject: "Bienvenido a Banco Libre",
+    htmlContent: `<h1>Bienvenido</h1><p>Tu cuenta ${cuenta} ha sido creada exitosamente con saldo inicial de $10000.</p>`
   });
+
+  res.json({ ok: true, mensaje: "Cuenta creada correctamente" });
 });
 
 // ===============================
@@ -74,19 +70,10 @@ app.post("/crear-cuenta", async (req, res) => {
 // ===============================
 app.post("/login", async (req, res) => {
   const { cuenta, password } = req.body;
+  const user = await Usuario.findOne({ cuenta, password });
+  if (!user) return res.json({ ok: false, mensaje: "Credenciales inválidas" });
 
-  const user = await Usuario.findOne({ cuenta });
-  if (!user) return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
-
-  const ok = await bcrypt.compare(password, user.password);
-  if (!ok) return res.json({ ok: false, mensaje: "Contraseña incorrecta" });
-
-  res.json({
-    ok: true,
-    correo: user.correo,
-    cuenta: user.cuenta,
-    saldo: user.saldo
-  });
+  res.json({ ok: true, cuenta: user.cuenta, correo: user.correo, saldo: user.saldo });
 });
 
 // ===============================
@@ -114,42 +101,41 @@ app.post("/depositar", async (req, res) => {
   await userOrigen.save();
   await userDestino.save();
 
-  // Ticket para ambos
-  let ticketOrigen = new SibApiV3Sdk.SendSmtpEmail();
-  ticketOrigen.sender = { email: "mg307966@gmail.com" };
-  ticketOrigen.to = [{ email: userOrigen.correo }];
-  ticketOrigen.subject = "Ticket de depósito enviado - Banco Libre";
-  ticketOrigen.textContent = `Has realizado un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
+  // Ticket por correo
+  await apiInstance.sendTransacEmail({
+    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
+    to: [{ email: userOrigen.correo }],
+    subject: "Ticket de depósito enviado",
+    htmlContent: `<p>Has realizado un depósito:</p>
+                  <p>Origen: ${origen}</p>
+                  <p>Destino: ${destino}</p>
+                  <p>Monto: $${monto}</p>
+                  <p>Hora: ${hora}</p>`
+  });
 
-  let ticketDestino = new SibApiV3Sdk.SendSmtpEmail();
-  ticketDestino.sender = { email: "mg307966@gmail.com" };
-  ticketDestino.to = [{ email: userDestino.correo }];
-  ticketDestino.subject = "Ticket de depósito recibido - Banco Libre";
-  ticketDestino.textContent = `Has recibido un depósito:\n\nOrigen: ${origen}\nDestino: ${destino}\nMonto: $${monto}\nHora: ${hora}`;
+  await apiInstance.sendTransacEmail({
+    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
+    to: [{ email: userDestino.correo }],
+    subject: "Ticket de depósito recibido",
+    htmlContent: `<p>Has recibido un depósito:</p>
+                  <p>Origen: ${origen}</p>
+                  <p>Destino: ${destino}</p>
+                  <p>Monto: $${monto}</p>
+                  <p>Hora: ${hora}</p>`
+  });
 
-  try {
-    await apiInstance.sendTransacEmail(ticketOrigen);
-    await apiInstance.sendTransacEmail(ticketDestino);
-    res.json({ ok: true, mensaje: "Depósito realizado " });
-  } catch (error) {
-    res.json({ ok: true, mensaje: "Depósito realizado, pero error al enviar tickets: " + error.toString() });
-  }
+  res.json({ ok: true, mensaje: "Depósito realizado" });
 });
 
 // ===============================
 //   CONSULTAR CUENTA
 // ===============================
-app.get("/cuenta/:cuenta", async (req, res) => {
-  const user = await Usuario.findOne({ cuenta: req.params.cuenta });
+app.get("/cuenta/:id", async (req, res) => {
+  const cuenta = req.params.id;
+  const user = await Usuario.findOne({ cuenta });
   if (!user) return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
 
-  res.json({
-    ok: true,
-    correo: user.correo,
-    cuenta: user.cuenta,
-    saldo: user.saldo,
-    movimientos: user.movimientos
-  });
+  res.json({ ok: true, correo: user.correo, cuenta: user.cuenta, saldo: user.saldo, movimientos: user.movimientos });
 });
 
 // ===============================
@@ -157,24 +143,19 @@ app.get("/cuenta/:cuenta", async (req, res) => {
 // ===============================
 app.post("/enviar-pin", async (req, res) => {
   const { correo } = req.body;
-
   const user = await Usuario.findOne({ correo });
   if (!user) return res.json({ ok: false, mensaje: "Correo no registrado" });
 
   const pin = Math.floor(100000 + Math.random() * 900000);
 
-  let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-  sendSmtpEmail.sender = { email: "mg307966@gmail.com" };
-  sendSmtpEmail.to = [{ email: correo }];
-  sendSmtpEmail.subject = "PIN de restablecimiento - Banco Libre";
-  sendSmtpEmail.textContent = `Cuenta: ${user.cuenta}\nPIN: ${pin}`;
+  await apiInstance.sendTransacEmail({
+    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
+    to: [{ email: correo }],
+    subject: "PIN de recuperación",
+    htmlContent: `<p>Cuenta: ${user.cuenta}</p><p>PIN: <strong>${pin}</strong></p>`
+  });
 
-  try {
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-    res.json({ ok: true, mensaje: "PIN enviado", pin, cuenta: user.cuenta });
-  } catch (error) {
-    res.status(500).json({ ok: false, mensaje: error.toString() });
-  }
+  res.json({ ok: true, mensaje: "PIN enviado", pin, cuenta: user.cuenta });
 });
 
 // ===============================
@@ -182,97 +163,15 @@ app.post("/enviar-pin", async (req, res) => {
 // ===============================
 app.post("/cambiar-password", async (req, res) => {
   const { correo, nuevaPassword } = req.body;
-
   const user = await Usuario.findOne({ correo });
-  if (!user) return res.json({ ok: false, mensaje: "Correo no registrado" });
+  if (!user) return res.json({ ok: false, mensaje: "Correo no encontrado" });
 
-  const hash = await bcrypt.hash(nuevaPassword, 10);
-  user.password = hash;
+  user.password = nuevaPassword;
   await user.save();
-
-  res.json({ ok: true, mensaje: "Contraseña cambiada" });
-}); 
-// ===============================
-//   CRIPTOMONEDAS: Carrito y Compras
-// ===============================
-
-// Agregar al carrito en DB
-app.post("/carrito/add", async (req, res) => {
-  const { userEmail, crypto, cantidad, precioUnitario } = req.body;
-
-  if (!userEmail) {
-    return res.json({ ok: false, mensaje: "Correo no recibido" });
-  }
-
-  let carrito = await Carrito.findOne({ userEmail });
-  if (!carrito) {
-    carrito = new Carrito({ userEmail, items: [] });
-  }
-
-  carrito.items.push({ crypto, cantidad, precioUnitario });
-  await carrito.save();
-
-  res.json({ ok: true, mensaje: "Cripto agregada al carrito" });
-});
-
-
-// Ver carrito
-app.get("/carrito/:userEmail", async (req, res) => {
-  const carrito = await Carrito.findOne({ userEmail: req.params.userEmail });
-  res.json({ ok: true, carrito: carrito ? carrito.items : [] });
-});
-
-// Checkout
-app.post("/carrito/checkout", async (req, res) => {
-  const { userEmail } = req.body;
-  const carrito = await Carrito.findOne({ userEmail });
-  if (!carrito || carrito.items.length === 0) {
-    return res.json({ ok: false, mensaje: "Carrito vacío" });
-  }
-
-  const ticketId = Date.now().toString();
-  const fecha = new Date().toLocaleString();
-  const items = carrito.items;
-
-  let total = 0;
-  items.forEach(i => total += i.cantidad * i.precioUnitario);
-
-  // Guardar compra en DB
-  await Compra.create({ ticketId, fecha, items, userEmail, total });
-
-  // Actualizar saldo y movimientos del usuario
-  const user = await Usuario.findOne({ correo: userEmail });
-  if (user) {
-    user.saldo -= total;
-    user.movimientos.push(
-      `Compra de ${items.map(i => `${i.crypto} x${i.cantidad}`).join(", ")} | $${total} | ${fecha}`
-    );
-    await user.save();
-  }
-
-  // Vaciar carrito en DB
-  carrito.items = [];
-  await carrito.save();
-
-  res.json({ ok: true, mensaje: "Compra registrada correctamente." });
+  res.json({ ok: true, mensaje: "Contraseña actualizada" });
 });
 
 // ===============================
-//   MIS CRIPTOS (solo compras)
+//   Servidor
 // ===============================
-app.get("/mis-criptos/:userEmail", async (req, res) => {
-  const compras = await Compra.find({ userEmail: req.params.userEmail });
-  res.json({ ok: true, compras });
-});
-
-// ===============================
-//   API Historial de Compras
-// ===============================
-app.get("/api/compras", async (req, res) => {
-  const compras = await Compra.find();
-  res.json(compras);
-});
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+app.listen(3000, () => console.log("Servidor Banco Libre en puerto 3000"));

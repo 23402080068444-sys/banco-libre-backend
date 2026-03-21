@@ -245,18 +245,10 @@ function login() {
   .then(res => res.json())
   .then(data => {
     if (data.ok) {
-      // Guardar en localStorage
+      cuentaActual = data.cuenta;
       localStorage.setItem("correo", data.correo);
-
-      // Guardar también en DB (ejemplo: actualizar último login)
-      fetch("https://banco-libre-backend.onrender.com/guardar-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo: data.correo, fecha: new Date().toLocaleString() })
-      });
-
-      // Redirigir a inicio
-       cambiarPantalla("inicio");
+      cuentaActualSpan();
+      cambiarPantalla("inicio");
     } else {
       alert(data.mensaje);
     }
@@ -266,7 +258,6 @@ function login() {
     alert("Error al iniciar sesión");
   });
 }
-
 
 /* logout */
 function logout(){
@@ -295,10 +286,6 @@ function depositar(){
       cambiarPantalla("balance");
     }
   });
-}
-function irACriptomonedas() {
-  const correo = localStorage.getItem("correo");
-  window.location.href = `criptomonedas.html?correo=${correo}`;
 }
 
 /* cambiar pantalla */
@@ -389,25 +376,6 @@ function cambiarPassword(){
   } else {
     alert("PIN incorrecto");
   }
-}
-</script>
-<script>
-function irACriptomonedas() {
-  const correo = localStorage.getItem("correo");
-  if (!correo) {
-    alert("No hay sesión activa");
-    return;
-  }
-  window.location.href = `criptomonedas.html?correo=${correo}`;
-}
-
-function irAMisCriptos() {
-  const correo = localStorage.getItem("correo");
-  if (!correo) {
-    alert("No hay sesión activa");
-    return;
-  }
-  window.location.href = `misCriptomonedas.html?correo=${correo}`;
 }
 </script>
 
