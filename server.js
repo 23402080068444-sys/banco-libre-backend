@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const brevo = require("@getbrevo/brevo");
+const SibApiV3Sdk = require("sib-api-v3-sdk"); // 👈 usamos el SDK correcto
 
 const app = express();
 app.use(cors());
@@ -27,10 +27,12 @@ const Usuario = mongoose.model("Usuario", new mongoose.Schema({
 }));
 
 // ===============================
-//   Configuración Brevo
+//   Configuración Brevo (Sendinblue)
 // ===============================
-let apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+let defaultClient = SibApiV3Sdk.ApiClient.instance;
+let apiKey = defaultClient.authentications["api-key"];
+apiKey.apiKey = process.env.BREVO_API_KEY;
+let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
 // ===============================
 //   CREAR CUENTA
@@ -38,29 +40,27 @@ apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BR
 app.post("/crear-cuenta", async (req, res) => {
   const { correo, password, cuenta } = req.body;
 
-  // Validar cuenta
   if (!/^\d{10}$/.test(cuenta)) {
     return res.json({ ok: false, mensaje: "El número de cuenta debe tener exactamente 10 dígitos" });
   }
 
-  // Validar duplicados
   const existeCorreo = await Usuario.findOne({ correo });
   if (existeCorreo) return res.json({ ok: false, mensaje: "Correo ya registrado" });
 
   const existeCuenta = await Usuario.findOne({ cuenta });
   if (existeCuenta) return res.json({ ok: false, mensaje: "Número de cuenta ya registrado" });
 
-  // Crear usuario
   const nuevo = new Usuario({ correo, password, cuenta, saldo: 10000, movimientos: [] });
   await nuevo.save();
 
   // Enviar correo de bienvenida
-  await apiInstance.sendTransacEmail({
-    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
-    to: [{ email: correo }],
-    subject: "Bienvenido a Banco Libre",
-    htmlContent: `<h1>Bienvenido</h1><p>Tu cuenta ${cuenta} ha sido creada exitosamente con saldo inicial de $10000.</p>`
-  });
+  let sendEmail = new SibApiV3Sdk.SendSmtpEmail();
+  sendEmail.sender = { email: "noreply@bancolibre.com", name: "Banco Libre" };
+  sendEmail.to = [{ email: correo }];
+  sendEmail.subject = "Bienvenido a Banco Libre";
+  sendEmail.htmlContent = `<h1>Bienvenido</h1><p>Tu cuenta ${cuenta} ha sido creada exitosamente con saldo inicial de $10000.</p>`;
+
+  await apiInstance.sendTransacEmail(sendEmail);
 
   res.json({ ok: true, mensaje: "Cuenta creada correctamente" });
 });
@@ -102,27 +102,28 @@ app.post("/depositar", async (req, res) => {
   await userDestino.save();
 
   // Ticket por correo
-  await apiInstance.sendTransacEmail({
-    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
-    to: [{ email: userOrigen.correo }],
-    subject: "Ticket de depósito enviado",
-    htmlContent: `<p>Has realizado un depósito:</p>
-                  <p>Origen: ${origen}</p>
-                  <p>Destino: ${destino}</p>
-                  <p>Monto: $${monto}</p>
-                  <p>Hora: ${hora}</p>`
-  });
+  let ticketOrigen = new SibApiV3Sdk.SendSmtpEmail();
+  ticketOrigen.sender = { email: "noreply@bancolibre.com", name: "Banco Libre" };
+  ticketOrigen.to = [{ email: userOrigen.correo }];
+  ticketOrigen.subject = "Ticket de depósito enviado";
+  ticketOrigen.htmlContent = `<p>Has realizado un depósito:</p>
+                              <p>Origen: ${origen}</p>
+                              <p>Destino: ${destino}</p>
+                              <p>Monto: $${monto}</p>
+                              <p>Hora: ${hora}</p>`;
 
-  await apiInstance.sendTransacEmail({
-    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
-    to: [{ email: userDestino.correo }],
-    subject: "Ticket de depósito recibido",
-    htmlContent: `<p>Has recibido un depósito:</p>
-                  <p>Origen: ${origen}</p>
-                  <p>Destino: ${destino}</p>
-                  <p>Monto: $${monto}</p>
-                  <p>Hora: ${hora}</p>`
-  });
+  let ticketDestino = new SibApiV3Sdk.SendSmtpEmail();
+  ticketDestino.sender = { email: "noreply@bancolibre.com", name: "Banco Libre" };
+  ticketDestino.to = [{ email: userDestino.correo }];
+  ticketDestino.subject = "Ticket de depósito recibido";
+  ticketDestino.htmlContent = `<p>Has recibido un depósito:</p>
+                               <p>Origen: ${origen}</p>
+                               <p>Destino: ${destino}</p>
+                               <p>Monto: $${monto}</p>
+                               <p>Hora: ${hora}</p>`;
+
+  await apiInstance.sendTransacEmail(ticketOrigen);
+  await apiInstance.sendTransacEmail(ticketDestino);
 
   res.json({ ok: true, mensaje: "Depósito realizado" });
 });
@@ -148,12 +149,13 @@ app.post("/enviar-pin", async (req, res) => {
 
   const pin = Math.floor(100000 + Math.random() * 900000);
 
-  await apiInstance.sendTransacEmail({
-    sender: { email: "noreply@bancolibre.com", name: "Banco Libre" },
-    to: [{ email: correo }],
-    subject: "PIN de recuperación",
-    htmlContent: `<p>Cuenta: ${user.cuenta}</p><p>PIN: <strong>${pin}</strong></p>`
-  });
+  let sendEmail = new SibApiV3Sdk.SendSmtpEmail();
+  sendEmail.sender = { email: "noreply@bancolibre.com", name: "Banco Libre" };
+  sendEmail.to = [{ email: correo }];
+  sendEmail.subject = "PIN de recuperación";
+  sendEmail.htmlContent = `<p>Cuenta: ${user.cuenta}</p><p>PIN: <strong>${pin}</strong></p>`;
+
+  await apiInstance.sendTransacEmail(sendEmail);
 
   res.json({ ok: true, mensaje: "PIN enviado", pin, cuenta: user.cuenta });
 });
