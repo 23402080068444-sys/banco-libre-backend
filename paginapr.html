@@ -1,3 +1,6 @@
+1pag · HTML
+Copiar
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,7 +8,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Banco Libre</title>
 <style>
-/* estilos iguales a los que ya tenías */
 body {
   margin: 0;
   padding: 20px;
@@ -27,7 +29,7 @@ body {
   display: flex;
   flex-direction: column;
 }
-.pantalla { display: none; padding: 20px; text-align: center; flex: 1; }
+.pantalla { display: none; padding: 20px; text-align: center; flex: 1; overflow-y: auto; }
 .pantalla.activa { display: block; }
 h1,h2 { color: #007aff; }
 input {
@@ -35,13 +37,12 @@ input {
   border: 1px solid #ccc; border-radius: 12px; font-size: 16px;
 }
 #movimientos {
-  max-height: 400px;   /* límite de altura visible */
-  overflow-y: auto;    /* activa scroll vertical */
-  padding: 10px;       /* espacio interno */
-  background: #f9f9f9; /* fondo suave */
-  border-radius: 12px; /* esquinas redondeadas */
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 12px;
 }
-
 button {
   background: #007aff; color: white; border: none; border-radius: 12px;
   padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer;
@@ -57,9 +58,9 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
 .logo:hover { transform: scale(1.05); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
 .logo:active { transform: scale(0.95); opacity: 0.85; }
 .header {
-  position:absolute; top:0; left:0; width:100%; height:60px;
-  background:#007aff; color:white; display:flex; align-items:center;
-  padding:0 15px; z-index:1000;
+  position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+  background: #007aff; color: white; display: flex; align-items: center;
+  padding: 0 15px; z-index: 1000;
 }
 .menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; }
 .title { font-weight: bold; }
@@ -71,7 +72,7 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
 .drawer.active { left: 0; }
 .drawer a {
   display: block; padding: 15px; text-decoration: none; color: #333;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #ddd; cursor: pointer;
 }
 .overlay {
   position: absolute; width: 100%; height: 100%;
@@ -79,35 +80,182 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
 }
 .overlay.active { display: block; }
 .contenido { padding-top: 80px; }
+ 
+/* ===== ADMIN STYLES ===== */
+.admin-header {
+  position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: white; display: flex; align-items: center;
+  padding: 0 15px; z-index: 1000; box-sizing: border-box;
+}
+.admin-badge {
+  background: #ff4444; color: white; font-size: 10px;
+  padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-weight: bold;
+}
+#admin { background: #0f0f1a; }
+#admin .contenido {
+  padding-top: 70px;
+  text-align: left;
+}
+#admin h2 {
+  color: #00d4ff;
+  text-align: center;
+  margin-bottom: 5px;
+}
+#admin p {
+  color: #aaa;
+  text-align: center;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+ 
+/* Tarjetas de usuario en admin */
+.admin-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 14px;
+  margin: 8px 0;
+  padding: 14px;
+  color: white;
+}
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.admin-cuenta-num {
+  font-size: 13px;
+  color: #00d4ff;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.admin-saldo {
+  font-size: 18px;
+  font-weight: bold;
+  color: #4cff91;
+  margin: 4px 0;
+}
+.admin-correo {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 10px;
+}
+.admin-btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.admin-btn {
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  margin: 0;
+  cursor: pointer;
+  border: none;
+  color: white;
+  flex: 1;
+  min-width: 80px;
+}
+.btn-edit { background: #007aff; }
+.btn-edit:hover { background: #005bb5; }
+.btn-delete { background: #ff3b30; }
+.btn-delete:hover { background: #cc2020; }
+.btn-history { background: #5856d6; }
+.btn-history:hover { background: #3634a3; }
+ 
+/* Modal de edición de saldo */
+.modal-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); z-index: 200; display: none;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: #1a1a2e; border: 1px solid #2a2a4a;
+  border-radius: 20px; padding: 25px; width: 80%; text-align: center;
+  color: white;
+}
+.modal-box h3 { color: #00d4ff; margin-top: 0; }
+.modal-box input {
+  background: #0f0f1a; border: 1px solid #2a2a4a;
+  color: white; border-radius: 10px; width: 85%; padding: 12px;
+  font-size: 16px; margin: 10px 0;
+}
+.modal-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+.modal-btn-row button { margin: 0; flex: 1; font-size: 14px; padding: 10px; }
+ 
+/* Modal de historial */
+.history-list {
+  max-height: 220px; overflow-y: auto;
+  background: #0f0f1a; border-radius: 10px;
+  padding: 10px; margin: 10px 0; text-align: left;
+}
+.history-list p {
+  color: #ccc; font-size: 11px; margin: 5px 0;
+  border-bottom: 1px solid #2a2a4a; padding-bottom: 5px;
+}
+ 
+/* Buscador admin */
+.admin-search {
+  width: 85%; padding: 10px 14px;
+  background: #1a1a2e; border: 1px solid #2a2a4a;
+  color: white; border-radius: 12px; font-size: 14px;
+  margin: 8px auto; display: block;
+}
+.admin-search::placeholder { color: #555; }
+ 
+.admin-list-wrap {
+  max-height: 440px; overflow-y: auto;
+  padding: 0 5px;
+}
+ 
+/* Stats bar */
+.admin-stats {
+  display: flex; justify-content: space-around;
+  background: #1a1a2e; border-radius: 14px;
+  padding: 12px; margin-bottom: 10px; border: 1px solid #2a2a4a;
+}
+.stat-item { text-align: center; }
+.stat-val { font-size: 18px; font-weight: bold; color: #00d4ff; }
+.stat-label { font-size: 10px; color: #666; }
+ 
+/* Refresh btn */
+.admin-refresh {
+  background: #1a1a2e; border: 1px solid #00d4ff;
+  color: #00d4ff; border-radius: 10px; padding: 8px 16px;
+  font-size: 13px; cursor: pointer; margin: 5px auto; display: block;
+}
+.admin-refresh:hover { background: #00d4ff; color: #0f0f1a; }
 </style>
 </head>
-
+ 
 <body><div class="app">
-
-  <!-- drawer -->
+ 
+  <!-- DRAWER (se muestra solo para usuarios normales) -->
   <div class="drawer" id="drawer">
     <a onclick="cambiarPantalla('inicio');toggleMenu()">Inicio</a>
     <a onclick="cambiarPantalla('balance');toggleMenu()">Balance</a>
     <a onclick="cambiarPantalla('depositos');toggleMenu()">Depósitos</a>
     <a onclick="cambiarPantalla('perfil');toggleMenu()">Perfil</a>
-	<a href="criptomonedas.html" onclick="toggleMenu()">Criptomonedas</a>
-<a href="misCriptomonedas.html" onclick="toggleMenu()">Mis Criptomonedas</a>
+    <a href="criptomonedas.html" onclick="toggleMenu()">Criptomonedas</a>
+    <a href="misCriptomonedas.html" onclick="toggleMenu()">Mis Criptomonedas</a>
     <a onclick="logout();toggleMenu()">Cerrar sesión</a>
   </div>
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-
-  <!-- login -->
+ 
+  <!-- ===== LOGIN ===== -->
   <div id="login" class="pantalla activa">
     <img src="bancolibre.jpg.jpeg" class="logo">
     <h1>Inicio de Sesión</h1>
-    <input id="usuario" placeholder="Número de cuenta">
+    <input id="usuario" placeholder="Número de cuenta o correo">
     <input id="password" type="password" placeholder="Contraseña">
     <button onclick="login()">Ingresar</button>
     <button onclick="cambiarPantalla('registro')">Crear cuenta</button>
     <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
   </div>
-
-  <!-- registro -->
+ 
+  <!-- ===== REGISTRO ===== -->
   <div id="registro" class="pantalla">
     <h2>Crear cuenta</h2>
     <input id="nuevaCuenta" placeholder="Número de cuenta">
@@ -116,8 +264,8 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
     <button onclick="crearCuenta()">Registrar</button>
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
-
-  <!-- inicio -->
+ 
+  <!-- ===== INICIO ===== -->
   <div id="inicio" class="pantalla">
     <div class="header">
       <div class="menu-icon" onclick="toggleMenu()">☰</div>
@@ -128,8 +276,8 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
       <p>Cuenta: <span id="cuentaActual"></span></p>
     </div>
   </div>
-
-  <!-- depositos -->
+ 
+  <!-- ===== DEPÓSITOS ===== -->
   <div id="depositos" class="pantalla">
     <div class="header">
       <div class="menu-icon" onclick="toggleMenu()">☰</div>
@@ -142,26 +290,23 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
       <button onclick="depositar()">Depositar</button>
     </div>
   </div>
-
-  <!-- balance -->
-<!-- balance -->
-<div id="balance" class="pantalla">
-  <div class="header">
-    <div class="menu-icon" onclick="toggleMenu()">☰</div>
-    <div class="title">Banco Libre</div>
-  </div>
-  <div class="contenido">
-    <h2>Saldo: $<span id="saldo">0</span></h2>
-    <h3>Movimientos</h3>
-    <div id="movimientos">
-      <ul id="listaMovimientos"></ul>
+ 
+  <!-- ===== BALANCE ===== -->
+  <div id="balance" class="pantalla">
+    <div class="header">
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <div class="title">Banco Libre</div>
     </div>
-    <!-- Botón para imprimir ticket -->
+    <div class="contenido">
+      <h2>Saldo: $<span id="saldo">0</span></h2>
+      <h3>Movimientos</h3>
+      <div id="movimientos">
+        <ul id="listaMovimientos"></ul>
+      </div>
+    </div>
   </div>
-</div>
-
-
-  <!-- perfil -->
+ 
+  <!-- ===== PERFIL ===== -->
   <div id="perfil" class="pantalla">
     <div class="header">
       <div class="menu-icon" onclick="toggleMenu()">☰</div>
@@ -172,8 +317,8 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
       <p>Cuenta actual: <span id="cuentaPerfil"></span></p>
     </div>
   </div>
-
-  <!-- reset -->
+ 
+  <!-- ===== RESET ===== -->
   <div id="reset" class="pantalla">
     <h2>Restablecer contraseña</h2>
     <input id="correoReset" placeholder="Correo registrado">
@@ -183,78 +328,127 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
     <button onclick="cambiarPassword()">Cambiar contraseña</button>
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
+ 
+  <!-- ===== PANEL ADMIN ===== -->
+  <div id="admin" class="pantalla">
+    <div class="admin-header">
+      <div class="menu-icon" onclick="logout()" style="font-size:20px;">⏻</div>
+      <div class="title" style="flex:1;">Panel Admin</div>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <div class="contenido" style="padding: 70px 12px 12px;">
+ 
+      <!-- Stats generales -->
+      <div class="admin-stats" id="adminStats">
+        <div class="stat-item">
+          <div class="stat-val" id="statCuentas">—</div>
+          <div class="stat-label">Cuentas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="statSaldo">—</div>
+          <div class="stat-label">Saldo total</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" id="statMovs">—</div>
+          <div class="stat-label">Movimientos</div>
+        </div>
+      </div>
+ 
+      <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
+      <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
+ 
+      <div class="admin-list-wrap" id="adminListWrap">
+        <p style="color:#555; text-align:center; font-size:13px;">Cargando cuentas...</p>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- ===== MODAL EDITAR SALDO ===== -->
+  <div class="modal-overlay" id="modalSaldo">
+    <div class="modal-box">
+      <h3>✏️ Editar Saldo</h3>
+      <p id="modalCuentaLabel" style="color:#aaa; font-size:13px;"></p>
+      <input id="nuevoSaldoInput" type="number" placeholder="Nuevo saldo">
+      <div class="modal-btn-row">
+        <button class="btn-edit" onclick="guardarSaldo()">Guardar</button>
+        <button class="btn-delete" onclick="cerrarModal('modalSaldo')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- ===== MODAL HISTORIAL ===== -->
+  <div class="modal-overlay" id="modalHistorial">
+    <div class="modal-box">
+      <h3>📋 Historial</h3>
+      <p id="modalHistCuenta" style="color:#aaa; font-size:13px;"></p>
+      <div class="history-list" id="historialLista"></div>
+      <button class="btn-history" onclick="cerrarModal('modalHistorial')" style="width:100%; margin:0;">Cerrar</button>
+    </div>
+  </div>
+ 
+  <!-- ===== MODAL CONFIRMAR BORRADO ===== -->
+  <div class="modal-overlay" id="modalBorrar">
+    <div class="modal-box">
+      <h3 style="color:#ff4444;">⚠️ Eliminar Cuenta</h3>
+      <p id="modalBorrarLabel" style="color:#aaa; font-size:13px;"></p>
+      <p style="color:#ff4444; font-size:12px;">Esta acción no se puede deshacer.</p>
+      <div class="modal-btn-row">
+        <button class="btn-delete" onclick="confirmarBorrado()">Eliminar</button>
+        <button class="btn-edit" onclick="cerrarModal('modalBorrar')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+ 
 <script>
+const BACKEND = "https://banco-libre-backend.onrender.com";
+const ADMIN_CORREO = "admin@gmail.com";
+const ADMIN_PASS = "pqrb728px";
+ 
 let cuentaActual = null;
 let pinTemporal = null;
 let correoTemporal = null;
-
-// referencias al menú
+let esAdmin = false;
+let todasLasCuentas = [];
+let cuentaParaEditar = null;
+let cuentaParaBorrar = null;
+ 
 const drawer = document.getElementById("drawer");
 const overlay = document.getElementById("overlay");
-
-/* menu */
+ 
+/* ===================== MENU ===================== */
 function toggleMenu(){
   drawer.classList.toggle("active");
   overlay.classList.toggle("active");
 }
-
-/* crear cuenta */
-function crearCuenta(){
-  let cuenta = nuevaCuenta.value.trim();
-  let p = nuevaPassword.value.trim();
-  let correo = nuevoCorreo.value.trim().toLowerCase();
-
-  if(!cuenta || !p || !correo){
-    alert("Completa todos los campos");
-    return;
-  }
-
-  if(cuenta.length !== 10 || !/^\d+$/.test(cuenta)){
-    alert("El número de cuenta debe tener exactamente 10 dígitos");
-    return;
-  }
-
-  let regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if(!regexCorreo.test(correo)){
-    alert("Correo inválido");
-    return;
-  }
-
-  fetch("https://banco-libre-backend.onrender.com/crear-cuenta", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo, password:p, cuenta })
-  })
-  .then(res => res.json())
-  .then(data => {
-    alert(data.mensaje);
-    if(data.ok) cambiarPantalla("login");
-  });
-}
-
-/* login */
+ 
+/* ===================== LOGIN ===================== */
 function login() {
-  let cuenta = usuario.value.trim();
-  let p = password.value.trim();
-
-  if(!cuenta || !p){
-    alert("Ingresa cuenta y contraseña");
+  let inputCuenta = document.getElementById("usuario").value.trim();
+  let p = document.getElementById("password").value.trim();
+ 
+  if (!inputCuenta || !p) { alert("Ingresa cuenta y contraseña"); return; }
+ 
+  // ---- ADMIN LOCAL ----
+  if (inputCuenta === ADMIN_CORREO && p === ADMIN_PASS) {
+    esAdmin = true;
+    cuentaActual = null;
+    cambiarPantalla("admin");
+    cargarAdmin();
     return;
   }
-
-  fetch("https://banco-libre-backend.onrender.com/login", {
+ 
+  // ---- USUARIO NORMAL ----
+  fetch(BACKEND + "/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cuenta, password: p })
+    body: JSON.stringify({ cuenta: inputCuenta, password: p })
   })
   .then(res => res.json())
   .then(data => {
     if (data.ok) {
+      esAdmin = false;
       cuentaActual = data.cuenta;
-      if (!cuentaActual) {
-        alert("Error: cuenta no asignada");
-        return;
-      }
+      if (!cuentaActual) { alert("Error: cuenta no asignada"); return; }
       localStorage.setItem("correo", data.correo);
       cuentaActualSpan();
       cambiarPantalla("inicio");
@@ -262,84 +456,80 @@ function login() {
       alert(data.mensaje);
     }
   })
-  .catch(err => {
-    console.error("Error en login:", err);
-    alert("Error al iniciar sesión");
-  });
+  .catch(err => { console.error("Error en login:", err); alert("Error al iniciar sesión"); });
 }
-
-/* logout */
+ 
+/* ===================== LOGOUT ===================== */
 function logout(){
   cuentaActual = null;
+  esAdmin = false;
+  todasLasCuentas = [];
   cambiarPantalla("login");
 }
-
-/* deposito */
-function depositar(){
-  let montoDeposito = parseFloat(monto.value);
-  let destino = cuentaDestino.value.trim();
-
-  if(!cuentaActual){
-    alert("Debes iniciar sesión primero");
-    return;
+ 
+/* ===================== REGISTRO ===================== */
+function crearCuenta(){
+  let cuenta = document.getElementById("nuevaCuenta").value.trim();
+  let p = document.getElementById("nuevaPassword").value.trim();
+  let correo = document.getElementById("nuevoCorreo").value.trim().toLowerCase();
+ 
+  if (!cuenta || !p || !correo) { alert("Completa todos los campos"); return; }
+  if (cuenta.length !== 10 || !/^\d+$/.test(cuenta)) {
+    alert("El número de cuenta debe tener exactamente 10 dígitos"); return;
   }
-  if(!destino || destino.length !== 10){
-    alert("Cuenta destino inválida");
-    return;
-  }
-  if(isNaN(montoDeposito) || montoDeposito <= 0){
-    alert("Monto inválido");
-    return;
-  }
-  if(destino === cuentaActual){
-    alert("No puedes depositar a tu misma cuenta");
-    return;
-  }
-
-  fetch("https://banco-libre-backend.onrender.com/depositar", {
+  let regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regexCorreo.test(correo)) { alert("Correo inválido"); return; }
+ 
+  fetch(BACKEND + "/crear-cuenta", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      origen: cuentaActual,
-      destino: destino,
-      monto: montoDeposito
-    })
+    body: JSON.stringify({ correo, password: p, cuenta })
   })
   .then(res => res.json())
-  .then(data => {
-    alert(data.mensaje);
-    if(data.ok){
-      cambiarPantalla("balance");
-    }
-  })
-  .catch(err => {
-    console.error("Error en depósito:", err);
-    alert("Error al realizar depósito");
-  });
+  .then(data => { alert(data.mensaje); if (data.ok) cambiarPantalla("login"); });
 }
-
-/* cambiar pantalla */
+ 
+/* ===================== DEPÓSITO ===================== */
+function depositar(){
+  let montoDeposito = parseFloat(document.getElementById("monto").value);
+  let destino = document.getElementById("cuentaDestino").value.trim();
+ 
+  if (!cuentaActual) { alert("Debes iniciar sesión primero"); return; }
+  if (!destino || destino.length !== 10) { alert("Cuenta destino inválida"); return; }
+  if (isNaN(montoDeposito) || montoDeposito <= 0) { alert("Monto inválido"); return; }
+  if (destino === cuentaActual) { alert("No puedes depositar a tu misma cuenta"); return; }
+ 
+  fetch(BACKEND + "/depositar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ origen: cuentaActual, destino, monto: montoDeposito })
+  })
+  .then(res => res.json())
+  .then(data => { alert(data.mensaje); if (data.ok) cambiarPantalla("balance"); })
+  .catch(err => { console.error("Error en depósito:", err); alert("Error al realizar depósito"); });
+}
+ 
+/* ===================== CAMBIAR PANTALLA ===================== */
 function cambiarPantalla(id){
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
-
-  if(cuentaActual){
+ 
+  if (cuentaActual && !esAdmin) {
     cuentaActualSpan();
-    if(id === "balance"){
-      fetch("https://banco-libre-backend.onrender.com/cuenta/" + cuentaActual)
+    if (id === "balance") {
+      fetch(BACKEND + "/cuenta/" + cuentaActual)
       .then(res => res.json())
       .then(data => {
-        saldo.textContent = data.saldo;
+        document.getElementById("saldo").textContent = data.saldo;
+        let movimientos = document.getElementById("movimientos");
         movimientos.innerHTML = "";
         data.movimientos.forEach(m => {
           let li = document.createElement("li");
           li.textContent = m;
-
           let btn = document.createElement("button");
           btn.textContent = "Imprimir Ticket";
           btn.style.marginLeft = "10px";
           btn.onclick = () => imprimirTicketMovimiento(m);
-
           li.appendChild(btn);
           movimientos.appendChild(li);
         });
@@ -347,38 +537,34 @@ function cambiarPantalla(id){
     }
   }
 }
-
-/* actualizar cuenta */
+ 
 function cuentaActualSpan(){
   document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e => {
     e.textContent = cuentaActual;
   });
 }
-
-/* imprimir ticket de un movimiento */
+ 
 function imprimirTicketMovimiento(movimiento){
   let contenido = "<h2>Ticket de Movimiento</h2>";
   contenido += "<p><strong>Cuenta:</strong> " + cuentaActual + "</p>";
   contenido += "<p><strong>Detalle:</strong> " + movimiento + "</p>";
-
   let ventana = window.open("", "Ticket", "width=600,height=400");
   ventana.document.write(contenido);
   ventana.document.close();
   ventana.print();
 }
-
-/* reset */
+ 
+/* ===================== RESET ===================== */
 function enviarPin(){
-  let correo = correoReset.value.trim().toLowerCase();
-
-  fetch("https://banco-libre-backend.onrender.com/enviar-pin", {
+  let correo = document.getElementById("correoReset").value.trim().toLowerCase();
+  fetch(BACKEND + "/enviar-pin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ correo })
   })
   .then(res => res.json())
   .then(data => {
-    if(data.ok){
+    if (data.ok) {
       pinTemporal = data.pin;
       correoTemporal = correo;
       alert("PIN enviado al correo registrado (Cuenta: " + data.cuenta + ")");
@@ -387,29 +573,157 @@ function enviarPin(){
     }
   });
 }
-
+ 
 function cambiarPassword(){
-  if(parseInt(pinIngresado.value) === pinTemporal){
-    fetch("https://banco-libre-backend.onrender.com/cambiar-password", {
+  if (parseInt(document.getElementById("pinIngresado").value) === pinTemporal) {
+    fetch(BACKEND + "/cambiar-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        correo: correoTemporal,
-        nuevaPassword: nuevaPasswordReset.value
-      })
+      body: JSON.stringify({ correo: correoTemporal, nuevaPassword: document.getElementById("nuevaPasswordReset").value })
     })
     .then(res => res.json())
-    .then(data => {
-      alert(data.mensaje);
-      if(data.ok) cambiarPantalla("login");
-    });
+    .then(data => { alert(data.mensaje); if (data.ok) cambiarPantalla("login"); });
   } else {
     alert("PIN incorrecto");
   }
 }
+ 
+/* ===================== ADMIN ===================== */
+async function cargarAdmin(){
+  try {
+    let res = await fetch(BACKEND + "/admin/cuentas", {
+      headers: { "x-admin-token": ADMIN_PASS }
+    });
+    let data = await res.json();
+    if (!data.ok) { alert("Error al cargar cuentas: " + data.mensaje); return; }
+ 
+    todasLasCuentas = data.cuentas;
+    renderizarCuentas(todasLasCuentas);
+ 
+    // Stats
+    let totalSaldo = todasLasCuentas.reduce((a, c) => a + c.saldo, 0);
+    let totalMovs = todasLasCuentas.reduce((a, c) => a + (c.movimientos ? c.movimientos.length : 0), 0);
+    document.getElementById("statCuentas").textContent = todasLasCuentas.length;
+    document.getElementById("statSaldo").textContent = "$" + totalSaldo.toLocaleString();
+    document.getElementById("statMovs").textContent = totalMovs;
+  } catch(err) {
+    console.error("Error admin:", err);
+    document.getElementById("adminListWrap").innerHTML = '<p style="color:#ff4444; text-align:center;">Error al conectar con el servidor</p>';
+  }
+}
+ 
+function renderizarCuentas(lista){
+  let wrap = document.getElementById("adminListWrap");
+  if (lista.length === 0) {
+    wrap.innerHTML = '<p style="color:#555; text-align:center; font-size:13px;">Sin resultados</p>';
+    return;
+  }
+  wrap.innerHTML = "";
+  lista.forEach(c => {
+    let card = document.createElement("div");
+    card.className = "admin-card";
+    card.innerHTML = `
+      <div class="admin-card-header">
+        <span class="admin-cuenta-num">🏦 ${c.cuenta}</span>
+      </div>
+      <div class="admin-saldo">$${(c.saldo || 0).toLocaleString()}</div>
+      <div class="admin-correo">📧 ${c.correo}</div>
+      <div class="admin-btn-row">
+        <button class="admin-btn btn-edit" onclick="abrirModalSaldo('${c.cuenta}', ${c.saldo})">✏️ Saldo</button>
+        <button class="admin-btn btn-history" onclick="verHistorial('${c.cuenta}')">📋 Historial</button>
+        <button class="admin-btn btn-delete" onclick="abrirModalBorrar('${c.cuenta}', '${c.correo}')">🗑️ Borrar</button>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+ 
+function filtrarCuentas(){
+  let q = document.getElementById("adminBuscador").value.trim().toLowerCase();
+  let filtradas = todasLasCuentas.filter(c =>
+    c.cuenta.includes(q) || (c.correo && c.correo.toLowerCase().includes(q))
+  );
+  renderizarCuentas(filtradas);
+}
+ 
+/* ---- Modal Saldo ---- */
+function abrirModalSaldo(cuenta, saldoActual){
+  cuentaParaEditar = cuenta;
+  document.getElementById("modalCuentaLabel").textContent = "Cuenta: " + cuenta + " | Saldo actual: $" + saldoActual;
+  document.getElementById("nuevoSaldoInput").value = saldoActual;
+  document.getElementById("modalSaldo").classList.add("active");
+}
+ 
+async function guardarSaldo(){
+  let nuevoSaldo = parseFloat(document.getElementById("nuevoSaldoInput").value);
+  if (isNaN(nuevoSaldo) || nuevoSaldo < 0) { alert("Saldo inválido"); return; }
+  try {
+    let res = await fetch(BACKEND + "/admin/editar-saldo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-token": ADMIN_PASS },
+      body: JSON.stringify({ cuenta: cuentaParaEditar, nuevoSaldo })
+    });
+    let data = await res.json();
+    alert(data.mensaje);
+    if (data.ok) {
+      cerrarModal("modalSaldo");
+      cargarAdmin();
+    }
+  } catch(err) { alert("Error al guardar saldo"); }
+}
+ 
+/* ---- Modal Historial ---- */
+async function verHistorial(cuenta){
+  document.getElementById("modalHistCuenta").textContent = "Cuenta: " + cuenta;
+  document.getElementById("historialLista").innerHTML = '<p style="color:#555;">Cargando...</p>';
+  document.getElementById("modalHistorial").classList.add("active");
+  try {
+    let res = await fetch(BACKEND + "/cuenta/" + cuenta);
+    let data = await res.json();
+    let lista = document.getElementById("historialLista");
+    lista.innerHTML = "";
+    if (!data.movimientos || data.movimientos.length === 0) {
+      lista.innerHTML = '<p style="color:#555;">Sin movimientos</p>';
+    } else {
+      data.movimientos.slice().reverse().forEach(m => {
+        let p = document.createElement("p");
+        p.textContent = m;
+        lista.appendChild(p);
+      });
+    }
+  } catch(err) {
+    document.getElementById("historialLista").innerHTML = '<p style="color:#ff4444;">Error al cargar historial</p>';
+  }
+}
+ 
+/* ---- Modal Borrar ---- */
+function abrirModalBorrar(cuenta, correo){
+  cuentaParaBorrar = cuenta;
+  document.getElementById("modalBorrarLabel").textContent = "¿Eliminar cuenta " + cuenta + " (" + correo + ")?";
+  document.getElementById("modalBorrar").classList.add("active");
+}
+ 
+async function confirmarBorrado(){
+  try {
+    let res = await fetch(BACKEND + "/admin/borrar-cuenta", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-token": ADMIN_PASS },
+      body: JSON.stringify({ cuenta: cuentaParaBorrar })
+    });
+    let data = await res.json();
+    alert(data.mensaje);
+    if (data.ok) {
+      cerrarModal("modalBorrar");
+      cargarAdmin();
+    }
+  } catch(err) { alert("Error al borrar cuenta"); }
+}
+ 
+/* ---- Cerrar modales ---- */
+function cerrarModal(id){
+  document.getElementById(id).classList.remove("active");
+}
 </script>
-
-
-
-</body>
+ 
+</div></body>
 </html>
