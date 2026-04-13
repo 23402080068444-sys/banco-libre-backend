@@ -1,6 +1,3 @@
-1pag · HTML
-Copiar
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,246 +5,160 @@ Copiar
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Banco Libre</title>
 <style>
+:root {
+  --azul: #007aff;
+  --azul-dark: #005bb5;
+  --blanco: #ffffff;
+  --gris-fondo: #e5e5e5;
+  --gris-card: #f2f2f7;
+  --texto: #1c1c1e;
+  --texto-sub: #8e8e93;
+}
 body {
-  margin: 0;
-  padding: 20px;
+  margin: 0; padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #e5e5e5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  background-color: var(--gris-fondo);
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
 }
 .app {
-  width: 390px;
-  height: 667px;
-  background: #fff;
-  border-radius: 40px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  width: 390px; height: 667px; background: var(--blanco);
+  border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  overflow: hidden; position: relative; display: flex; flex-direction: column;
 }
-.pantalla { display: none; padding: 20px; text-align: center; flex: 1; overflow-y: auto; }
+.pantalla { display: none; padding: 20px; text-align: center; flex: 1; overflow-y: auto; height: 100%; box-sizing: border-box; }
 .pantalla.activa { display: block; }
-h1,h2 { color: #007aff; }
-input {
-  width: 80%; padding: 12px; margin: 10px 0;
-  border: 1px solid #ccc; border-radius: 12px; font-size: 16px;
-}
-#movimientos {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-  background: #f9f9f9;
-  border-radius: 12px;
-}
-button {
-  background: #007aff; color: white; border: none; border-radius: 12px;
-  padding: 12px 20px; font-size: 16px; margin: 10px; cursor: pointer;
-}
-button:hover { background: #005bb5; }
-ul { list-style: none; padding: 0; }
-ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
-.logo {
-  width: 90%; max-width: 300px; height: auto; border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.logo:hover { transform: scale(1.05); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
-.logo:active { transform: scale(0.95); opacity: 0.85; }
-.header {
-  position: absolute; top: 0; left: 0; width: 100%; height: 60px;
-  background: #007aff; color: white; display: flex; align-items: center;
-  padding: 0 15px; z-index: 1000;
-}
+h1,h2 { color: var(--azul); }
+input { width: 80%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 12px; font-size: 15px; box-sizing: border-box; }
+button { background: var(--azul); color: white; border: none; border-radius: 12px; padding: 12px 20px; font-size: 15px; margin: 6px; cursor: pointer; transition: background 0.2s; }
+button:hover { background: var(--azul-dark); }
+ul { list-style: none; padding: 0; margin: 0; }
+ul li { background: var(--gris-card); margin: 5px 0; padding: 10px; border-radius: 8px; font-size: 13px; }
+.logo { width: 90%; max-width: 300px; height: auto; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); transition: transform 0.3s; }
+.logo:hover { transform: scale(1.05); }
+.header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: var(--azul); color: white; display: flex; align-items: center; padding: 0 15px; z-index: 1000; box-sizing: border-box; }
 .menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; }
-.title { font-weight: bold; }
-.drawer {
-  position: absolute; top: 0; left: -250px; width: 250px; height: 100%;
-  background: white; box-shadow: 2px 0 10px rgba(0,0,0,.3);
-  transition: .3s; padding-top: 60px; z-index: 20;
-}
+.title { font-weight: bold; font-size: 17px; flex: 1; }
+.contenido { padding-top: 75px; }
+.drawer { position: absolute; top: 0; left: -260px; width: 260px; height: 100%; background: white; box-shadow: 2px 0 10px rgba(0,0,0,.2); transition: .3s; padding-top: 60px; z-index: 20; }
 .drawer.active { left: 0; }
-.drawer a {
-  display: block; padding: 15px; text-decoration: none; color: #333;
-  border-bottom: 1px solid #ddd; cursor: pointer;
-}
-.overlay {
-  position: absolute; width: 100%; height: 100%;
-  background: rgba(0,0,0,.4); display: none; z-index: 15;
-}
+.drawer a { display: flex; align-items: center; gap: 10px; padding: 14px 18px; text-decoration: none; color: var(--texto); border-bottom: 1px solid #f0f0f0; font-size: 15px; cursor: pointer; }
+.drawer a:hover { background: #f5f9ff; color: var(--azul); }
+.overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,.35); display: none; z-index: 15; }
 .overlay.active { display: block; }
-.contenido { padding-top: 80px; }
+#movimientos { max-height: 350px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 12px; }
  
-/* ===== ADMIN STYLES ===== */
-.admin-header {
-  position: absolute; top: 0; left: 0; width: 100%; height: 60px;
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  color: white; display: flex; align-items: center;
-  padding: 0 15px; z-index: 1000; box-sizing: border-box;
-}
-.admin-badge {
-  background: #ff4444; color: white; font-size: 10px;
-  padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-weight: bold;
-}
-#admin { background: #0f0f1a; }
-#admin .contenido {
-  padding-top: 70px;
-  text-align: left;
-}
-#admin h2 {
-  color: #00d4ff;
-  text-align: center;
-  margin-bottom: 5px;
-}
-#admin p {
-  color: #aaa;
-  text-align: center;
-  font-size: 13px;
-  margin-bottom: 15px;
-}
+/* CRIPTOMONEDAS */
+.cripto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-bottom: 20px; }
+.cripto-card { background: var(--gris-card); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; }
+.cripto-card:hover { border-color: var(--azul); background: #f0f6ff; }
+.cripto-card.en-carrito { border-color: var(--azul); background: #e8f2ff; }
+.cripto-emoji { font-size: 28px; }
+.cripto-nombre { font-weight: bold; font-size: 13px; color: var(--texto); margin: 4px 0 2px; }
+.cripto-simbolo { font-size: 11px; color: var(--texto-sub); }
+.cripto-precio { font-size: 14px; font-weight: bold; color: var(--azul); margin-top: 6px; }
+.cripto-badge { position: absolute; top: 6px; right: 6px; background: var(--azul); color: white; font-size: 10px; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-weight: bold; }
+.cripto-card.en-carrito .cripto-badge { display: flex; }
+.cart-badge { background: #ff3b30; color: white; font-size: 11px; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-weight: bold; margin-left: -8px; margin-top: -10px; }
+.cart-badge.visible { display: flex; }
  
-/* Tarjetas de usuario en admin */
-.admin-card {
-  background: #1a1a2e;
-  border: 1px solid #2a2a4a;
-  border-radius: 14px;
-  margin: 8px 0;
-  padding: 14px;
-  color: white;
-}
-.admin-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.admin-cuenta-num {
-  font-size: 13px;
-  color: #00d4ff;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-.admin-saldo {
-  font-size: 18px;
-  font-weight: bold;
-  color: #4cff91;
-  margin: 4px 0;
-}
-.admin-correo {
-  font-size: 11px;
-  color: #888;
-  margin-bottom: 10px;
-}
-.admin-btn-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.admin-btn {
-  font-size: 12px;
-  padding: 7px 12px;
-  border-radius: 8px;
-  margin: 0;
-  cursor: pointer;
-  border: none;
-  color: white;
-  flex: 1;
-  min-width: 80px;
-}
-.btn-edit { background: #007aff; }
-.btn-edit:hover { background: #005bb5; }
-.btn-delete { background: #ff3b30; }
-.btn-delete:hover { background: #cc2020; }
-.btn-history { background: #5856d6; }
-.btn-history:hover { background: #3634a3; }
+/* CARRITO */
+.carrito-item { background: var(--gris-card); border-radius: 12px; padding: 12px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+.carrito-info { text-align: left; }
+.carrito-nombre { font-weight: bold; font-size: 14px; }
+.carrito-sub { font-size: 12px; color: var(--texto-sub); }
+.carrito-ctrl { display: flex; align-items: center; gap: 8px; }
+.carrito-ctrl button { padding: 4px 10px; font-size: 16px; margin: 0; border-radius: 8px; min-width: 32px; }
+.carrito-cantidad { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; }
+.carrito-total-bar { background: var(--azul); color: white; border-radius: 14px; padding: 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+.carrito-total-bar span { font-size: 16px; font-weight: bold; }
+.btn-comprar { background: white; color: var(--azul); border: none; border-radius: 10px; padding: 8px 16px; font-weight: bold; font-size: 14px; cursor: pointer; }
+.btn-comprar:hover { background: #e8f2ff; }
  
-/* Modal de edición de saldo */
-.modal-overlay {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7); z-index: 200; display: none;
-  align-items: center; justify-content: center;
-}
+/* MIS CRIPTOS */
+.mis-cripto-item { background: var(--gris-card); border-radius: 12px; padding: 12px 14px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+.mis-cripto-left { display: flex; align-items: center; gap: 10px; }
+.mis-cripto-emoji { font-size: 24px; }
+.mis-cripto-nombre { font-weight: bold; font-size: 14px; }
+.mis-cripto-cant { font-size: 12px; color: var(--texto-sub); }
+.mis-cripto-valor { font-weight: bold; color: var(--azul); font-size: 15px; }
+ 
+/* ADMIN */
+#admin { background: #f5f9ff; }
+.admin-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: var(--azul); color: white; display: flex; align-items: center; padding: 0 15px; z-index: 1000; box-sizing: border-box; }
+.admin-badge { background: #ff3b30; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+.admin-tabs { display: flex; gap: 0; margin-bottom: 12px; background: white; border-radius: 12px; padding: 4px; border: 1px solid #e0e0e0; }
+.admin-tab { flex: 1; padding: 8px 4px; font-size: 11px; font-weight: bold; background: transparent; color: var(--texto-sub); border: none; border-radius: 9px; cursor: pointer; transition: all 0.2s; margin: 0; }
+.admin-tab.active { background: var(--azul); color: white; }
+.admin-tab-content { display: none; }
+.admin-tab-content.active { display: block; }
+.admin-stats { display: flex; justify-content: space-around; background: white; border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 1px solid #e8eef5; box-shadow: 0 2px 8px rgba(0,122,255,0.08); }
+.stat-item { text-align: center; }
+.stat-val { font-size: 18px; font-weight: bold; color: var(--azul); }
+.stat-label { font-size: 10px; color: var(--texto-sub); }
+.admin-card { background: white; border: 1px solid #e8eef5; border-radius: 14px; margin: 8px 0; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+.admin-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.admin-cuenta-num { font-size: 13px; color: var(--azul); font-weight: bold; letter-spacing: 1px; }
+.admin-saldo { font-size: 20px; font-weight: bold; color: #1c1c1e; margin: 2px 0; }
+.admin-correo { font-size: 11px; color: var(--texto-sub); margin-bottom: 10px; }
+.admin-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-btn { font-size: 11px; padding: 7px 10px; border-radius: 8px; margin: 0; cursor: pointer; border: none; color: white; flex: 1; min-width: 60px; }
+.btn-edit { background: var(--azul); } .btn-edit:hover { background: var(--azul-dark); }
+.btn-delete { background: #ff3b30; } .btn-delete:hover { background: #cc2020; }
+.btn-history { background: #5856d6; } .btn-history:hover { background: #3634a3; }
+.btn-cripto { background: #34c759; } .btn-cripto:hover { background: #28a745; }
+.admin-search { width: 100%; padding: 10px 14px; box-sizing: border-box; background: white; border: 1px solid #e0e0e0; color: var(--texto); border-radius: 12px; font-size: 14px; margin: 6px 0 8px; }
+.admin-list-wrap { max-height: 360px; overflow-y: auto; padding-bottom: 10px; }
+.admin-refresh { background: white; border: 1px solid var(--azul); color: var(--azul); border-radius: 10px; padding: 7px 14px; font-size: 12px; cursor: pointer; margin: 0 0 8px; display: inline-block; }
+.admin-refresh:hover { background: #f0f6ff; }
+.admin-cripto-row { background: white; border: 1px solid #e8eef5; border-radius: 12px; padding: 12px 14px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.admin-cripto-left { display: flex; align-items: center; gap: 10px; }
+.admin-cripto-emoji { font-size: 24px; }
+.admin-cripto-nombre { font-weight: bold; font-size: 14px; color: var(--texto); }
+.admin-cripto-simbolo { font-size: 11px; color: var(--texto-sub); }
+.admin-cripto-precio { font-size: 15px; font-weight: bold; color: var(--azul); }
+.btn-edit-precio { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; margin: 0; }
+.btn-edit-precio:hover { background: var(--azul-dark); }
+ 
+/* MODALES */
+.modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
 .modal-overlay.active { display: flex; }
-.modal-box {
-  background: #1a1a2e; border: 1px solid #2a2a4a;
-  border-radius: 20px; padding: 25px; width: 80%; text-align: center;
-  color: white;
-}
-.modal-box h3 { color: #00d4ff; margin-top: 0; }
-.modal-box input {
-  background: #0f0f1a; border: 1px solid #2a2a4a;
-  color: white; border-radius: 10px; width: 85%; padding: 12px;
-  font-size: 16px; margin: 10px 0;
-}
+.modal-box { background: white; border-radius: 20px; padding: 24px; width: 82%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.modal-box h3 { color: var(--azul); margin-top: 0; }
+.modal-box input { background: #f5f9ff; border: 1px solid #d0e0f5; color: var(--texto); border-radius: 10px; width: 85%; padding: 12px; font-size: 15px; margin: 10px 0; }
 .modal-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
 .modal-btn-row button { margin: 0; flex: 1; font-size: 14px; padding: 10px; }
- 
-/* Modal de historial */
-.history-list {
-  max-height: 220px; overflow-y: auto;
-  background: #0f0f1a; border-radius: 10px;
-  padding: 10px; margin: 10px 0; text-align: left;
-}
-.history-list p {
-  color: #ccc; font-size: 11px; margin: 5px 0;
-  border-bottom: 1px solid #2a2a4a; padding-bottom: 5px;
-}
- 
-/* Buscador admin */
-.admin-search {
-  width: 85%; padding: 10px 14px;
-  background: #1a1a2e; border: 1px solid #2a2a4a;
-  color: white; border-radius: 12px; font-size: 14px;
-  margin: 8px auto; display: block;
-}
-.admin-search::placeholder { color: #555; }
- 
-.admin-list-wrap {
-  max-height: 440px; overflow-y: auto;
-  padding: 0 5px;
-}
- 
-/* Stats bar */
-.admin-stats {
-  display: flex; justify-content: space-around;
-  background: #1a1a2e; border-radius: 14px;
-  padding: 12px; margin-bottom: 10px; border: 1px solid #2a2a4a;
-}
-.stat-item { text-align: center; }
-.stat-val { font-size: 18px; font-weight: bold; color: #00d4ff; }
-.stat-label { font-size: 10px; color: #666; }
- 
-/* Refresh btn */
-.admin-refresh {
-  background: #1a1a2e; border: 1px solid #00d4ff;
-  color: #00d4ff; border-radius: 10px; padding: 8px 16px;
-  font-size: 13px; cursor: pointer; margin: 5px auto; display: block;
-}
-.admin-refresh:hover { background: #00d4ff; color: #0f0f1a; }
+.history-list { max-height: 200px; overflow-y: auto; background: #f5f9ff; border-radius: 10px; padding: 10px; margin: 10px 0; text-align: left; }
+.history-list p { color: var(--texto); font-size: 11px; margin: 5px 0; border-bottom: 1px solid #e8eef5; padding-bottom: 5px; }
+.admin-user-cripto-item { background: #f5f9ff; border-radius: 10px; padding: 10px 12px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+.auc-left { display: flex; align-items: center; gap: 8px; }
+.auc-emoji { font-size: 20px; }
+.auc-nombre { font-weight: bold; font-size: 13px; }
+.auc-cant { font-size: 11px; color: var(--texto-sub); }
+.btn-auc-quitar { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin: 0; }
+.qty-selector { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 12px 0; }
+.qty-btn { padding: 8px 16px; font-size: 20px; border-radius: 10px; margin: 0; }
+.qty-num { font-size: 24px; font-weight: bold; color: var(--azul); min-width: 40px; text-align: center; }
 </style>
 </head>
- 
 <body><div class="app">
  
-  <!-- DRAWER (se muestra solo para usuarios normales) -->
+  <!-- DRAWER -->
   <div class="drawer" id="drawer">
-    <a onclick="cambiarPantalla('inicio');toggleMenu()">Inicio</a>
-    <a onclick="cambiarPantalla('balance');toggleMenu()">Balance</a>
-    <a onclick="cambiarPantalla('depositos');toggleMenu()">Depósitos</a>
-    <a onclick="cambiarPantalla('perfil');toggleMenu()">Perfil</a>
-    <a href="criptomonedas.html" onclick="toggleMenu()">Criptomonedas</a>
-    <a href="misCriptomonedas.html" onclick="toggleMenu()">Mis Criptomonedas</a>
-    <a onclick="logout();toggleMenu()">Cerrar sesión</a>
+    <a onclick="cambiarPantalla('inicio');toggleMenu()">🏠 Inicio</a>
+    <a onclick="cambiarPantalla('balance');toggleMenu()">💰 Balance</a>
+    <a onclick="cambiarPantalla('depositos');toggleMenu()">💸 Depósitos</a>
+    <a onclick="cambiarPantalla('criptomonedas');toggleMenu()">🪙 Criptomonedas</a>
+    <a onclick="cambiarPantalla('carrito');toggleMenu()">🛒 Carrito <span id="carritoDrawerCount" style="background:var(--azul);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;display:none"></span></a>
+    <a onclick="cambiarPantalla('misCriptos');toggleMenu()">💎 Mis Criptomonedas</a>
+    <a onclick="cambiarPantalla('perfil');toggleMenu()">👤 Perfil</a>
+    <a onclick="logout();toggleMenu()">🚪 Cerrar sesión</a>
   </div>
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
  
-  <!-- ===== LOGIN ===== -->
+  <!-- LOGIN -->
   <div id="login" class="pantalla activa">
-    <img src="bancolibre.jpg.jpeg" class="logo">
-    <h1>Inicio de Sesión</h1>
+    <img src="bancolibre.jpg.jpeg" class="logo" onerror="this.style.display='none'">
+    <h1>Banco Libre</h1>
     <input id="usuario" placeholder="Número de cuenta o correo">
     <input id="password" type="password" placeholder="Contraseña">
     <button onclick="login()">Ingresar</button>
@@ -255,119 +166,123 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
     <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
   </div>
  
-  <!-- ===== REGISTRO ===== -->
+  <!-- REGISTRO -->
   <div id="registro" class="pantalla">
     <h2>Crear cuenta</h2>
-    <input id="nuevaCuenta" placeholder="Número de cuenta">
+    <input id="nuevaCuenta" placeholder="Número de cuenta (10 dígitos)">
     <input id="nuevaPassword" type="password" placeholder="Contraseña">
     <input id="nuevoCorreo" type="email" placeholder="Correo electrónico">
     <button onclick="crearCuenta()">Registrar</button>
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
  
-  <!-- ===== INICIO ===== -->
+  <!-- INICIO -->
   <div id="inicio" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Banco Libre</div>
-    </div>
-    <div class="contenido">
-      <h2>Bienvenido</h2>
-      <p>Cuenta: <span id="cuentaActual"></span></p>
-    </div>
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Banco Libre</div></div>
+    <div class="contenido"><h2>Bienvenido 👋</h2><p>Cuenta: <strong><span id="cuentaActual"></span></strong></p></div>
   </div>
  
-  <!-- ===== DEPÓSITOS ===== -->
+  <!-- DEPÓSITOS -->
   <div id="depositos" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Banco Libre</div>
-    </div>
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Depósitos</div></div>
     <div class="contenido">
-      <h2>Depósitos</h2>
+      <h2>Transferir</h2>
       <input id="cuentaDestino" placeholder="Cuenta destino">
       <input id="monto" type="number" placeholder="Monto">
-      <button onclick="depositar()">Depositar</button>
+      <button onclick="depositar()">💸 Depositar</button>
     </div>
   </div>
  
-  <!-- ===== BALANCE ===== -->
+  <!-- BALANCE -->
   <div id="balance" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Banco Libre</div>
-    </div>
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Balance</div></div>
     <div class="contenido">
       <h2>Saldo: $<span id="saldo">0</span></h2>
-      <h3>Movimientos</h3>
-      <div id="movimientos">
-        <ul id="listaMovimientos"></ul>
-      </div>
+      <h3 style="text-align:left;">Movimientos</h3>
+      <div id="movimientos"><ul id="listaMovimientos"></ul></div>
     </div>
   </div>
  
-  <!-- ===== PERFIL ===== -->
+  <!-- PERFIL -->
   <div id="perfil" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Banco Libre</div>
-    </div>
-    <div class="contenido">
-      <h2>Perfil</h2>
-      <p>Cuenta actual: <span id="cuentaPerfil"></span></p>
-    </div>
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
+    <div class="contenido"><h2>👤 Perfil</h2><p>Cuenta: <strong><span id="cuentaPerfil"></span></strong></p></div>
   </div>
  
-  <!-- ===== RESET ===== -->
+  <!-- RESET -->
   <div id="reset" class="pantalla">
     <h2>Restablecer contraseña</h2>
     <input id="correoReset" placeholder="Correo registrado">
     <button onclick="enviarPin()">Enviar PIN</button>
-    <input id="pinIngresado" placeholder="PIN">
+    <input id="pinIngresado" placeholder="PIN recibido">
     <input id="nuevaPasswordReset" type="password" placeholder="Nueva contraseña">
     <button onclick="cambiarPassword()">Cambiar contraseña</button>
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
  
-  <!-- ===== PANEL ADMIN ===== -->
+  <!-- CRIPTOMONEDAS -->
+  <div id="criptomonedas" class="pantalla">
+    <div class="header">
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <div class="title">Criptomonedas</div>
+      <div style="display:flex;align-items:flex-start;cursor:pointer;" onclick="cambiarPantalla('carrito')">
+        🛒<span class="cart-badge" id="cartBadge">0</span>
+      </div>
+    </div>
+    <div class="contenido">
+      <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Toca una moneda para comprar</p>
+      <div class="cripto-grid" id="criptoGrid"></div>
+    </div>
+  </div>
+ 
+  <!-- CARRITO -->
+  <div id="carrito" class="pantalla">
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">🛒 Carrito</div></div>
+    <div class="contenido"><div id="carritoContenido"></div></div>
+  </div>
+ 
+  <!-- MIS CRIPTOS -->
+  <div id="misCriptos" class="pantalla">
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">💎 Mis Criptos</div></div>
+    <div class="contenido"><div id="misCriptosContenido"><p style="color:var(--texto-sub);">Cargando...</p></div></div>
+  </div>
+ 
+  <!-- PANEL ADMIN -->
   <div id="admin" class="pantalla">
     <div class="admin-header">
-      <div class="menu-icon" onclick="logout()" style="font-size:20px;">⏻</div>
-      <div class="title" style="flex:1;">Panel Admin</div>
+      <div class="menu-icon" onclick="logout()" style="font-size:20px;" title="Salir">⏻</div>
+      <div class="title">Panel Admin</div>
       <span class="admin-badge">ADMIN</span>
     </div>
     <div class="contenido" style="padding: 70px 12px 12px;">
- 
-      <!-- Stats generales -->
-      <div class="admin-stats" id="adminStats">
-        <div class="stat-item">
-          <div class="stat-val" id="statCuentas">—</div>
-          <div class="stat-label">Cuentas</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-val" id="statSaldo">—</div>
-          <div class="stat-label">Saldo total</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-val" id="statMovs">—</div>
-          <div class="stat-label">Movimientos</div>
-        </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
+        <button class="admin-tab" onclick="switchAdminTab('criptos')">🪙 Criptos</button>
       </div>
- 
-      <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
-      <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
- 
-      <div class="admin-list-wrap" id="adminListWrap">
-        <p style="color:#555; text-align:center; font-size:13px;">Cargando cuentas...</p>
+      <!-- TAB USUARIOS -->
+      <div class="admin-tab-content active" id="tabUsuarios">
+        <div class="admin-stats">
+          <div class="stat-item"><div class="stat-val" id="statCuentas">—</div><div class="stat-label">Cuentas</div></div>
+          <div class="stat-item"><div class="stat-val" id="statSaldo">—</div><div class="stat-label">Saldo total</div></div>
+          <div class="stat-item"><div class="stat-val" id="statMovs">—</div><div class="stat-label">Movimientos</div></div>
+        </div>
+        <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
+        <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
+        <div class="admin-list-wrap" id="adminListWrap"><p style="color:var(--texto-sub);text-align:center;font-size:13px;">Cargando...</p></div>
+      </div>
+      <!-- TAB CRIPTOS -->
+      <div class="admin-tab-content" id="tabCriptos">
+        <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Modifica el precio de cada criptomoneda</p>
+        <div id="adminCriptosList"></div>
       </div>
     </div>
   </div>
  
-  <!-- ===== MODAL EDITAR SALDO ===== -->
+  <!-- MODAL EDITAR SALDO -->
   <div class="modal-overlay" id="modalSaldo">
     <div class="modal-box">
       <h3>✏️ Editar Saldo</h3>
-      <p id="modalCuentaLabel" style="color:#aaa; font-size:13px;"></p>
+      <p id="modalCuentaLabel" style="color:var(--texto-sub);font-size:13px;"></p>
       <input id="nuevoSaldoInput" type="number" placeholder="Nuevo saldo">
       <div class="modal-btn-row">
         <button class="btn-edit" onclick="guardarSaldo()">Guardar</button>
@@ -376,25 +291,66 @@ ul li { background: #f2f2f7; margin: 5px 0; padding: 10px; border-radius: 8px; }
     </div>
   </div>
  
-  <!-- ===== MODAL HISTORIAL ===== -->
+  <!-- MODAL HISTORIAL -->
   <div class="modal-overlay" id="modalHistorial">
     <div class="modal-box">
       <h3>📋 Historial</h3>
-      <p id="modalHistCuenta" style="color:#aaa; font-size:13px;"></p>
+      <p id="modalHistCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
       <div class="history-list" id="historialLista"></div>
-      <button class="btn-history" onclick="cerrarModal('modalHistorial')" style="width:100%; margin:0;">Cerrar</button>
+      <button onclick="cerrarModal('modalHistorial')" style="width:100%;margin:0;">Cerrar</button>
     </div>
   </div>
  
-  <!-- ===== MODAL CONFIRMAR BORRADO ===== -->
+  <!-- MODAL BORRAR -->
   <div class="modal-overlay" id="modalBorrar">
     <div class="modal-box">
-      <h3 style="color:#ff4444;">⚠️ Eliminar Cuenta</h3>
-      <p id="modalBorrarLabel" style="color:#aaa; font-size:13px;"></p>
-      <p style="color:#ff4444; font-size:12px;">Esta acción no se puede deshacer.</p>
+      <h3 style="color:#ff3b30;">⚠️ Eliminar Cuenta</h3>
+      <p id="modalBorrarLabel" style="color:var(--texto-sub);font-size:13px;"></p>
+      <p style="color:#ff3b30;font-size:12px;">Esta acción no se puede deshacer.</p>
       <div class="modal-btn-row">
         <button class="btn-delete" onclick="confirmarBorrado()">Eliminar</button>
         <button class="btn-edit" onclick="cerrarModal('modalBorrar')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- MODAL PRECIO CRIPTO -->
+  <div class="modal-overlay" id="modalPrecioCripto">
+    <div class="modal-box">
+      <h3 id="modalCriptoNombre">✏️ Editar Precio</h3>
+      <p id="modalCriptoPrecioActual" style="color:var(--texto-sub);font-size:13px;"></p>
+      <input id="nuevoPrecioInput" type="number" placeholder="Nuevo precio ($)">
+      <div class="modal-btn-row">
+        <button class="btn-edit" onclick="guardarPrecioCripto()">Guardar</button>
+        <button class="btn-delete" onclick="cerrarModal('modalPrecioCripto')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- MODAL CRIPTOS USUARIO ADMIN -->
+  <div class="modal-overlay" id="modalUserCriptos">
+    <div class="modal-box">
+      <h3>🪙 Criptos del usuario</h3>
+      <p id="modalUserCriptoCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
+      <div class="history-list" id="userCriptosList" style="max-height:220px;"></div>
+      <button onclick="cerrarModal('modalUserCriptos')" style="width:100%;margin:8px 0 0;">Cerrar</button>
+    </div>
+  </div>
+ 
+  <!-- MODAL COMPRA CANTIDAD -->
+  <div class="modal-overlay" id="modalCompra">
+    <div class="modal-box">
+      <h3 id="modalCompraNombre">Comprar</h3>
+      <p id="modalCompraPrecio" style="color:var(--texto-sub);font-size:13px;"></p>
+      <div class="qty-selector">
+        <button class="qty-btn" onclick="cambiarCantidadCompra(-1)">−</button>
+        <span class="qty-num" id="qtyNum">1</span>
+        <button class="qty-btn" onclick="cambiarCantidadCompra(1)">+</button>
+      </div>
+      <p id="modalCompraTotal" style="font-weight:bold;color:var(--azul);font-size:16px;"></p>
+      <div class="modal-btn-row">
+        <button class="btn-cripto" onclick="agregarAlCarrito()">Añadir al carrito</button>
+        <button class="btn-delete" onclick="cerrarModal('modalCompra')">Cancelar</button>
       </div>
     </div>
   </div>
@@ -404,326 +360,371 @@ const BACKEND = "https://banco-libre-backend.onrender.com";
 const ADMIN_CORREO = "admin@gmail.com";
 const ADMIN_PASS = "pqrb728px";
  
-let cuentaActual = null;
-let pinTemporal = null;
-let correoTemporal = null;
-let esAdmin = false;
-let todasLasCuentas = [];
-let cuentaParaEditar = null;
-let cuentaParaBorrar = null;
+let cuentaActual = null, pinTemporal = null, correoTemporal = null;
+let esAdmin = false, todasLasCuentas = [];
+let cuentaParaEditar = null, cuentaParaBorrar = null, criptoParaEditar = null;
+let cantidadCompra = 1, criptoCompraActual = null;
+let carrito = {};
+ 
+const CRIPTOS = [
+  { simbolo:"BLC", nombre:"BancoCoin",   emoji:"🏦", precio:1200 },
+  { simbolo:"LBX", nombre:"LibrexToken", emoji:"🔓", precio:850  },
+  { simbolo:"NVX", nombre:"NovaCoin",    emoji:"🌟", precio:3200 },
+  { simbolo:"ZRO", nombre:"ZeroCoin",    emoji:"⚡", precio:450  },
+  { simbolo:"QNT", nombre:"QuantumBit",  emoji:"🔬", precio:5600 },
+  { simbolo:"SLX", nombre:"SolarEx",     emoji:"☀️", precio:980  },
+  { simbolo:"DRK", nombre:"DarkMatter",  emoji:"🌑", precio:2100 },
+  { simbolo:"AQX", nombre:"AquaToken",   emoji:"🌊", precio:670  },
+  { simbolo:"FNX", nombre:"PhoenixCoin", emoji:"🔥", precio:4300 },
+  { simbolo:"LNR", nombre:"LunarBit",    emoji:"🌙", precio:1550 }
+];
+ 
+let preciosCriptos = {};
+CRIPTOS.forEach(c => { preciosCriptos[c.simbolo] = c.precio; });
  
 const drawer = document.getElementById("drawer");
 const overlay = document.getElementById("overlay");
+function toggleMenu(){ drawer.classList.toggle("active"); overlay.classList.toggle("active"); }
  
-/* ===================== MENU ===================== */
-function toggleMenu(){
-  drawer.classList.toggle("active");
-  overlay.classList.toggle("active");
-}
- 
-/* ===================== LOGIN ===================== */
-function login() {
-  let inputCuenta = document.getElementById("usuario").value.trim();
+/* LOGIN */
+function login(){
+  let input = document.getElementById("usuario").value.trim();
   let p = document.getElementById("password").value.trim();
- 
-  if (!inputCuenta || !p) { alert("Ingresa cuenta y contraseña"); return; }
- 
-  // ---- ADMIN LOCAL ----
-  if (inputCuenta === ADMIN_CORREO && p === ADMIN_PASS) {
-    esAdmin = true;
-    cuentaActual = null;
-    cambiarPantalla("admin");
-    cargarAdmin();
-    return;
-  }
- 
-  // ---- USUARIO NORMAL ----
-  fetch(BACKEND + "/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cuenta: inputCuenta, password: p })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.ok) {
-      esAdmin = false;
-      cuentaActual = data.cuenta;
-      if (!cuentaActual) { alert("Error: cuenta no asignada"); return; }
-      localStorage.setItem("correo", data.correo);
-      cuentaActualSpan();
-      cambiarPantalla("inicio");
-    } else {
-      alert(data.mensaje);
-    }
-  })
-  .catch(err => { console.error("Error en login:", err); alert("Error al iniciar sesión"); });
+  if(!input||!p){ alert("Ingresa cuenta y contraseña"); return; }
+  if(input===ADMIN_CORREO && p===ADMIN_PASS){ esAdmin=true; cuentaActual=null; cambiarPantalla("admin"); cargarAdmin(); return; }
+  fetch(BACKEND+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cuenta:input,password:p})})
+  .then(r=>r.json()).then(data=>{
+    if(data.ok){ esAdmin=false; cuentaActual=data.cuenta; localStorage.setItem("correo",data.correo); cuentaActualSpan(); cargarPreciosCriptos(); cambiarPantalla("inicio"); }
+    else alert(data.mensaje);
+  }).catch(()=>alert("Error al iniciar sesión"));
 }
  
-/* ===================== LOGOUT ===================== */
-function logout(){
-  cuentaActual = null;
-  esAdmin = false;
-  todasLasCuentas = [];
-  cambiarPantalla("login");
-}
+function logout(){ cuentaActual=null; esAdmin=false; todasLasCuentas=[]; carrito={}; actualizarBadgeCarrito(); cambiarPantalla("login"); }
  
-/* ===================== REGISTRO ===================== */
+/* REGISTRO */
 function crearCuenta(){
-  let cuenta = document.getElementById("nuevaCuenta").value.trim();
-  let p = document.getElementById("nuevaPassword").value.trim();
-  let correo = document.getElementById("nuevoCorreo").value.trim().toLowerCase();
- 
-  if (!cuenta || !p || !correo) { alert("Completa todos los campos"); return; }
-  if (cuenta.length !== 10 || !/^\d+$/.test(cuenta)) {
-    alert("El número de cuenta debe tener exactamente 10 dígitos"); return;
-  }
-  let regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!regexCorreo.test(correo)) { alert("Correo inválido"); return; }
- 
-  fetch(BACKEND + "/crear-cuenta", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo, password: p, cuenta })
-  })
-  .then(res => res.json())
-  .then(data => { alert(data.mensaje); if (data.ok) cambiarPantalla("login"); });
+  let cuenta=document.getElementById("nuevaCuenta").value.trim();
+  let p=document.getElementById("nuevaPassword").value.trim();
+  let correo=document.getElementById("nuevoCorreo").value.trim().toLowerCase();
+  if(!cuenta||!p||!correo){alert("Completa todos los campos");return;}
+  if(cuenta.length!==10||!/^\d+$/.test(cuenta)){alert("El número de cuenta debe tener exactamente 10 dígitos");return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){alert("Correo inválido");return;}
+  fetch(BACKEND+"/crear-cuenta",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo,password:p,cuenta})})
+  .then(r=>r.json()).then(data=>{alert(data.mensaje);if(data.ok)cambiarPantalla("login");});
 }
  
-/* ===================== DEPÓSITO ===================== */
+/* DEPÓSITO */
 function depositar(){
-  let montoDeposito = parseFloat(document.getElementById("monto").value);
-  let destino = document.getElementById("cuentaDestino").value.trim();
- 
-  if (!cuentaActual) { alert("Debes iniciar sesión primero"); return; }
-  if (!destino || destino.length !== 10) { alert("Cuenta destino inválida"); return; }
-  if (isNaN(montoDeposito) || montoDeposito <= 0) { alert("Monto inválido"); return; }
-  if (destino === cuentaActual) { alert("No puedes depositar a tu misma cuenta"); return; }
- 
-  fetch(BACKEND + "/depositar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ origen: cuentaActual, destino, monto: montoDeposito })
-  })
-  .then(res => res.json())
-  .then(data => { alert(data.mensaje); if (data.ok) cambiarPantalla("balance"); })
-  .catch(err => { console.error("Error en depósito:", err); alert("Error al realizar depósito"); });
+  let monto=parseFloat(document.getElementById("monto").value);
+  let destino=document.getElementById("cuentaDestino").value.trim();
+  if(!cuentaActual){alert("Inicia sesión primero");return;}
+  if(!destino||destino.length!==10){alert("Cuenta destino inválida");return;}
+  if(isNaN(monto)||monto<=0){alert("Monto inválido");return;}
+  if(destino===cuentaActual){alert("No puedes depositar a tu misma cuenta");return;}
+  fetch(BACKEND+"/depositar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({origen:cuentaActual,destino,monto})})
+  .then(r=>r.json()).then(data=>{alert(data.mensaje);if(data.ok)cambiarPantalla("balance");})
+  .catch(()=>alert("Error al realizar depósito"));
 }
  
-/* ===================== CAMBIAR PANTALLA ===================== */
+/* PANTALLA */
 function cambiarPantalla(id){
-  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
+  document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
- 
-  if (cuentaActual && !esAdmin) {
+  if(!esAdmin&&cuentaActual){
     cuentaActualSpan();
-    if (id === "balance") {
-      fetch(BACKEND + "/cuenta/" + cuentaActual)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("saldo").textContent = data.saldo;
-        let movimientos = document.getElementById("movimientos");
-        movimientos.innerHTML = "";
-        data.movimientos.forEach(m => {
-          let li = document.createElement("li");
-          li.textContent = m;
-          let btn = document.createElement("button");
-          btn.textContent = "Imprimir Ticket";
-          btn.style.marginLeft = "10px";
-          btn.onclick = () => imprimirTicketMovimiento(m);
-          li.appendChild(btn);
-          movimientos.appendChild(li);
-        });
-      });
-    }
+    if(id==="balance") cargarBalance();
+    if(id==="criptomonedas") renderizarCriptos();
+    if(id==="carrito") renderizarCarrito();
+    if(id==="misCriptos") cargarMisCriptos();
   }
 }
  
-function cuentaActualSpan(){
-  document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e => {
-    e.textContent = cuentaActual;
+function cuentaActualSpan(){ document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e=>e.textContent=cuentaActual); }
+ 
+function cargarBalance(){
+  fetch(BACKEND+"/cuenta/"+cuentaActual).then(r=>r.json()).then(data=>{
+    document.getElementById("saldo").textContent=data.saldo;
+    let mov=document.getElementById("movimientos"); mov.innerHTML="";
+    let ul=document.createElement("ul");
+    (data.movimientos||[]).slice().reverse().forEach(m=>{
+      let li=document.createElement("li"); li.textContent=m;
+      let btn=document.createElement("button"); btn.textContent="🖨️ Ticket"; btn.style.cssText="margin-left:8px;padding:4px 8px;font-size:11px;";
+      btn.onclick=()=>imprimirTicketMovimiento(m); li.appendChild(btn); ul.appendChild(li);
+    }); mov.appendChild(ul);
   });
 }
  
-function imprimirTicketMovimiento(movimiento){
-  let contenido = "<h2>Ticket de Movimiento</h2>";
-  contenido += "<p><strong>Cuenta:</strong> " + cuentaActual + "</p>";
-  contenido += "<p><strong>Detalle:</strong> " + movimiento + "</p>";
-  let ventana = window.open("", "Ticket", "width=600,height=400");
-  ventana.document.write(contenido);
-  ventana.document.close();
-  ventana.print();
+function imprimirTicketMovimiento(m){
+  let v=window.open("","Ticket","width=600,height=400");
+  v.document.write(`<h2>Ticket</h2><p><b>Cuenta:</b> ${cuentaActual}</p><p><b>Detalle:</b> ${m}</p>`);
+  v.document.close(); v.print();
 }
  
-/* ===================== RESET ===================== */
+/* RESET */
 function enviarPin(){
-  let correo = document.getElementById("correoReset").value.trim().toLowerCase();
-  fetch(BACKEND + "/enviar-pin", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.ok) {
-      pinTemporal = data.pin;
-      correoTemporal = correo;
-      alert("PIN enviado al correo registrado (Cuenta: " + data.cuenta + ")");
-    } else {
-      alert(data.mensaje);
-    }
+  let correo=document.getElementById("correoReset").value.trim().toLowerCase();
+  fetch(BACKEND+"/enviar-pin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo})})
+  .then(r=>r.json()).then(data=>{ if(data.ok){pinTemporal=data.pin;correoTemporal=correo;alert("PIN enviado (Cuenta: "+data.cuenta+")");} else alert(data.mensaje); });
+}
+function cambiarPassword(){
+  if(parseInt(document.getElementById("pinIngresado").value)===pinTemporal){
+    fetch(BACKEND+"/cambiar-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo:correoTemporal,nuevaPassword:document.getElementById("nuevaPasswordReset").value})})
+    .then(r=>r.json()).then(data=>{alert(data.mensaje);if(data.ok)cambiarPantalla("login");});
+  } else alert("PIN incorrecto");
+}
+ 
+/* CRIPTOS */
+function cargarPreciosCriptos(){
+  fetch(BACKEND+"/criptos/precios").then(r=>r.json())
+  .then(data=>{ if(data.ok&&data.precios) preciosCriptos=data.precios; }).catch(()=>{});
+}
+ 
+function renderizarCriptos(){
+  let grid=document.getElementById("criptoGrid"); grid.innerHTML="";
+  CRIPTOS.forEach(c=>{
+    let precio=preciosCriptos[c.simbolo]||c.precio;
+    let cant=carrito[c.simbolo]||0;
+    let card=document.createElement("div");
+    card.className="cripto-card"+(cant>0?" en-carrito":"");
+    card.onclick=()=>abrirModalCompra(c.simbolo);
+    card.innerHTML=`<span class="cripto-badge">${cant}</span><div class="cripto-emoji">${c.emoji}</div><div class="cripto-nombre">${c.nombre}</div><div class="cripto-simbolo">${c.simbolo}</div><div class="cripto-precio">$${precio.toLocaleString()}</div>`;
+    grid.appendChild(card);
   });
 }
  
-function cambiarPassword(){
-  if (parseInt(document.getElementById("pinIngresado").value) === pinTemporal) {
-    fetch(BACKEND + "/cambiar-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ correo: correoTemporal, nuevaPassword: document.getElementById("nuevaPasswordReset").value })
-    })
-    .then(res => res.json())
-    .then(data => { alert(data.mensaje); if (data.ok) cambiarPantalla("login"); });
-  } else {
-    alert("PIN incorrecto");
-  }
+function abrirModalCompra(simbolo){
+  criptoCompraActual=simbolo; cantidadCompra=1;
+  let c=CRIPTOS.find(x=>x.simbolo===simbolo);
+  let precio=preciosCriptos[simbolo]||c.precio;
+  document.getElementById("modalCompraNombre").textContent=c.emoji+" "+c.nombre;
+  document.getElementById("modalCompraPrecio").textContent="Precio unitario: $"+precio.toLocaleString();
+  document.getElementById("qtyNum").textContent=1;
+  document.getElementById("modalCompraTotal").textContent="Total: $"+precio.toLocaleString();
+  document.getElementById("modalCompra").classList.add("active");
 }
  
-/* ===================== ADMIN ===================== */
-async function cargarAdmin(){
-  try {
-    let res = await fetch(BACKEND + "/admin/cuentas", {
-      headers: { "x-admin-token": ADMIN_PASS }
+function cambiarCantidadCompra(delta){
+  cantidadCompra=Math.max(1,cantidadCompra+delta);
+  let c=CRIPTOS.find(x=>x.simbolo===criptoCompraActual);
+  let precio=preciosCriptos[criptoCompraActual]||c.precio;
+  document.getElementById("qtyNum").textContent=cantidadCompra;
+  document.getElementById("modalCompraTotal").textContent="Total: $"+(precio*cantidadCompra).toLocaleString();
+}
+ 
+function agregarAlCarrito(){
+  if(!criptoCompraActual) return;
+  carrito[criptoCompraActual]=(carrito[criptoCompraActual]||0)+cantidadCompra;
+  cerrarModal("modalCompra"); actualizarBadgeCarrito(); renderizarCriptos();
+}
+ 
+function actualizarBadgeCarrito(){
+  let total=Object.values(carrito).reduce((a,b)=>a+b,0);
+  let badge=document.getElementById("cartBadge");
+  let dc=document.getElementById("carritoDrawerCount");
+  if(total>0){ badge.textContent=total; badge.classList.add("visible"); dc.textContent=total; dc.style.display="inline-block"; }
+  else { badge.classList.remove("visible"); dc.style.display="none"; }
+}
+ 
+/* CARRITO */
+function renderizarCarrito(){
+  let contenido=document.getElementById("carritoContenido");
+  let items=Object.entries(carrito).filter(([,qty])=>qty>0);
+  if(items.length===0){ contenido.innerHTML=`<p style="color:var(--texto-sub);margin-top:20px;">Tu carrito está vacío 🛒</p><button onclick="cambiarPantalla('criptomonedas')">Ver criptomonedas</button>`; return; }
+  let total=0, html="";
+  items.forEach(([sim,qty])=>{
+    let c=CRIPTOS.find(x=>x.simbolo===sim);
+    let precio=preciosCriptos[sim]||c.precio;
+    total+=precio*qty;
+    html+=`<div class="carrito-item"><div class="carrito-info"><div class="carrito-nombre">${c.emoji} ${c.nombre}</div><div class="carrito-sub">$${precio.toLocaleString()} c/u</div></div><div class="carrito-ctrl"><button onclick="cambiarQtyCarrito('${sim}',-1)">−</button><span class="carrito-cantidad">${qty}</span><button onclick="cambiarQtyCarrito('${sim}',1)">+</button></div></div>`;
+  });
+  html+=`<div class="carrito-total-bar"><span>Total: $${total.toLocaleString()}</span><button class="btn-comprar" onclick="comprarCarrito()">Comprar</button></div>`;
+  contenido.innerHTML=html;
+}
+ 
+function cambiarQtyCarrito(sim,delta){
+  carrito[sim]=Math.max(0,(carrito[sim]||0)+delta);
+  if(carrito[sim]===0) delete carrito[sim];
+  actualizarBadgeCarrito(); renderizarCarrito();
+}
+ 
+async function comprarCarrito(){
+  let items=Object.entries(carrito).filter(([,qty])=>qty>0);
+  if(items.length===0) return;
+  let total=items.reduce((sum,[sim,qty])=>sum+(preciosCriptos[sim]||CRIPTOS.find(x=>x.simbolo===sim).precio)*qty,0);
+  try{
+    let res=await fetch(BACKEND+"/comprar-criptos",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cuenta:cuentaActual,items:carrito,total})});
+    let data=await res.json();
+    alert(data.mensaje);
+    if(data.ok){ carrito={}; actualizarBadgeCarrito(); cambiarPantalla("misCriptos"); }
+  }catch(e){alert("Error al procesar compra");}
+}
+ 
+/* MIS CRIPTOS */
+async function cargarMisCriptos(){
+  let contenido=document.getElementById("misCriptosContenido");
+  contenido.innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
+  try{
+    let res=await fetch(BACKEND+"/cuenta/"+cuentaActual);
+    let data=await res.json();
+    let criptos=data.criptomonedas||{};
+    let keys=Object.keys(criptos).filter(k=>criptos[k]>0);
+    if(keys.length===0){ contenido.innerHTML=`<p style="color:var(--texto-sub);margin-top:20px;">No tienes criptomonedas aún 💎</p><button onclick="cambiarPantalla('criptomonedas')">Ir a comprar</button>`; return; }
+    let totalValor=0, html="";
+    keys.forEach(sim=>{
+      let c=CRIPTOS.find(x=>x.simbolo===sim); if(!c) return;
+      let precio=preciosCriptos[sim]||c.precio;
+      let cant=criptos[sim]; let valor=precio*cant; totalValor+=valor;
+      html+=`<div class="mis-cripto-item"><div class="mis-cripto-left"><span class="mis-cripto-emoji">${c.emoji}</span><div><div class="mis-cripto-nombre">${c.nombre}</div><div class="mis-cripto-cant">${cant} ${sim}</div></div></div><div class="mis-cripto-valor">$${valor.toLocaleString()}</div></div>`;
     });
-    let data = await res.json();
-    if (!data.ok) { alert("Error al cargar cuentas: " + data.mensaje); return; }
- 
-    todasLasCuentas = data.cuentas;
-    renderizarCuentas(todasLasCuentas);
- 
-    // Stats
-    let totalSaldo = todasLasCuentas.reduce((a, c) => a + c.saldo, 0);
-    let totalMovs = todasLasCuentas.reduce((a, c) => a + (c.movimientos ? c.movimientos.length : 0), 0);
-    document.getElementById("statCuentas").textContent = todasLasCuentas.length;
-    document.getElementById("statSaldo").textContent = "$" + totalSaldo.toLocaleString();
-    document.getElementById("statMovs").textContent = totalMovs;
-  } catch(err) {
-    console.error("Error admin:", err);
-    document.getElementById("adminListWrap").innerHTML = '<p style="color:#ff4444; text-align:center;">Error al conectar con el servidor</p>';
-  }
+    html=`<div style="background:var(--azul);color:white;border-radius:14px;padding:12px;margin-bottom:12px;"><div style="font-size:12px;opacity:0.8;">Valor total de criptos</div><div style="font-size:22px;font-weight:bold;">$${totalValor.toLocaleString()}</div></div>`+html;
+    contenido.innerHTML=html;
+  }catch(e){contenido.innerHTML='<p style="color:#ff3b30;">Error al cargar</p>';}
 }
  
-function renderizarCuentas(lista){
-  let wrap = document.getElementById("adminListWrap");
-  if (lista.length === 0) {
-    wrap.innerHTML = '<p style="color:#555; text-align:center; font-size:13px;">Sin resultados</p>';
-    return;
-  }
-  wrap.innerHTML = "";
-  lista.forEach(c => {
-    let card = document.createElement("div");
-    card.className = "admin-card";
-    card.innerHTML = `
-      <div class="admin-card-header">
-        <span class="admin-cuenta-num">🏦 ${c.cuenta}</span>
-      </div>
-      <div class="admin-saldo">$${(c.saldo || 0).toLocaleString()}</div>
-      <div class="admin-correo">📧 ${c.correo}</div>
-      <div class="admin-btn-row">
-        <button class="admin-btn btn-edit" onclick="abrirModalSaldo('${c.cuenta}', ${c.saldo})">✏️ Saldo</button>
-        <button class="admin-btn btn-history" onclick="verHistorial('${c.cuenta}')">📋 Historial</button>
-        <button class="admin-btn btn-delete" onclick="abrirModalBorrar('${c.cuenta}', '${c.correo}')">🗑️ Borrar</button>
-      </div>
-    `;
+/* ADMIN */
+function switchAdminTab(tab){
+  document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".admin-tab-content").forEach(t=>t.classList.remove("active"));
+  if(tab==="usuarios"){ document.querySelector(".admin-tab:nth-child(1)").classList.add("active"); document.getElementById("tabUsuarios").classList.add("active"); }
+  else { document.querySelector(".admin-tab:nth-child(2)").classList.add("active"); document.getElementById("tabCriptos").classList.add("active"); renderizarAdminCriptos(); }
+}
+ 
+async function cargarAdmin(){
+  try{
+    let res=await fetch(BACKEND+"/admin/cuentas",{headers:{"x-admin-token":ADMIN_PASS}});
+    let data=await res.json();
+    if(!data.ok){alert("Error: "+data.mensaje);return;}
+    todasLasCuentas=data.cuentas;
+    renderizarCuentasAdmin(todasLasCuentas);
+    let res2=await fetch(BACKEND+"/criptos/precios");
+    let data2=await res2.json();
+    if(data2.ok&&data2.precios) preciosCriptos=data2.precios;
+    let totalSaldo=todasLasCuentas.reduce((a,c)=>a+(c.saldo||0),0);
+    let totalMovs=todasLasCuentas.reduce((a,c)=>a+((c.movimientos||[]).length),0);
+    document.getElementById("statCuentas").textContent=todasLasCuentas.length;
+    document.getElementById("statSaldo").textContent="$"+totalSaldo.toLocaleString();
+    document.getElementById("statMovs").textContent=totalMovs;
+  }catch(e){document.getElementById("adminListWrap").innerHTML='<p style="color:#ff3b30;text-align:center;">Error al conectar</p>';}
+}
+ 
+function renderizarCuentasAdmin(lista){
+  let wrap=document.getElementById("adminListWrap");
+  if(lista.length===0){wrap.innerHTML='<p style="color:var(--texto-sub);text-align:center;">Sin resultados</p>';return;}
+  wrap.innerHTML="";
+  lista.forEach(c=>{
+    let card=document.createElement("div"); card.className="admin-card";
+    card.innerHTML=`<div class="admin-card-header"><span class="admin-cuenta-num">🏦 ${c.cuenta}</span></div><div class="admin-saldo">$${(c.saldo||0).toLocaleString()}</div><div class="admin-correo">📧 ${c.correo}</div><div class="admin-btn-row"><button class="admin-btn btn-edit" onclick="abrirModalSaldo('${c.cuenta}',${c.saldo})">✏️ Saldo</button><button class="admin-btn btn-history" onclick="verHistorial('${c.cuenta}')">📋 Historial</button><button class="admin-btn btn-cripto" onclick="verCriptosUsuario('${c.cuenta}')">🪙 Criptos</button><button class="admin-btn btn-delete" onclick="abrirModalBorrar('${c.cuenta}','${c.correo}')">🗑️</button></div>`;
     wrap.appendChild(card);
   });
 }
  
 function filtrarCuentas(){
-  let q = document.getElementById("adminBuscador").value.trim().toLowerCase();
-  let filtradas = todasLasCuentas.filter(c =>
-    c.cuenta.includes(q) || (c.correo && c.correo.toLowerCase().includes(q))
-  );
-  renderizarCuentas(filtradas);
+  let q=document.getElementById("adminBuscador").value.trim().toLowerCase();
+  renderizarCuentasAdmin(todasLasCuentas.filter(c=>c.cuenta.includes(q)||(c.correo&&c.correo.toLowerCase().includes(q))));
 }
  
-/* ---- Modal Saldo ---- */
-function abrirModalSaldo(cuenta, saldoActual){
-  cuentaParaEditar = cuenta;
-  document.getElementById("modalCuentaLabel").textContent = "Cuenta: " + cuenta + " | Saldo actual: $" + saldoActual;
-  document.getElementById("nuevoSaldoInput").value = saldoActual;
+function renderizarAdminCriptos(){
+  let lista=document.getElementById("adminCriptosList"); lista.innerHTML="";
+  CRIPTOS.forEach(c=>{
+    let precio=preciosCriptos[c.simbolo]||c.precio;
+    let row=document.createElement("div"); row.className="admin-cripto-row";
+    row.innerHTML=`<div class="admin-cripto-left"><span class="admin-cripto-emoji">${c.emoji}</span><div><div class="admin-cripto-nombre">${c.nombre}</div><div class="admin-cripto-simbolo">${c.simbolo}</div></div></div><div style="display:flex;align-items:center;gap:8px;"><span class="admin-cripto-precio" id="precio-${c.simbolo}">$${precio.toLocaleString()}</span><button class="btn-edit-precio" onclick="abrirModalPrecioCripto('${c.simbolo}')">✏️</button></div>`;
+    lista.appendChild(row);
+  });
+}
+ 
+function abrirModalPrecioCripto(simbolo){
+  criptoParaEditar=simbolo;
+  let c=CRIPTOS.find(x=>x.simbolo===simbolo);
+  let precio=preciosCriptos[simbolo]||c.precio;
+  document.getElementById("modalCriptoNombre").textContent=c.emoji+" "+c.nombre;
+  document.getElementById("modalCriptoPrecioActual").textContent="Precio actual: $"+precio.toLocaleString();
+  document.getElementById("nuevoPrecioInput").value=precio;
+  document.getElementById("modalPrecioCripto").classList.add("active");
+}
+ 
+async function guardarPrecioCripto(){
+  let precio=parseFloat(document.getElementById("nuevoPrecioInput").value);
+  if(isNaN(precio)||precio<=0){alert("Precio inválido");return;}
+  try{
+    let res=await fetch(BACKEND+"/admin/editar-precio-cripto",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({simbolo:criptoParaEditar,precio})});
+    let data=await res.json();
+    alert(data.mensaje);
+    if(data.ok){ preciosCriptos[criptoParaEditar]=precio; let el=document.getElementById("precio-"+criptoParaEditar); if(el) el.textContent="$"+precio.toLocaleString(); cerrarModal("modalPrecioCripto"); }
+  }catch(e){alert("Error al guardar precio");}
+}
+ 
+async function verCriptosUsuario(cuenta){
+  document.getElementById("modalUserCriptoCuenta").textContent="Cuenta: "+cuenta;
+  document.getElementById("userCriptosList").innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
+  document.getElementById("modalUserCriptos").classList.add("active");
+  try{
+    let res=await fetch(BACKEND+"/cuenta/"+cuenta);
+    let data=await res.json();
+    let criptos=data.criptomonedas||{};
+    let lista=document.getElementById("userCriptosList");
+    let keys=Object.keys(criptos).filter(k=>criptos[k]>0);
+    if(keys.length===0){lista.innerHTML='<p style="color:var(--texto-sub);">Sin criptomonedas</p>';return;}
+    lista.innerHTML="";
+    keys.forEach(sim=>{
+      let c=CRIPTOS.find(x=>x.simbolo===sim); if(!c) return;
+      let precio=preciosCriptos[sim]||c.precio;
+      let cant=criptos[sim];
+      let div=document.createElement("div"); div.className="admin-user-cripto-item";
+      div.innerHTML=`<div class="auc-left"><span class="auc-emoji">${c.emoji}</span><div><div class="auc-nombre">${c.nombre}</div><div class="auc-cant">${cant} ${sim} · $${(precio*cant).toLocaleString()}</div></div></div><button class="btn-auc-quitar" onclick="quitarCriptoUsuario('${cuenta}','${sim}')">Quitar</button>`;
+      lista.appendChild(div);
+    });
+  }catch(e){document.getElementById("userCriptosList").innerHTML='<p style="color:#ff3b30;">Error</p>';}
+}
+ 
+async function quitarCriptoUsuario(cuenta,simbolo){
+  if(!confirm("¿Quitar todas las "+simbolo+" de la cuenta "+cuenta+"?")) return;
+  try{
+    let res=await fetch(BACKEND+"/admin/quitar-cripto",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta,simbolo})});
+    let data=await res.json(); alert(data.mensaje);
+    if(data.ok) verCriptosUsuario(cuenta);
+  }catch(e){alert("Error");}
+}
+ 
+function abrirModalSaldo(cuenta,saldo){
+  cuentaParaEditar=cuenta;
+  document.getElementById("modalCuentaLabel").textContent="Cuenta: "+cuenta+" | Saldo: $"+saldo;
+  document.getElementById("nuevoSaldoInput").value=saldo;
   document.getElementById("modalSaldo").classList.add("active");
 }
- 
 async function guardarSaldo(){
-  let nuevoSaldo = parseFloat(document.getElementById("nuevoSaldoInput").value);
-  if (isNaN(nuevoSaldo) || nuevoSaldo < 0) { alert("Saldo inválido"); return; }
-  try {
-    let res = await fetch(BACKEND + "/admin/editar-saldo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-token": ADMIN_PASS },
-      body: JSON.stringify({ cuenta: cuentaParaEditar, nuevoSaldo })
-    });
-    let data = await res.json();
-    alert(data.mensaje);
-    if (data.ok) {
-      cerrarModal("modalSaldo");
-      cargarAdmin();
-    }
-  } catch(err) { alert("Error al guardar saldo"); }
+  let nuevoSaldo=parseFloat(document.getElementById("nuevoSaldoInput").value);
+  if(isNaN(nuevoSaldo)||nuevoSaldo<0){alert("Saldo inválido");return;}
+  let res=await fetch(BACKEND+"/admin/editar-saldo",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta:cuentaParaEditar,nuevoSaldo})});
+  let data=await res.json(); alert(data.mensaje);
+  if(data.ok){cerrarModal("modalSaldo");cargarAdmin();}
 }
  
-/* ---- Modal Historial ---- */
 async function verHistorial(cuenta){
-  document.getElementById("modalHistCuenta").textContent = "Cuenta: " + cuenta;
-  document.getElementById("historialLista").innerHTML = '<p style="color:#555;">Cargando...</p>';
+  document.getElementById("modalHistCuenta").textContent="Cuenta: "+cuenta;
+  document.getElementById("historialLista").innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
   document.getElementById("modalHistorial").classList.add("active");
-  try {
-    let res = await fetch(BACKEND + "/cuenta/" + cuenta);
-    let data = await res.json();
-    let lista = document.getElementById("historialLista");
-    lista.innerHTML = "";
-    if (!data.movimientos || data.movimientos.length === 0) {
-      lista.innerHTML = '<p style="color:#555;">Sin movimientos</p>';
-    } else {
-      data.movimientos.slice().reverse().forEach(m => {
-        let p = document.createElement("p");
-        p.textContent = m;
-        lista.appendChild(p);
-      });
-    }
-  } catch(err) {
-    document.getElementById("historialLista").innerHTML = '<p style="color:#ff4444;">Error al cargar historial</p>';
-  }
+  let res=await fetch(BACKEND+"/cuenta/"+cuenta);
+  let data=await res.json();
+  let lista=document.getElementById("historialLista");
+  let movs=data.movimientos||[];
+  if(movs.length===0){lista.innerHTML='<p style="color:var(--texto-sub);">Sin movimientos</p>';return;}
+  lista.innerHTML="";
+  movs.slice().reverse().forEach(m=>{let p=document.createElement("p");p.textContent=m;lista.appendChild(p);});
 }
  
-/* ---- Modal Borrar ---- */
-function abrirModalBorrar(cuenta, correo){
-  cuentaParaBorrar = cuenta;
-  document.getElementById("modalBorrarLabel").textContent = "¿Eliminar cuenta " + cuenta + " (" + correo + ")?";
+function abrirModalBorrar(cuenta,correo){
+  cuentaParaBorrar=cuenta;
+  document.getElementById("modalBorrarLabel").textContent="¿Eliminar cuenta "+cuenta+" ("+correo+")?";
   document.getElementById("modalBorrar").classList.add("active");
 }
- 
 async function confirmarBorrado(){
-  try {
-    let res = await fetch(BACKEND + "/admin/borrar-cuenta", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-token": ADMIN_PASS },
-      body: JSON.stringify({ cuenta: cuentaParaBorrar })
-    });
-    let data = await res.json();
-    alert(data.mensaje);
-    if (data.ok) {
-      cerrarModal("modalBorrar");
-      cargarAdmin();
-    }
-  } catch(err) { alert("Error al borrar cuenta"); }
+  let res=await fetch(BACKEND+"/admin/borrar-cuenta",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta:cuentaParaBorrar})});
+  let data=await res.json(); alert(data.mensaje);
+  if(data.ok){cerrarModal("modalBorrar");cargarAdmin();}
 }
  
-/* ---- Cerrar modales ---- */
-function cerrarModal(id){
-  document.getElementById(id).classList.remove("active");
-}
+function cerrarModal(id){document.getElementById(id).classList.remove("active");}
 </script>
- 
 </div></body>
 </html>
