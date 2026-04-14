@@ -1,4 +1,3 @@
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -9,7 +8,8 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
  
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+// Aumentar límite para fotos en base64
+app.use(bodyParser.json({ limit: "5mb" }));
  
 // ===============================
 //   Conexión a MongoDB
@@ -27,7 +27,9 @@ const Usuario = mongoose.model("Usuario", new mongoose.Schema({
   cuenta: String,
   saldo: { type: Number, default: 0 },
   movimientos: [String],
-  criptomonedas: { type: Map, of: Number, default: {} }
+  criptomonedas: { type: Map, of: Number, default: {} },
+  nombre: { type: String, default: "" },
+  foto: { type: String, default: "" }   // base64 o URL
 }));
  
 // ===============================
@@ -38,7 +40,19 @@ const PrecioCripto = mongoose.model("PrecioCripto", new mongoose.Schema({
   precio: Number
 }));
  
-// Precios por defecto si no existen en DB
+// ===============================
+//   Modelo de Comentarios
+// ===============================
+const Comentario = mongoose.model("Comentario", new mongoose.Schema({
+  cuenta: String,
+  nombre: String,
+  foto: String,
+  estrellas: Number,
+  texto: String,
+  fecha: String
+}));
+ 
+// Precios por defecto
 const CRIPTOS_DEFAULT = [
   { simbolo: "BLC", precio: 1200 },
   { simbolo: "LBX", precio: 850  },
@@ -69,6 +83,19 @@ let defaultClient = SibApiV3Sdk.ApiClient.instance;
 let apiKey = defaultClient.authentications["api-key"];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+ 
+async function enviarCorreo(para, asunto, html) {
+  try {
+    let email = new SibApiV3Sdk.SendSmtpEmail();
+    email.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
+    email.to = [{ email: para }];
+    email.subject = asunto;
+    email.htmlContent = html;
+    await apiInstance.sendTransacEmail(email);
+  } catch (err) {
+    console.error("Error enviando correo a " + para + ":", err.message);
+  }
+}
  
 // ===============================
 //   Middleware Admin
@@ -107,14 +134,8 @@ app.post("/crear-cuenta", async (req, res) => {
   const nuevo = new Usuario({ correo, password: hash, cuenta, saldo: 10000, movimientos: [], criptomonedas: {} });
   await nuevo.save();
  
-  try {
-    let sendEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendEmail.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
-    sendEmail.to = [{ email: correo }];
-    sendEmail.subject = "Bienvenido a Banco Libre";
-    sendEmail.htmlContent = `<h1>Bienvenido</h1><p>Tu cuenta ${cuenta} ha sido creada exitosamente con saldo inicial de $10000.</p>`;
-    await apiInstance.sendTransacEmail(sendEmail);
-  } catch (err) { console.error("Error enviando correo:", err); }
+  await enviarCorreo(correo, "Bienvenido a Banco Libre",
+    `<h1>Bienvenido</h1><p>Tu cuenta <b>${cuenta}</b> fue creada con saldo inicial de <b>$10,000</b>.</p>`);
  
   res.json({ ok: true, mensaje: "Cuenta creada correctamente" });
 });
@@ -130,7 +151,14 @@ app.post("/login", async (req, res) => {
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) return res.json({ ok: false, mensaje: "Contraseña incorrecta" });
  
-  res.json({ ok: true, cuenta: user.cuenta, correo: user.correo, saldo: user.saldo });
+  // Correo de inicio de sesión
+  const hora = new Date().toLocaleString();
+  await enviarCorreo(user.correo, "Inicio de sesión detectado - Banco Libre",
+    `<p>Hola${user.nombre ? " " + user.nombre : ""},</p>
+     <p>Se detectó un inicio de sesión en tu cuenta <b>${cuenta}</b> el <b>${hora}</b>.</p>
+     <p>Si no fuiste tú, cambia tu contraseña de inmediato.</p>`);
+ 
+  res.json({ ok: true, cuenta: user.cuenta, correo: user.correo, saldo: user.saldo, nombre: user.nombre || "", foto: user.foto || "" });
 });
  
 // ===============================
@@ -158,21 +186,18 @@ app.post("/depositar", async (req, res) => {
   await userOrigen.save();
   await userDestino.save();
  
-  try {
-    let t1 = new SibApiV3Sdk.SendSmtpEmail();
-    t1.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
-    t1.to = [{ email: userOrigen.correo }];
-    t1.subject = "Ticket de depósito enviado";
-    t1.htmlContent = `<p>Origen: ${origen}</p><p>Destino: ${destino}</p><p>Monto: $${monto}</p><p>Hora: ${hora}</p>`;
-    await apiInstance.sendTransacEmail(t1);
+  // Correos de ticket
+  await enviarCorreo(userOrigen.correo, "Ticket: Depósito enviado - Banco Libre",
+    `<h2>Ticket de depósito enviado</h2>
+     <p><b>Origen:</b> ${origen}</p><p><b>Destino:</b> ${destino}</p>
+     <p><b>Monto:</b> $${monto}</p><p><b>Hora:</b> ${hora}</p>
+     <p>Tu nuevo saldo es: <b>$${userOrigen.saldo}</b></p>`);
  
-    let t2 = new SibApiV3Sdk.SendSmtpEmail();
-    t2.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
-    t2.to = [{ email: userDestino.correo }];
-    t2.subject = "Ticket de depósito recibido";
-    t2.htmlContent = `<p>Origen: ${origen}</p><p>Destino: ${destino}</p><p>Monto: $${monto}</p><p>Hora: ${hora}</p>`;
-    await apiInstance.sendTransacEmail(t2);
-  } catch (err) { console.error("Error enviando tickets:", err); }
+  await enviarCorreo(userDestino.correo, "Ticket: Depósito recibido - Banco Libre",
+    `<h2>Ticket de depósito recibido</h2>
+     <p><b>Origen:</b> ${origen}</p><p><b>Destino:</b> ${destino}</p>
+     <p><b>Monto:</b> $${monto}</p><p><b>Hora:</b> ${hora}</p>
+     <p>Tu nuevo saldo es: <b>$${userDestino.saldo}</b></p>`);
  
   res.json({ ok: true, mensaje: "Depósito realizado" });
 });
@@ -184,13 +209,16 @@ app.get("/cuenta/:id", async (req, res) => {
   const user = await Usuario.findOne({ cuenta: req.params.id });
   if (!user) return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
  
-  // Convertir Map a objeto plano
   const criptos = {};
   if (user.criptomonedas) {
     user.criptomonedas.forEach((val, key) => { criptos[key] = val; });
   }
  
-  res.json({ ok: true, correo: user.correo, cuenta: user.cuenta, saldo: user.saldo, movimientos: user.movimientos, criptomonedas: criptos });
+  res.json({
+    ok: true, correo: user.correo, cuenta: user.cuenta,
+    saldo: user.saldo, movimientos: user.movimientos,
+    criptomonedas: criptos, nombre: user.nombre, foto: user.foto
+  });
 });
  
 // ===============================
@@ -202,14 +230,8 @@ app.post("/enviar-pin", async (req, res) => {
   if (!user) return res.json({ ok: false, mensaje: "Correo no registrado" });
  
   const pin = Math.floor(100000 + Math.random() * 900000);
-  try {
-    let sendEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendEmail.sender = { email: "mg307966@gmail.com", name: "Banco Libre" };
-    sendEmail.to = [{ email: correo }];
-    sendEmail.subject = "PIN de recuperación";
-    sendEmail.htmlContent = `<p>Cuenta: ${user.cuenta}</p><p>PIN: <strong>${pin}</strong></p>`;
-    await apiInstance.sendTransacEmail(sendEmail);
-  } catch (err) { console.error("Error enviando PIN:", err); return res.json({ ok: false, mensaje: "Error al enviar correo" }); }
+  await enviarCorreo(correo, "PIN de recuperación - Banco Libre",
+    `<p>Cuenta: <b>${user.cuenta}</b></p><p>Tu PIN es: <h2>${pin}</h2></p><p>Expira en 10 minutos.</p>`);
  
   res.json({ ok: true, mensaje: "PIN enviado", pin, cuenta: user.cuenta });
 });
@@ -225,6 +247,21 @@ app.post("/cambiar-password", async (req, res) => {
   user.password = await bcrypt.hash(nuevaPassword, 10);
   await user.save();
   res.json({ ok: true, mensaje: "Contraseña actualizada" });
+});
+ 
+// ===============================
+//   PERFIL — Guardar nombre y foto
+// ===============================
+app.post("/perfil/guardar", async (req, res) => {
+  const { cuenta, nombre, foto } = req.body;
+  const user = await Usuario.findOne({ cuenta });
+  if (!user) return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
+ 
+  if (nombre !== undefined) user.nombre = nombre;
+  if (foto !== undefined) user.foto = foto;
+  await user.save();
+ 
+  res.json({ ok: true, mensaje: "Perfil actualizado" });
 });
  
 // ===============================
@@ -244,7 +281,6 @@ app.get("/criptos/precios", async (req, res) => {
 // ===============================
 app.post("/comprar-criptos", async (req, res) => {
   const { cuenta, items, total } = req.body;
-  // items = { simbolo: cantidad, ... }
  
   if (!cuenta || !items || typeof total !== "number")
     return res.json({ ok: false, mensaje: "Datos inválidos" });
@@ -255,7 +291,6 @@ app.post("/comprar-criptos", async (req, res) => {
   if (user.saldo < total)
     return res.json({ ok: false, mensaje: "Saldo insuficiente para completar la compra" });
  
-  // Verificar precios actuales del backend
   const preciosDB = await PrecioCripto.find({});
   const preciosObj = {};
   preciosDB.forEach(p => { preciosObj[p.simbolo] = p.precio; });
@@ -267,9 +302,8 @@ app.post("/comprar-criptos", async (req, res) => {
     totalReal += precio * qty;
   }
  
-  // Pequeña tolerancia por redondeo (1%)
   if (Math.abs(totalReal - total) / totalReal > 0.01)
-    return res.json({ ok: false, mensaje: "El precio cambió, por favor recarga e intenta de nuevo" });
+    return res.json({ ok: false, mensaje: "El precio cambió, recarga e intenta de nuevo" });
  
   user.saldo -= totalReal;
  
@@ -286,7 +320,52 @@ app.post("/comprar-criptos", async (req, res) => {
   user.markModified("criptomonedas");
   await user.save();
  
+  // Correo de confirmación de compra
+  await enviarCorreo(user.correo, "Confirmación de compra de criptos - Banco Libre",
+    `<h2>Compra realizada</h2>
+     <p>Has comprado: <b>${resumen.join(", ")}</b></p>
+     <p>Total descontado: <b>$${totalReal.toLocaleString()}</b></p>
+     <p>Saldo restante: <b>$${user.saldo.toLocaleString()}</b></p>
+     <p>Fecha: ${hora}</p>`);
+ 
   res.json({ ok: true, mensaje: `Compra realizada: ${resumen.join(", ")}` });
+});
+ 
+// ===============================
+//   COMENTARIOS — Nuevo
+// ===============================
+app.post("/comentarios/nuevo", async (req, res) => {
+  const { cuenta, estrellas, texto, nombre, foto } = req.body;
+  if (!cuenta || !estrellas || !texto)
+    return res.json({ ok: false, mensaje: "Datos incompletos" });
+  if (estrellas < 1 || estrellas > 5)
+    return res.json({ ok: false, mensaje: "Puntuación inválida" });
+ 
+  const fecha = new Date().toLocaleString();
+  const nuevo = new Comentario({ cuenta, nombre: nombre || "", foto: foto || "", estrellas, texto, fecha });
+  await nuevo.save();
+ 
+  res.json({ ok: true, mensaje: "Reseña publicada" });
+});
+ 
+// ===============================
+//   COMENTARIOS — Listar todos
+// ===============================
+app.get("/comentarios", async (req, res) => {
+  try {
+    const comentarios = await Comentario.find({}).sort({ _id: 1 });
+    res.json({ ok: true, comentarios });
+  } catch (err) { res.json({ ok: false, mensaje: "Error" }); }
+});
+ 
+// ===============================
+//   COMENTARIOS — Por usuario
+// ===============================
+app.get("/comentarios/usuario/:cuenta", async (req, res) => {
+  try {
+    const comentarios = await Comentario.find({ cuenta: req.params.cuenta });
+    res.json({ ok: true, comentarios });
+  } catch (err) { res.json({ ok: false, mensaje: "Error" }); }
 });
  
 // ===============================
@@ -294,7 +373,7 @@ app.post("/comprar-criptos", async (req, res) => {
 // ===============================
 app.get("/admin/cuentas", verificarAdmin, async (req, res) => {
   try {
-    const cuentas = await Usuario.find({}, { correo: 1, cuenta: 1, saldo: 1, movimientos: 1, criptomonedas: 1, _id: 0 });
+    const cuentas = await Usuario.find({}, { correo: 1, cuenta: 1, saldo: 1, movimientos: 1, criptomonedas: 1, nombre: 1, foto: 1, _id: 0 });
     res.json({ ok: true, cuentas });
   } catch (err) { res.json({ ok: false, mensaje: "Error del servidor" }); }
 });
@@ -315,6 +394,12 @@ app.post("/admin/editar-saldo", verificarAdmin, async (req, res) => {
   const hora = new Date().toLocaleString();
   user.movimientos.push(`[ADMIN] Saldo ajustado de $${saldoAnterior} a $${nuevoSaldo} | ${hora}`);
   await user.save();
+ 
+  // Notificar al usuario
+  await enviarCorreo(user.correo, "Tu saldo fue modificado - Banco Libre",
+    `<p>Un administrador ajustó tu saldo.</p>
+     <p>Saldo anterior: <b>$${saldoAnterior}</b> → Nuevo saldo: <b>$${nuevoSaldo}</b></p>
+     <p>Fecha: ${hora}</p>`);
  
   res.json({ ok: true, mensaje: `Saldo actualizado a $${nuevoSaldo}` });
 });
@@ -368,7 +453,19 @@ app.post("/admin/quitar-cripto", verificarAdmin, async (req, res) => {
 });
  
 // ===============================
+//   RUTAS ADMIN — Borrar opinión
+// ===============================
+app.post("/admin/borrar-opinion", verificarAdmin, async (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.json({ ok: false, mensaje: "ID requerido" });
+ 
+  const result = await Comentario.deleteOne({ _id: id });
+  if (result.deletedCount === 0) return res.json({ ok: false, mensaje: "Reseña no encontrada" });
+ 
+  res.json({ ok: true, mensaje: "Reseña eliminada" });
+});
+ 
+// ===============================
 //   Servidor
 // ===============================
 app.listen(3000, () => console.log("Servidor Banco Libre en puerto 3000"));
- 
