@@ -48,15 +48,17 @@ ul li { background: var(--gris-card); margin: 5px 0; padding: 10px; border-radiu
 #movimientos { max-height: 350px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 12px; }
  
 /* ===== CARRUSEL INICIO ===== */
-.carrusel-wrap { overflow: hidden; position: relative; margin: 0 -20px; }
-.carrusel-track { display: flex; transition: transform 0.4s ease; }
+.carrusel-wrap { overflow: hidden; position: relative; margin: 0 -20px; touch-action: pan-y; user-select: none; }
+.carrusel-track { display: flex; transition: transform 0.4s ease; will-change: transform; }
 .carrusel-slide {
   min-width: 100%; padding: 0 20px; box-sizing: border-box;
 }
 .carrusel-card {
   border-radius: 18px; padding: 18px 20px; color: white; text-align: left;
-  margin-bottom: 4px; position: relative; overflow: hidden;
+  margin-bottom: 4px; position: relative; overflow: hidden; cursor: pointer;
+  transition: opacity 0.15s;
 }
+.carrusel-card:active { opacity: 0.88; }
 .carrusel-card.oferta { background: linear-gradient(135deg, #007aff, #00c6ff); }
 .carrusel-card.promo  { background: linear-gradient(135deg, #ff6b35, #ff3b30); }
 .carrusel-card.tip    { background: linear-gradient(135deg, #34c759, #00b050); }
@@ -292,41 +294,41 @@ textarea {
         <button class="inicio-acceso-btn" onclick="cambiarPantalla('comentarios')"><span class="inicio-acceso-icon">⭐</span>Reseñas</button>
       </div>
       <!-- CARRUSEL -->
-      <div class="carrusel-wrap">
+      <div class="carrusel-wrap" id="carruselWrap">
         <div class="carrusel-track" id="carruselTrack">
           <div class="carrusel-slide">
-            <div class="carrusel-card oferta">
+            <div class="carrusel-card oferta" onclick="irDesdeCarrusel('criptomonedas','ZRO')">
               <span class="cc-emoji">⚡</span>
               <h3>¡Oferta del día!</h3>
-              <p>ZeroCoin (ZRO) con precio mínimo histórico. ¡No te lo pierdas!</p>
+              <p>ZeroCoin (ZRO) con precio mínimo histórico. ¡Toca para comprar!</p>
             </div>
           </div>
           <div class="carrusel-slide">
-            <div class="carrusel-card cripto">
+            <div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','FNX')">
               <span class="cc-emoji">🔥</span>
               <h3>PhoenixCoin en alza</h3>
-              <p>FNX subió un 12% esta semana. ¿Es el momento de invertir?</p>
+              <p>FNX subió un 12% esta semana. ¡Toca para invertir!</p>
             </div>
           </div>
           <div class="carrusel-slide">
-            <div class="carrusel-card tip">
+            <div class="carrusel-card tip" onclick="cambiarPantalla('balance')">
               <span class="cc-emoji">💡</span>
               <h3>Consejo financiero</h3>
               <p>Diversifica tu cartera. No pongas todos tus fondos en una sola cripto.</p>
             </div>
           </div>
           <div class="carrusel-slide">
-            <div class="carrusel-card promo">
+            <div class="carrusel-card promo" onclick="cambiarPantalla('registro')">
               <span class="cc-emoji">🎁</span>
               <h3>Nuevo usuario</h3>
-              <p>Cada cuenta nueva inicia con $10,000. Comienza a invertir hoy.</p>
+              <p>Cada cuenta nueva inicia con $10,000. ¡Comparte con un amigo!</p>
             </div>
           </div>
           <div class="carrusel-slide">
-            <div class="carrusel-card cripto">
+            <div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','NVX')">
               <span class="cc-emoji">🌟</span>
               <h3>NovaCoin recomendada</h3>
-              <p>NVX es la cripto más estable del banco. Ideal para principiantes.</p>
+              <p>NVX es la cripto más estable del banco. ¡Toca para comprar!</p>
             </div>
           </div>
         </div>
@@ -447,7 +449,6 @@ textarea {
         <button class="admin-tab" onclick="switchAdminTab('criptos')">🪙 Criptos</button>
         <button class="admin-tab" onclick="switchAdminTab('opiniones')">⭐ Reseñas</button>
       </div>
-      <!-- TAB USUARIOS -->
       <div class="admin-tab-content active" id="tabUsuarios">
         <div class="admin-stats">
           <div class="stat-item"><div class="stat-val" id="statCuentas">—</div><div class="stat-label">Cuentas</div></div>
@@ -458,12 +459,10 @@ textarea {
         <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
         <div class="admin-list-wrap" id="adminListWrap"><p style="color:var(--texto-sub);text-align:center;font-size:13px;">Cargando...</p></div>
       </div>
-      <!-- TAB CRIPTOS -->
       <div class="admin-tab-content" id="tabCriptos">
         <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Modifica el precio de cada criptomoneda</p>
         <div id="adminCriptosList" style="max-height:480px;overflow-y:auto;"></div>
       </div>
-      <!-- TAB OPINIONES -->
       <div class="admin-tab-content" id="tabOpiniones">
         <button class="admin-refresh" onclick="cargarOpinionesAdmin()">↻ Actualizar</button>
         <div id="adminOpinionesList" style="max-height:480px;overflow-y:auto;">
@@ -473,7 +472,7 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL EDITAR SALDO -->
+  <!-- MODALES -->
   <div class="modal-overlay" id="modalSaldo">
     <div class="modal-box">
       <h3>✏️ Editar Saldo</h3>
@@ -486,7 +485,6 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL HISTORIAL -->
   <div class="modal-overlay" id="modalHistorial">
     <div class="modal-box">
       <h3>📋 Historial</h3>
@@ -496,7 +494,6 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL BORRAR -->
   <div class="modal-overlay" id="modalBorrar">
     <div class="modal-box">
       <h3 style="color:#ff3b30;">⚠️ Eliminar Cuenta</h3>
@@ -509,7 +506,6 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL PRECIO CRIPTO -->
   <div class="modal-overlay" id="modalPrecioCripto">
     <div class="modal-box">
       <h3 id="modalCriptoNombre">✏️ Editar Precio</h3>
@@ -522,7 +518,6 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL CRIPTOS USUARIO ADMIN -->
   <div class="modal-overlay" id="modalUserCriptos">
     <div class="modal-box">
       <h3>🪙 Criptos del usuario</h3>
@@ -532,7 +527,6 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL COMPRA CANTIDAD -->
   <div class="modal-overlay" id="modalCompra">
     <div class="modal-box">
       <h3 id="modalCompraNombre">Comprar</h3>
@@ -550,7 +544,6 @@ textarea {
     </div>
   </div>
  
-  <!-- MODAL OPINIONES USUARIO (ADMIN) -->
   <div class="modal-overlay" id="modalOpinionesUsuario">
     <div class="modal-box">
       <h3>⭐ Reseñas del usuario</h3>
@@ -594,9 +587,74 @@ const drawer = document.getElementById("drawer");
 const overlay = document.getElementById("overlay");
 function toggleMenu(){ drawer.classList.toggle("active"); overlay.classList.toggle("active"); }
  
-/* ===== CARRUSEL ===== */
+/* ==========================================
+   PERSISTENCIA DE SESIÓN con sessionStorage
+   ========================================== */
+function guardarSesion() {
+  if (cuentaActual) {
+    sessionStorage.setItem("bl_cuenta", cuentaActual);
+    sessionStorage.setItem("bl_nombre", perfilNombre);
+    sessionStorage.setItem("bl_foto", perfilFotoUrl);
+  }
+}
+ 
+function guardarPantalla(id) {
+  // Solo guardamos pantallas que requieren sesión
+  const pantallasPublicas = ["login","registro","reset"];
+  if (!pantallasPublicas.includes(id)) {
+    sessionStorage.setItem("bl_pantalla", id);
+  }
+}
+ 
+async function restaurarSesion() {
+  const cuenta = sessionStorage.getItem("bl_cuenta");
+  const pantalla = sessionStorage.getItem("bl_pantalla");
+  if (!cuenta) return false;
+ 
+  try {
+    // Verificar que la cuenta sigue siendo válida
+    const res = await fetch(BACKEND + "/cuenta/" + cuenta);
+    const data = await res.json();
+    if (!data.ok) { limpiarSesion(); return false; }
+ 
+    cuentaActual = cuenta;
+    perfilNombre = sessionStorage.getItem("bl_nombre") || data.nombre || "";
+    perfilFotoUrl = sessionStorage.getItem("bl_foto") || data.foto || "";
+    esAdmin = false;
+ 
+    cuentaActualSpan();
+    await cargarPreciosCriptos();
+    initCarrusel();
+    await cargarDatosInicio();
+ 
+    // Ir a la pantalla guardada (o inicio por defecto)
+    const irA = pantalla || "inicio";
+    cambiarPantalla(irA);
+    return true;
+  } catch(e) {
+    limpiarSesion();
+    return false;
+  }
+}
+ 
+function limpiarSesion() {
+  sessionStorage.removeItem("bl_cuenta");
+  sessionStorage.removeItem("bl_nombre");
+  sessionStorage.removeItem("bl_foto");
+  sessionStorage.removeItem("bl_pantalla");
+}
+ 
+/* ===== CARRUSEL con SWIPE táctil ===== */
 let carruselIdx = 0;
 const TOTAL_SLIDES = 5;
+let carruselTimer = null;
+// Variables para swipe
+let touchStartX = 0;
+let touchStartY = 0;
+let isDragging = false;
+let dragStartX = 0;
+let currentTranslate = 0;
+ 
 function initCarrusel(){
   let dots = document.getElementById("carruselDots");
   dots.innerHTML = "";
@@ -606,12 +664,117 @@ function initCarrusel(){
     d.onclick = ()=>irASlide(i);
     dots.appendChild(d);
   }
-  setInterval(()=>{ irASlide((carruselIdx+1)%TOTAL_SLIDES); }, 4000);
+ 
+  // Iniciar autoplay
+  iniciarAutoplay();
+ 
+  // Touch events para swipe
+  const wrap = document.getElementById("carruselWrap");
+  const track = document.getElementById("carruselTrack");
+ 
+  wrap.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    isDragging = true;
+    dragStartX = touchStartX;
+    currentTranslate = -carruselIdx * 100;
+    track.style.transition = "none";
+    detenerAutoplay();
+  }, { passive: true });
+ 
+  wrap.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    // Si el movimiento es más vertical que horizontal, no interferir
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    const pct = (dx / wrap.offsetWidth) * 100;
+    track.style.transform = `translateX(${currentTranslate + pct}%)`;
+  }, { passive: true });
+ 
+  wrap.addEventListener("touchend", (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dx = e.changedTouches[0].clientX - dragStartX;
+    track.style.transition = "transform 0.4s ease";
+ 
+    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) {
+      irASlide(carruselIdx + 1);
+    } else if (dx > 40 && carruselIdx > 0) {
+      irASlide(carruselIdx - 1);
+    } else {
+      irASlide(carruselIdx); // volver al actual
+    }
+    iniciarAutoplay();
+  }, { passive: true });
+ 
+  // Mouse drag para desktop
+  let mouseDown = false;
+  let mouseStartX = 0;
+ 
+  wrap.addEventListener("mousedown", (e) => {
+    mouseDown = true;
+    mouseStartX = e.clientX;
+    dragStartX = e.clientX;
+    currentTranslate = -carruselIdx * 100;
+    track.style.transition = "none";
+    detenerAutoplay();
+    e.preventDefault();
+  });
+ 
+  wrap.addEventListener("mousemove", (e) => {
+    if (!mouseDown) return;
+    const dx = e.clientX - mouseStartX;
+    const pct = (dx / wrap.offsetWidth) * 100;
+    track.style.transform = `translateX(${currentTranslate + pct}%)`;
+  });
+ 
+  wrap.addEventListener("mouseup", (e) => {
+    if (!mouseDown) return;
+    mouseDown = false;
+    track.style.transition = "transform 0.4s ease";
+    const dx = e.clientX - dragStartX;
+    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) {
+      irASlide(carruselIdx + 1);
+    } else if (dx > 40 && carruselIdx > 0) {
+      irASlide(carruselIdx - 1);
+    } else {
+      irASlide(carruselIdx);
+    }
+    iniciarAutoplay();
+  });
+ 
+  wrap.addEventListener("mouseleave", (e) => {
+    if (mouseDown) {
+      mouseDown = false;
+      track.style.transition = "transform 0.4s ease";
+      irASlide(carruselIdx);
+      iniciarAutoplay();
+    }
+  });
 }
+ 
+function iniciarAutoplay() {
+  detenerAutoplay();
+  carruselTimer = setInterval(()=>{ irASlide((carruselIdx+1)%TOTAL_SLIDES); }, 4000);
+}
+ 
+function detenerAutoplay() {
+  if (carruselTimer) { clearInterval(carruselTimer); carruselTimer = null; }
+}
+ 
 function irASlide(idx){
   carruselIdx = idx;
   document.getElementById("carruselTrack").style.transform = `translateX(-${idx*100}%)`;
   document.querySelectorAll(".carrusel-dot").forEach((d,i)=>d.classList.toggle("active",i===idx));
+}
+ 
+/* Navegar desde carrusel a criptomoneda específica */
+function irDesdeCarrusel(pantalla, simbolo) {
+  cambiarPantalla(pantalla);
+  if (simbolo && pantalla === 'criptomonedas') {
+    setTimeout(() => { abrirModalCompra(simbolo); }, 300);
+  }
 }
  
 /* ===== LOGIN ===== */
@@ -619,7 +782,11 @@ function login(){
   let input = document.getElementById("usuario").value.trim();
   let p = document.getElementById("password").value.trim();
   if(!input||!p){ alert("Ingresa cuenta y contraseña"); return; }
-  if(input===ADMIN_CORREO && p===ADMIN_PASS){ esAdmin=true; cuentaActual=null; cambiarPantalla("admin"); cargarAdmin(); return; }
+  if(input===ADMIN_CORREO && p===ADMIN_PASS){
+    esAdmin=true; cuentaActual=null;
+    limpiarSesion();
+    cambiarPantalla("admin"); cargarAdmin(); return;
+  }
   fetch(BACKEND+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cuenta:input,password:p})})
   .then(r=>r.json()).then(data=>{
     if(data.ok){
@@ -627,6 +794,7 @@ function login(){
       localStorage.setItem("correo",data.correo);
       perfilNombre = data.nombre || "";
       perfilFotoUrl = data.foto || "";
+      guardarSesion();
       cuentaActualSpan();
       cargarPreciosCriptos();
       initCarrusel();
@@ -639,6 +807,7 @@ function login(){
 function logout(){
   cuentaActual=null; esAdmin=false; todasLasCuentas=[]; carrito={};
   perfilNombre=""; perfilFotoUrl="";
+  limpiarSesion();
   actualizarBadgeCarrito(); cambiarPantalla("login");
 }
  
@@ -671,6 +840,7 @@ function depositar(){
 function cambiarPantalla(id){
   document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
+  guardarPantalla(id);
   if(!esAdmin&&cuentaActual){
     cuentaActualSpan();
     if(id==="balance") cargarBalance();
@@ -692,16 +862,16 @@ async function cargarDatosInicio(){
     let data=await res.json();
     document.getElementById("inicioSaldo").textContent="$"+(data.saldo||0).toLocaleString();
   }catch(e){}
-  // Mensaje bienvenida
   let nombre = perfilNombre || cuentaActual;
   document.getElementById("bienvenidaMsg").textContent = "Hola, " + nombre + " 👋 Bienvenido a Banco Libre";
-  // Avatar en header
   let hAvatar = document.getElementById("headerAvatar");
   if(perfilFotoUrl){
     hAvatar.innerHTML=`<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;">`;
   } else {
     hAvatar.innerHTML=`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>`;
   }
+  // Actualizar sesión guardada
+  guardarSesion();
 }
  
 function cargarBalance(){
@@ -761,6 +931,7 @@ async function guardarPerfil(){
     let data=await res.json();
     if(data.ok){
       perfilNombre=nombre;
+      guardarSesion();
       alert("Perfil guardado");
       cargarPerfil();
       cargarDatosInicio();
@@ -774,10 +945,10 @@ async function subirFotoPerfil(event){
   if(file.size > 2*1024*1024){ alert("La imagen no debe superar 2MB"); return; }
   let reader = new FileReader();
   reader.onload = async function(e){
-    perfilFotoUrl = e.target.result; // base64
+    perfilFotoUrl = e.target.result;
+    guardarSesion();
     cargarPerfil();
     cargarDatosInicio();
-    // Auto-guardar foto
     try{
       await fetch(BACKEND+"/perfil/guardar",{
         method:"POST", headers:{"Content-Type":"application/json"},
@@ -789,9 +960,12 @@ async function subirFotoPerfil(event){
 }
  
 /* ===== CRIPTOS ===== */
-function cargarPreciosCriptos(){
-  fetch(BACKEND+"/criptos/precios").then(r=>r.json())
-  .then(data=>{ if(data.ok&&data.precios) preciosCriptos=data.precios; }).catch(()=>{});
+async function cargarPreciosCriptos(){
+  try {
+    let res = await fetch(BACKEND+"/criptos/precios");
+    let data = await res.json();
+    if(data.ok&&data.precios) preciosCriptos=data.precios;
+  } catch(e) {}
 }
  
 function renderizarCriptos(){
@@ -1071,7 +1245,6 @@ async function quitarCriptoUsuario(cuenta,simbolo){
   }catch(e){alert("Error");}
 }
  
-/* Admin opiniones globales */
 async function cargarOpinionesAdmin(){
   let lista=document.getElementById("adminOpinionesList");
   lista.innerHTML='<p style="color:var(--texto-sub);text-align:center;font-size:13px;">Cargando...</p>';
@@ -1108,7 +1281,6 @@ async function borrarOpinion(id){
   }catch(e){alert("Error");}
 }
  
-/* Admin ver opiniones de un usuario */
 async function verOpinionesUsuario(cuenta){
   document.getElementById("modalOpinionCuenta").textContent="Cuenta: "+cuenta;
   document.getElementById("opinionesUsuarioLista").innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
@@ -1168,6 +1340,14 @@ async function confirmarBorrado(){
 }
  
 function cerrarModal(id){document.getElementById(id).classList.remove("active");}
+ 
+/* ===== INICIALIZACIÓN: restaurar sesión al cargar ===== */
+window.addEventListener("DOMContentLoaded", async () => {
+  const restaurado = await restaurarSesion();
+  if (!restaurado) {
+    cambiarPantalla("login");
+  }
+});
 </script>
 </div></body>
 </html>
