@@ -437,8 +437,8 @@ input:checked + .slider:before { transform: translateX(22px); }
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
   <!-- LOGIN -->
-  <div id="login" class="pantalla activa">
-    <img src="https://placehold.co/300x150/007aff/white?text=BANCO+LIBRE" class="logo">
+<div id="login" class="pantalla activa">
+    <img src="bancolibre.jpg.jpeg" class="logo" onerror="this.style.display='none'">
     <h1>Banco Libre</h1>
     <input id="usuario" placeholder="Número de cuenta">
     <input id="password" type="password" placeholder="Contraseña">
@@ -446,6 +446,8 @@ input:checked + .slider:before { transform: translateX(22px); }
     <button onclick="cambiarPantalla('registro')">Crear cuenta</button>
     <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
   </div>
+
+
 
   <!-- REGISTRO -->
   <div id="registro" class="pantalla">
