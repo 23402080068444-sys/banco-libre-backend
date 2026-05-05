@@ -14,6 +14,50 @@
   --texto: #1c1c1e;
   --texto-sub: #8e8e93;
 }
+
+/* ===== ANIMACIONES GLOBALES ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes popIn {
+  0%   { transform: scale(0.7); opacity: 0; }
+  70%  { transform: scale(1.07); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,122,255,0.25); }
+  50%       { box-shadow: 0 0 0 8px rgba(0,122,255,0); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  40%       { transform: translateY(-6px); }
+  70%       { transform: translateY(-3px); }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 body {
   margin: 0; padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -27,53 +71,116 @@ body {
 }
 .pantalla { display: none; padding: 20px; text-align: center; flex: 1; overflow-y: auto; height: 100%; box-sizing: border-box; }
 .pantalla.activa { display: block; }
+
+/* Animación al cambiar pantalla */
+.pantalla.entrando {
+  animation: fadeInUp 0.32s cubic-bezier(0.22,1,0.36,1) both;
+}
+
 h1,h2 { color: var(--azul); }
-input { width: 80%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 12px; font-size: 15px; box-sizing: border-box; }
-button { background: var(--azul); color: white; border: none; border-radius: 12px; padding: 12px 20px; font-size: 15px; margin: 6px; cursor: pointer; transition: background 0.2s; }
-button:hover { background: var(--azul-dark); }
+input {
+  width: 80%; padding: 12px; margin: 8px 0;
+  border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 15px;
+  box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+input:focus {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+}
+button {
+  background: var(--azul); color: white; border: none;
+  border-radius: 12px; padding: 12px 20px; font-size: 15px; margin: 6px;
+  cursor: pointer; transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+  position: relative; overflow: hidden;
+}
+button:hover { background: var(--azul-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
+button:active { transform: scale(0.96); }
+
+/* Ripple en botones */
+button::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 70%);
+  transform: scale(0); opacity: 0; border-radius: 50%;
+  transition: transform 0.4s, opacity 0.4s;
+}
+button:active::after { transform: scale(3); opacity: 1; transition: 0s; }
+
 ul { list-style: none; padding: 0; margin: 0; }
-ul li { background: var(--gris-card); margin: 5px 0; padding: 10px; border-radius: 8px; font-size: 13px; }
+ul li {
+  background: var(--gris-card); margin: 5px 0; padding: 10px;
+  border-radius: 8px; font-size: 13px;
+  animation: slideInLeft 0.25s ease both;
+}
 .logo { width: 90%; max-width: 300px; height: auto; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); transition: transform 0.3s; }
 .logo:hover { transform: scale(1.05); }
-.header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: var(--azul); color: white; display: flex; align-items: center; padding: 0 15px; z-index: 1000; box-sizing: border-box; }
-.menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; }
+.header {
+  position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+  background: var(--azul); color: white;
+  display: flex; align-items: center; padding: 0 15px; z-index: 1000; box-sizing: border-box;
+}
+.menu-icon { font-size: 26px; cursor: pointer; margin-right: 15px; transition: transform 0.2s; }
+.menu-icon:hover { transform: scale(1.15); }
 .title { font-weight: bold; font-size: 17px; flex: 1; }
 .contenido { padding-top: 75px; }
-.drawer { position: absolute; top: 0; left: -260px; width: 260px; height: 100%; background: white; box-shadow: 2px 0 10px rgba(0,0,0,.2); transition: .3s; padding-top: 60px; z-index: 20; overflow-y: auto; }
+.drawer {
+  position: absolute; top: 0; left: -260px; width: 260px; height: 100%;
+  background: white; box-shadow: 2px 0 10px rgba(0,0,0,.2);
+  transition: left 0.28s cubic-bezier(0.22,1,0.36,1);
+  padding-top: 60px; z-index: 20; overflow-y: auto;
+}
 .drawer.active { left: 0; }
-.drawer a { display: flex; align-items: center; gap: 10px; padding: 14px 18px; text-decoration: none; color: var(--texto); border-bottom: 1px solid #f0f0f0; font-size: 15px; cursor: pointer; }
-.drawer a:hover { background: #f5f9ff; color: var(--azul); }
+.drawer a {
+  display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+  text-decoration: none; color: var(--texto); border-bottom: 1px solid #f0f0f0;
+  font-size: 15px; cursor: pointer;
+  transition: background 0.15s, color 0.15s, padding-left 0.15s;
+}
+.drawer a:hover { background: #f5f9ff; color: var(--azul); padding-left: 26px; }
 .overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,.35); display: none; z-index: 15; }
-.overlay.active { display: block; }
+.overlay.active { display: block; animation: fadeIn 0.2s; }
 #movimientos { max-height: 350px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 12px; }
- 
+
+/* ===== SALDO ANIMADO ===== */
+.saldo-animado {
+  display: inline-block;
+  transition: transform 0.2s, color 0.3s;
+}
+.saldo-animado.actualizando {
+  animation: bounce 0.4s ease;
+  color: #34c759;
+}
+
 /* ===== CARRUSEL INICIO ===== */
 .carrusel-wrap { overflow: hidden; position: relative; margin: 0 -20px; touch-action: pan-y; user-select: none; }
-.carrusel-track { display: flex; transition: transform 0.4s ease; will-change: transform; }
-.carrusel-slide {
-  min-width: 100%; padding: 0 20px; box-sizing: border-box;
-}
+.carrusel-track { display: flex; transition: transform 0.4s cubic-bezier(0.22,1,0.36,1); will-change: transform; }
+.carrusel-slide { min-width: 100%; padding: 0 20px; box-sizing: border-box; }
 .carrusel-card {
   border-radius: 18px; padding: 18px 20px; color: white; text-align: left;
   margin-bottom: 4px; position: relative; overflow: hidden; cursor: pointer;
-  transition: opacity 0.15s;
+  transition: transform 0.18s, box-shadow 0.18s;
 }
-.carrusel-card:active { opacity: 0.88; }
+.carrusel-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.carrusel-card:active { transform: scale(0.97); }
 .carrusel-card.oferta { background: linear-gradient(135deg, #007aff, #00c6ff); }
 .carrusel-card.promo  { background: linear-gradient(135deg, #ff6b35, #ff3b30); }
 .carrusel-card.tip    { background: linear-gradient(135deg, #34c759, #00b050); }
 .carrusel-card.cripto { background: linear-gradient(135deg, #5856d6, #bf5af2); }
 .carrusel-card h3 { margin: 0 0 6px; font-size: 16px; }
 .carrusel-card p  { margin: 0; font-size: 13px; opacity: 0.9; }
-.carrusel-card .cc-emoji { font-size: 32px; position: absolute; right: 16px; top: 14px; opacity: 0.4; }
+.carrusel-card .cc-emoji { font-size: 32px; position: absolute; right: 16px; top: 14px; opacity: 0.35; transition: transform 0.3s, opacity 0.3s; }
+.carrusel-card:hover .cc-emoji { transform: scale(1.2) rotate(10deg); opacity: 0.6; }
 .carrusel-dots { display: flex; justify-content: center; gap: 6px; margin: 8px 0 14px; }
-.carrusel-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; transition: background 0.3s; cursor: pointer; }
-.carrusel-dot.active { background: var(--azul); }
- 
+.carrusel-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; transition: background 0.3s, transform 0.3s; cursor: pointer; }
+.carrusel-dot.active { background: var(--azul); transform: scale(1.3); }
+
 .inicio-saldo-card {
   background: linear-gradient(135deg, var(--azul), #0055cc);
   border-radius: 18px; padding: 16px 20px; color: white; text-align: left; margin-bottom: 14px;
+  animation: fadeInUp 0.4s 0.05s both;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+.inicio-saldo-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,122,255,0.35); }
 .inicio-saldo-label { font-size: 12px; opacity: 0.8; }
 .inicio-saldo-num { font-size: 28px; font-weight: bold; margin: 4px 0; }
 .inicio-accesos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -81,77 +188,137 @@ ul li { background: var(--gris-card); margin: 5px 0; padding: 10px; border-radiu
   background: var(--gris-card); border: none; border-radius: 14px;
   padding: 14px 10px; font-size: 13px; font-weight: bold; color: var(--texto);
   cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: background 0.18s, color 0.18s, transform 0.15s, box-shadow 0.18s;
+  animation: fadeInUp 0.35s calc(var(--i, 0) * 0.07s + 0.1s) both;
 }
-.inicio-acceso-btn:hover { background: #e8f0ff; color: var(--azul); }
-.inicio-acceso-icon { font-size: 22px; }
- 
+.inicio-acceso-btn:nth-child(1) { --i: 1; }
+.inicio-acceso-btn:nth-child(2) { --i: 2; }
+.inicio-acceso-btn:nth-child(3) { --i: 3; }
+.inicio-acceso-btn:nth-child(4) { --i: 4; }
+.inicio-acceso-btn:hover { background: #e8f0ff; color: var(--azul); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,122,255,0.15); }
+.inicio-acceso-icon { font-size: 22px; transition: transform 0.2s; }
+.inicio-acceso-btn:hover .inicio-acceso-icon { transform: scale(1.2) rotate(-5deg); }
+
 /* ===== CRIPTOMONEDAS ===== */
 .cripto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-bottom: 20px; }
-.cripto-card { background: var(--gris-card); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; }
-.cripto-card:hover { border-color: var(--azul); background: #f0f6ff; }
-.cripto-card.en-carrito { border-color: var(--azul); background: #e8f2ff; }
-.cripto-emoji { font-size: 28px; }
+.cripto-card {
+  background: var(--gris-card); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.22s; position: relative;
+  animation: fadeInUp 0.3s calc(var(--ci, 0) * 0.05s) both;
+}
+.cripto-card:hover { border-color: var(--azul); background: #f0f6ff; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,122,255,0.18); }
+.cripto-card.en-carrito { border-color: var(--azul); background: #e8f2ff; animation: pulseGlow 2s infinite; }
+.cripto-card:active { transform: scale(0.95); }
+.cripto-emoji { font-size: 28px; transition: transform 0.2s; }
+.cripto-card:hover .cripto-emoji { transform: scale(1.15) rotate(-5deg); }
 .cripto-nombre { font-weight: bold; font-size: 13px; color: var(--texto); margin: 4px 0 2px; }
 .cripto-simbolo { font-size: 11px; color: var(--texto-sub); }
 .cripto-precio { font-size: 14px; font-weight: bold; color: var(--azul); margin-top: 6px; }
-.cripto-badge { position: absolute; top: 6px; right: 6px; background: var(--azul); color: white; font-size: 10px; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-weight: bold; }
+.cripto-badge {
+  position: absolute; top: 6px; right: 6px; background: var(--azul); color: white;
+  font-size: 10px; border-radius: 50%; width: 18px; height: 18px; display: none;
+  align-items: center; justify-content: center; font-weight: bold;
+  animation: popIn 0.3s both;
+}
 .cripto-card.en-carrito .cripto-badge { display: flex; }
-.cart-badge { background: #ff3b30; color: white; font-size: 11px; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-weight: bold; margin-left: -8px; margin-top: -10px; }
-.cart-badge.visible { display: flex; }
- 
+.cart-badge {
+  background: #ff3b30; color: white; font-size: 11px; border-radius: 50%;
+  width: 18px; height: 18px; display: none; align-items: center; justify-content: center;
+  font-weight: bold; margin-left: -8px; margin-top: -10px;
+  transition: transform 0.2s;
+}
+.cart-badge.visible { display: flex; animation: popIn 0.3s both; }
+.cart-badge.bump { animation: bounce 0.35s ease; }
+
 /* ===== CARRITO ===== */
-.carrito-item { background: var(--gris-card); border-radius: 12px; padding: 12px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+.carrito-item {
+  background: var(--gris-card); border-radius: 12px; padding: 12px; margin: 6px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  animation: slideInRight 0.25s ease both;
+  transition: background 0.15s;
+}
+.carrito-item:hover { background: #eaf2ff; }
 .carrito-info { text-align: left; }
 .carrito-nombre { font-weight: bold; font-size: 14px; }
 .carrito-sub { font-size: 12px; color: var(--texto-sub); }
 .carrito-ctrl { display: flex; align-items: center; gap: 8px; }
 .carrito-ctrl button { padding: 4px 10px; font-size: 16px; margin: 0; border-radius: 8px; min-width: 32px; }
-.carrito-cantidad { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; }
-.carrito-total-bar { background: var(--azul); color: white; border-radius: 14px; padding: 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+.carrito-cantidad { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; transition: transform 0.15s; }
+.carrito-cantidad.bump { animation: bounce 0.3s ease; }
+.carrito-total-bar {
+  background: var(--azul); color: white; border-radius: 14px; padding: 14px; margin-top: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+  animation: fadeInUp 0.3s ease both;
+}
 .carrito-total-bar span { font-size: 16px; font-weight: bold; }
 .btn-comprar { background: white; color: var(--azul); border: none; border-radius: 10px; padding: 8px 16px; font-weight: bold; font-size: 14px; cursor: pointer; }
-.btn-comprar:hover { background: #e8f2ff; }
- 
+.btn-comprar:hover { background: #e8f2ff; transform: scale(1.04); }
+
 /* ===== MIS CRIPTOS ===== */
-.mis-cripto-item { background: var(--gris-card); border-radius: 12px; padding: 12px 14px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+.mis-cripto-item {
+  background: var(--gris-card); border-radius: 12px; padding: 12px 14px; margin: 6px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  animation: slideInLeft 0.25s calc(var(--mi, 0) * 0.06s) both;
+  transition: background 0.15s, transform 0.15s;
+}
+.mis-cripto-item:hover { background: #eaf2ff; transform: translateX(4px); }
 .mis-cripto-left { display: flex; align-items: center; gap: 10px; }
 .mis-cripto-emoji { font-size: 24px; }
 .mis-cripto-nombre { font-weight: bold; font-size: 14px; }
 .mis-cripto-cant { font-size: 12px; color: var(--texto-sub); }
 .mis-cripto-valor { font-weight: bold; color: var(--azul); font-size: 15px; }
- 
+
 /* ===== PERFIL ===== */
 .perfil-avatar-wrap { position: relative; display: inline-block; margin: 10px auto; }
 .perfil-avatar {
   width: 90px; height: 90px; border-radius: 50%;
-  object-fit: cover; border: 3px solid var(--azul);
-  background: var(--gris-card); display: block;
+  object-fit: cover; border: 3px solid var(--azul); background: var(--gris-card); display: block;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+.perfil-avatar:hover { transform: scale(1.06); box-shadow: 0 6px 18px rgba(0,122,255,0.3); }
 .perfil-avatar-placeholder {
   width: 90px; height: 90px; border-radius: 50%;
   background: var(--gris-card); border: 3px solid var(--azul);
   display: flex; align-items: center; justify-content: center; font-size: 40px;
-  margin: 10px auto;
+  margin: 10px auto; transition: transform 0.2s;
 }
+.perfil-avatar-placeholder:hover { transform: scale(1.06); }
 .perfil-camara-btn {
   position: absolute; bottom: 2px; right: 2px;
   background: var(--azul); border: none; border-radius: 50%;
   width: 28px; height: 28px; font-size: 14px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; padding: 0; margin: 0;
-  color: white;
+  display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; color: white;
+  transition: transform 0.18s, background 0.18s;
 }
-.perfil-nombre-display { font-size: 20px; font-weight: bold; color: var(--texto); margin: 4px 0; }
-.perfil-cuenta-display { font-size: 13px; color: var(--texto-sub); margin-bottom: 14px; }
-.perfil-edit-section { background: var(--gris-card); border-radius: 14px; padding: 14px; text-align: left; margin-top: 10px; }
+.perfil-camara-btn:hover { transform: scale(1.18); background: var(--azul-dark); }
+.perfil-nombre-display { font-size: 20px; font-weight: bold; color: var(--texto); margin: 4px 0; animation: fadeInUp 0.3s 0.1s both; }
+.perfil-cuenta-display { font-size: 13px; color: var(--texto-sub); margin-bottom: 8px; }
+
+/* Chip de "Cliente desde" */
+.perfil-cliente-desde {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, #007aff15, #007aff25);
+  border: 1px solid #007aff40; border-radius: 20px;
+  padding: 5px 12px; font-size: 12px; color: var(--azul);
+  font-weight: 600; margin-bottom: 14px;
+  animation: popIn 0.4s 0.2s both;
+}
+
+.perfil-edit-section { background: var(--gris-card); border-radius: 14px; padding: 14px; text-align: left; margin-top: 10px; animation: fadeInUp 0.35s 0.15s both; }
 .perfil-edit-section label { font-size: 13px; color: var(--texto-sub); display: block; margin-bottom: 4px; }
 .perfil-edit-section input { width: 100%; margin: 0 0 10px; box-sizing: border-box; }
- 
+
 /* ===== COMENTARIOS ===== */
 .estrellas { display: flex; justify-content: center; gap: 8px; margin: 10px 0; }
-.estrella { font-size: 28px; cursor: pointer; transition: transform 0.1s; opacity: 0.4; }
+.estrella { font-size: 28px; cursor: pointer; transition: transform 0.15s, opacity 0.15s; opacity: 0.4; }
 .estrella.activa { opacity: 1; }
-.estrella:hover { transform: scale(1.2); }
-.comentario-card { background: var(--gris-card); border-radius: 14px; padding: 12px 14px; margin: 8px 0; text-align: left; }
+.estrella:hover { transform: scale(1.25) rotate(-8deg); }
+.comentario-card {
+  background: var(--gris-card); border-radius: 14px; padding: 12px 14px; margin: 8px 0; text-align: left;
+  animation: slideInLeft 0.25s ease both;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.comentario-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
 .comentario-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .comentario-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #ddd; }
 .comentario-avatar-placeholder { width: 36px; height: 36px; border-radius: 50%; background: var(--azul); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -160,11 +327,32 @@ ul li { background: var(--gris-card); margin: 5px 0; padding: 10px; border-radiu
 .comentario-texto { font-size: 13px; color: var(--texto); margin: 0; }
 .comentario-fecha { font-size: 11px; color: var(--texto-sub); margin-top: 4px; }
 textarea {
-  width: 85%; padding: 12px; margin: 8px 0; border: 1px solid #ccc;
+  width: 85%; padding: 12px; margin: 8px 0; border: 1.5px solid #e0e0e0;
   border-radius: 12px; font-size: 14px; resize: none; font-family: inherit;
-  box-sizing: border-box;
+  box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
 }
- 
+textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+
+/* ===== LOGIN ANIMADO ===== */
+#login .logo { animation: fadeInUp 0.5s 0.1s both; }
+#login h1   { animation: fadeInUp 0.4s 0.2s both; }
+#login input:nth-of-type(1) { animation: fadeInUp 0.4s 0.3s both; }
+#login input:nth-of-type(2) { animation: fadeInUp 0.4s 0.35s both; }
+#login button { animation: fadeInUp 0.4s calc(0.4s + var(--bi, 0) * 0.06s) both; }
+#login button:nth-of-type(1) { --bi: 0; }
+#login button:nth-of-type(2) { --bi: 1; }
+#login button:nth-of-type(3) { --bi: 2; }
+
+/* ===== TOAST NOTIFICATION ===== */
+#toast {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1c1c1e; color: white; padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; z-index: 9999; pointer-events: none;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap; max-width: 80%;
+}
+#toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* ===== ADMIN ===== */
 #admin { background: #f5f9ff; }
 .admin-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: var(--azul); color: white; display: flex; align-items: center; padding: 0 15px; z-index: 1000; box-sizing: border-box; }
@@ -178,7 +366,7 @@ textarea {
 .stat-item { text-align: center; }
 .stat-val { font-size: 18px; font-weight: bold; color: var(--azul); }
 .stat-label { font-size: 10px; color: var(--texto-sub); }
-.admin-card { background: white; border: 1px solid #e8eef5; border-radius: 14px; margin: 8px 0; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+.admin-card { background: white; border: 1px solid #e8eef5; border-radius: 14px; margin: 8px 0; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); animation: fadeInUp 0.25s ease both; }
 .admin-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .admin-user-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--gris-card); border: 2px solid var(--azul); flex-shrink: 0; }
 .admin-user-avatar-placeholder { width: 44px; height: 44px; border-radius: 50%; background: var(--azul); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
@@ -206,11 +394,19 @@ textarea {
 .admin-cripto-precio { font-size: 15px; font-weight: bold; color: var(--azul); }
 .btn-edit-precio { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; margin: 0; }
 .btn-edit-precio:hover { background: var(--azul-dark); }
- 
+
 /* ===== MODALES ===== */
-.modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
-.modal-overlay.active { display: flex; }
-.modal-box { background: white; border-radius: 20px; padding: 24px; width: 82%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 85%; overflow-y: auto; }
+.modal-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 200; display: none;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+.modal-box {
+  background: white; border-radius: 20px; padding: 24px; width: 82%; text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 85%; overflow-y: auto;
+  animation: popIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
+}
 .modal-box h3 { color: var(--azul); margin-top: 0; }
 .modal-box input { background: #f5f9ff; border: 1px solid #d0e0f5; color: var(--texto); border-radius: 10px; width: 85%; padding: 12px; font-size: 15px; margin: 10px 0; }
 .modal-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
@@ -225,8 +421,9 @@ textarea {
 .btn-auc-quitar { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin: 0; }
 .qty-selector { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 12px 0; }
 .qty-btn { padding: 8px 16px; font-size: 20px; border-radius: 10px; margin: 0; }
-.qty-num { font-size: 24px; font-weight: bold; color: var(--azul); min-width: 40px; text-align: center; }
- 
+.qty-num { font-size: 24px; font-weight: bold; color: var(--azul); min-width: 40px; text-align: center; transition: transform 0.15s; }
+.qty-num.bump { animation: bounce 0.3s ease; }
+
 /* Admin opiniones */
 .admin-opinion-card { background: #f5f9ff; border-radius: 12px; padding: 12px; margin: 6px 0; text-align: left; }
 .admin-opinion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -234,10 +431,21 @@ textarea {
 .admin-opinion-texto { font-size: 13px; color: var(--texto); margin: 0 0 4px; }
 .admin-opinion-fecha { font-size: 11px; color: var(--texto-sub); }
 .btn-borrar-opinion { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin: 0; }
+
+/* ===== LOADING SPINNER ===== */
+.loading-spinner {
+  width: 28px; height: 28px; border: 3px solid #e0e0e0;
+  border-top-color: var(--azul); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 20px auto;
+}
 </style>
 </head>
 <body><div class="app">
- 
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
   <!-- DRAWER -->
   <div class="drawer" id="drawer">
     <a onclick="cambiarPantalla('inicio');toggleMenu()">🏠 Inicio</a>
@@ -251,7 +459,7 @@ textarea {
     <a onclick="logout();toggleMenu()">🚪 Cerrar sesión</a>
   </div>
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
- 
+
   <!-- LOGIN -->
   <div id="login" class="pantalla activa">
     <img src="bancolibre.jpg.jpeg" class="logo" onerror="this.style.display='none'">
@@ -262,7 +470,7 @@ textarea {
     <button onclick="cambiarPantalla('registro')">Crear cuenta</button>
     <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
   </div>
- 
+
   <!-- REGISTRO -->
   <div id="registro" class="pantalla">
     <h2>Crear cuenta</h2>
@@ -272,7 +480,7 @@ textarea {
     <button onclick="crearCuenta()">Registrar</button>
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
- 
+
   <!-- INICIO -->
   <div id="inicio" class="pantalla">
     <div class="header">
@@ -336,7 +544,7 @@ textarea {
       </div>
     </div>
   </div>
- 
+
   <!-- DEPÓSITOS -->
   <div id="depositos" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Depósitos</div></div>
@@ -347,17 +555,17 @@ textarea {
       <button onclick="depositar()">💸 Depositar</button>
     </div>
   </div>
- 
+
   <!-- BALANCE -->
   <div id="balance" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Balance</div></div>
     <div class="contenido">
-      <h2>Saldo: $<span id="saldo">0</span></h2>
+      <h2>Saldo: $<span id="saldo" class="saldo-animado">0</span></h2>
       <h3 style="text-align:left;">Movimientos</h3>
       <div id="movimientos"><ul id="listaMovimientos"></ul></div>
     </div>
   </div>
- 
+
   <!-- PERFIL -->
   <div id="perfil" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
@@ -370,6 +578,10 @@ textarea {
       </div>
       <div class="perfil-nombre-display" id="perfilNombreDisplay">—</div>
       <div class="perfil-cuenta-display" id="cuentaPerfil"></div>
+      <!-- NUEVO: Chip "Cliente desde" -->
+      <div class="perfil-cliente-desde" id="perfilClienteDesde" style="display:none;">
+        🗓️ <span id="perfilClienteDesdeTxt"></span>
+      </div>
       <div class="perfil-edit-section">
         <label>Nombre de usuario</label>
         <input id="inputNombrePerfil" placeholder="Tu nombre" style="width:100%;margin:0 0 10px;">
@@ -377,7 +589,7 @@ textarea {
       </div>
     </div>
   </div>
- 
+
   <!-- RESET -->
   <div id="reset" class="pantalla">
     <h2>Restablecer contraseña</h2>
@@ -388,7 +600,7 @@ textarea {
     <button onclick="cambiarPassword()">Cambiar contraseña</button>
     <button onclick="cambiarPantalla('login')">Volver</button>
   </div>
- 
+
   <!-- CRIPTOMONEDAS -->
   <div id="criptomonedas" class="pantalla">
     <div class="header">
@@ -403,19 +615,19 @@ textarea {
       <div class="cripto-grid" id="criptoGrid"></div>
     </div>
   </div>
- 
+
   <!-- CARRITO -->
   <div id="carrito" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">🛒 Carrito</div></div>
     <div class="contenido"><div id="carritoContenido"></div></div>
   </div>
- 
+
   <!-- MIS CRIPTOS -->
   <div id="misCriptos" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">💎 Mis Criptos</div></div>
-    <div class="contenido"><div id="misCriptosContenido"><p style="color:var(--texto-sub);">Cargando...</p></div></div>
+    <div class="contenido"><div id="misCriptosContenido"><div class="loading-spinner"></div></div></div>
   </div>
- 
+
   <!-- COMENTARIOS / RESEÑAS -->
   <div id="comentarios" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⭐ Reseñas</div></div>
@@ -432,10 +644,10 @@ textarea {
         <textarea id="textoComentario" rows="3" placeholder="Escribe tu opinión sobre Banco Libre..."></textarea>
         <button onclick="enviarComentario()" style="width:100%;margin:6px 0 0;">Publicar reseña</button>
       </div>
-      <div id="listaComentarios"><p style="color:var(--texto-sub);font-size:13px;">Cargando reseñas...</p></div>
+      <div id="listaComentarios"><div class="loading-spinner"></div></div>
     </div>
   </div>
- 
+
   <!-- PANEL ADMIN -->
   <div id="admin" class="pantalla">
     <div class="admin-header">
@@ -457,7 +669,7 @@ textarea {
         </div>
         <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
         <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
-        <div class="admin-list-wrap" id="adminListWrap"><p style="color:var(--texto-sub);text-align:center;font-size:13px;">Cargando...</p></div>
+        <div class="admin-list-wrap" id="adminListWrap"><div class="loading-spinner"></div></div>
       </div>
       <div class="admin-tab-content" id="tabCriptos">
         <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Modifica el precio de cada criptomoneda</p>
@@ -466,12 +678,12 @@ textarea {
       <div class="admin-tab-content" id="tabOpiniones">
         <button class="admin-refresh" onclick="cargarOpinionesAdmin()">↻ Actualizar</button>
         <div id="adminOpinionesList" style="max-height:480px;overflow-y:auto;">
-          <p style="color:var(--texto-sub);text-align:center;font-size:13px;">Cargando...</p>
+          <div class="loading-spinner"></div>
         </div>
       </div>
     </div>
   </div>
- 
+
   <!-- MODALES -->
   <div class="modal-overlay" id="modalSaldo">
     <div class="modal-box">
@@ -484,7 +696,7 @@ textarea {
       </div>
     </div>
   </div>
- 
+
   <div class="modal-overlay" id="modalHistorial">
     <div class="modal-box">
       <h3>📋 Historial</h3>
@@ -493,7 +705,7 @@ textarea {
       <button onclick="cerrarModal('modalHistorial')" style="width:100%;margin:0;">Cerrar</button>
     </div>
   </div>
- 
+
   <div class="modal-overlay" id="modalBorrar">
     <div class="modal-box">
       <h3 style="color:#ff3b30;">⚠️ Eliminar Cuenta</h3>
@@ -505,7 +717,7 @@ textarea {
       </div>
     </div>
   </div>
- 
+
   <div class="modal-overlay" id="modalPrecioCripto">
     <div class="modal-box">
       <h3 id="modalCriptoNombre">✏️ Editar Precio</h3>
@@ -517,7 +729,7 @@ textarea {
       </div>
     </div>
   </div>
- 
+
   <div class="modal-overlay" id="modalUserCriptos">
     <div class="modal-box">
       <h3>🪙 Criptos del usuario</h3>
@@ -526,7 +738,7 @@ textarea {
       <button onclick="cerrarModal('modalUserCriptos')" style="width:100%;margin:8px 0 0;">Cerrar</button>
     </div>
   </div>
- 
+
   <div class="modal-overlay" id="modalCompra">
     <div class="modal-box">
       <h3 id="modalCompraNombre">Comprar</h3>
@@ -543,7 +755,7 @@ textarea {
       </div>
     </div>
   </div>
- 
+
   <div class="modal-overlay" id="modalOpinionesUsuario">
     <div class="modal-box">
       <h3>⭐ Reseñas del usuario</h3>
@@ -552,12 +764,12 @@ textarea {
       <button onclick="cerrarModal('modalOpinionesUsuario')" style="width:100%;margin:8px 0 0;">Cerrar</button>
     </div>
   </div>
- 
+
 <script>
 const BACKEND = "https://banco-libre-backend.onrender.com";
 const ADMIN_CORREO = "admin@gmail.com";
 const ADMIN_PASS = "pqrb728px";
- 
+
 let cuentaActual = null, pinTemporal = null, correoTemporal = null;
 let esAdmin = false, todasLasCuentas = [];
 let cuentaParaEditar = null, cuentaParaBorrar = null, criptoParaEditar = null;
@@ -566,27 +778,66 @@ let carrito = {};
 let estrellaSeleccionada = 0;
 let perfilNombre = "";
 let perfilFotoUrl = "";
- 
+let perfilFechaRegistro = "";
+
 const CRIPTOS = [
-  { simbolo:"BLC", nombre:"BancoLibreCoin",   emoji:"🏦", precio:1200 },
-  { simbolo:"LBX", nombre:"LibrexToken", emoji:"🔓", precio:850  },
-  { simbolo:"NVX", nombre:"qlonuelCoin",    emoji:"🌟", precio:3200 },
-  { simbolo:"ZRO", nombre:"ZeroCoin",    emoji:"⚡", precio:450  },
-  { simbolo:"QNT", nombre:"QuantumBit",  emoji:"🔬", precio:5600 },
-  { simbolo:"SLX", nombre:"SolarEx",     emoji:"☀️", precio:980  },
-  { simbolo:"DRK", nombre:"DarkMatter",  emoji:"🌑", precio:2100 },
-  { simbolo:"AQX", nombre:"AquaToken",   emoji:"🌊", precio:670  },
-  { simbolo:"FNX", nombre:"PhoenixCoin", emoji:"🔥", precio:4300 },
-  { simbolo:"LNR", nombre:"LunarBit",    emoji:"🌙", precio:1550 }
+  { simbolo:"BLC", nombre:"BancoLibreCoin",  emoji:"🏦", precio:1200 },
+  { simbolo:"LBX", nombre:"LibrexToken",     emoji:"🔓", precio:850  },
+  { simbolo:"NVX", nombre:"NovaCoin",         emoji:"🌟", precio:3200 },
+  { simbolo:"ZRO", nombre:"ZeroCoin",         emoji:"⚡", precio:450  },
+  { simbolo:"QNT", nombre:"QuantumBit",       emoji:"🔬", precio:5600 },
+  { simbolo:"SLX", nombre:"SolarEx",          emoji:"☀️", precio:980  },
+  { simbolo:"DRK", nombre:"DarkMatter",       emoji:"🌑", precio:2100 },
+  { simbolo:"AQX", nombre:"AquaToken",        emoji:"🌊", precio:670  },
+  { simbolo:"FNX", nombre:"PhoenixCoin",      emoji:"🔥", precio:4300 },
+  { simbolo:"LNR", nombre:"LunarBit",         emoji:"🌙", precio:1550 }
 ];
- 
+
 let preciosCriptos = {};
 CRIPTOS.forEach(c => { preciosCriptos[c.simbolo] = c.precio; });
- 
+
+/* ===== TOAST ===== */
+let toastTimer = null;
+function showToast(msg, duracion = 2200) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("visible");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("visible"), duracion);
+}
+
 const drawer = document.getElementById("drawer");
 const overlay = document.getElementById("overlay");
 function toggleMenu(){ drawer.classList.toggle("active"); overlay.classList.toggle("active"); }
- 
+
+/* ==========================================
+   CARRITO — PERSISTENCIA EN localStorage
+   ========================================== */
+function guardarCarrito() {
+  if (cuentaActual) {
+    try { localStorage.setItem("bl_carrito_" + cuentaActual, JSON.stringify(carrito)); } catch(e) {}
+  }
+}
+
+function cargarCarritoLocal() {
+  if (cuentaActual) {
+    try {
+      const raw = localStorage.getItem("bl_carrito_" + cuentaActual);
+      carrito = raw ? JSON.parse(raw) : {};
+    } catch(e) { carrito = {}; }
+  } else {
+    carrito = {};
+  }
+  actualizarBadgeCarrito();
+}
+
+function limpiarCarritoLocal() {
+  if (cuentaActual) {
+    try { localStorage.removeItem("bl_carrito_" + cuentaActual); } catch(e) {}
+  }
+  carrito = {};
+}
+
 /* ==========================================
    PERSISTENCIA DE SESIÓN con sessionStorage
    ========================================== */
@@ -595,39 +846,39 @@ function guardarSesion() {
     sessionStorage.setItem("bl_cuenta", cuentaActual);
     sessionStorage.setItem("bl_nombre", perfilNombre);
     sessionStorage.setItem("bl_foto", perfilFotoUrl);
+    sessionStorage.setItem("bl_fecha", perfilFechaRegistro);
   }
 }
- 
+
 function guardarPantalla(id) {
-  // Solo guardamos pantallas que requieren sesión
   const pantallasPublicas = ["login","registro","reset"];
   if (!pantallasPublicas.includes(id)) {
     sessionStorage.setItem("bl_pantalla", id);
   }
 }
- 
+
 async function restaurarSesion() {
   const cuenta = sessionStorage.getItem("bl_cuenta");
   const pantalla = sessionStorage.getItem("bl_pantalla");
   if (!cuenta) return false;
- 
+
   try {
-    // Verificar que la cuenta sigue siendo válida
     const res = await fetch(BACKEND + "/cuenta/" + cuenta);
     const data = await res.json();
     if (!data.ok) { limpiarSesion(); return false; }
- 
+
     cuentaActual = cuenta;
     perfilNombre = sessionStorage.getItem("bl_nombre") || data.nombre || "";
     perfilFotoUrl = sessionStorage.getItem("bl_foto") || data.foto || "";
+    perfilFechaRegistro = sessionStorage.getItem("bl_fecha") || data.fechaRegistro || "";
     esAdmin = false;
- 
+
     cuentaActualSpan();
+    cargarCarritoLocal();           // ← restaurar carrito
     await cargarPreciosCriptos();
     initCarrusel();
     await cargarDatosInicio();
- 
-    // Ir a la pantalla guardada (o inicio por defecto)
+
     const irA = pantalla || "inicio";
     cambiarPantalla(irA);
     return true;
@@ -636,25 +887,22 @@ async function restaurarSesion() {
     return false;
   }
 }
- 
+
 function limpiarSesion() {
   sessionStorage.removeItem("bl_cuenta");
   sessionStorage.removeItem("bl_nombre");
   sessionStorage.removeItem("bl_foto");
+  sessionStorage.removeItem("bl_fecha");
   sessionStorage.removeItem("bl_pantalla");
 }
- 
+
 /* ===== CARRUSEL con SWIPE táctil ===== */
 let carruselIdx = 0;
 const TOTAL_SLIDES = 5;
 let carruselTimer = null;
-// Variables para swipe
-let touchStartX = 0;
-let touchStartY = 0;
-let isDragging = false;
-let dragStartX = 0;
-let currentTranslate = 0;
- 
+let touchStartX = 0, touchStartY = 0;
+let isDragging = false, dragStartX = 0, currentTranslate = 0;
+
 function initCarrusel(){
   let dots = document.getElementById("carruselDots");
   dots.innerHTML = "";
@@ -664,124 +912,88 @@ function initCarrusel(){
     d.onclick = ()=>irASlide(i);
     dots.appendChild(d);
   }
- 
-  // Iniciar autoplay
   iniciarAutoplay();
- 
-  // Touch events para swipe
+
   const wrap = document.getElementById("carruselWrap");
   const track = document.getElementById("carruselTrack");
- 
+
   wrap.addEventListener("touchstart", (e) => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    isDragging = true;
-    dragStartX = touchStartX;
+    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+    isDragging = true; dragStartX = touchStartX;
     currentTranslate = -carruselIdx * 100;
-    track.style.transition = "none";
-    detenerAutoplay();
+    track.style.transition = "none"; detenerAutoplay();
   }, { passive: true });
- 
+
   wrap.addEventListener("touchmove", (e) => {
     if (!isDragging) return;
     const dx = e.touches[0].clientX - touchStartX;
     const dy = e.touches[0].clientY - touchStartY;
-    // Si el movimiento es más vertical que horizontal, no interferir
     if (Math.abs(dy) > Math.abs(dx)) return;
     const pct = (dx / wrap.offsetWidth) * 100;
     track.style.transform = `translateX(${currentTranslate + pct}%)`;
   }, { passive: true });
- 
+
   wrap.addEventListener("touchend", (e) => {
     if (!isDragging) return;
     isDragging = false;
     const dx = e.changedTouches[0].clientX - dragStartX;
-    track.style.transition = "transform 0.4s ease";
- 
-    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) {
-      irASlide(carruselIdx + 1);
-    } else if (dx > 40 && carruselIdx > 0) {
-      irASlide(carruselIdx - 1);
-    } else {
-      irASlide(carruselIdx); // volver al actual
-    }
+    track.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
+    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) irASlide(carruselIdx + 1);
+    else if (dx > 40 && carruselIdx > 0) irASlide(carruselIdx - 1);
+    else irASlide(carruselIdx);
     iniciarAutoplay();
   }, { passive: true });
- 
-  // Mouse drag para desktop
-  let mouseDown = false;
-  let mouseStartX = 0;
- 
+
+  let mouseDown = false, mouseStartX = 0;
   wrap.addEventListener("mousedown", (e) => {
-    mouseDown = true;
-    mouseStartX = e.clientX;
-    dragStartX = e.clientX;
+    mouseDown = true; mouseStartX = e.clientX; dragStartX = e.clientX;
     currentTranslate = -carruselIdx * 100;
-    track.style.transition = "none";
-    detenerAutoplay();
-    e.preventDefault();
+    track.style.transition = "none"; detenerAutoplay(); e.preventDefault();
   });
- 
   wrap.addEventListener("mousemove", (e) => {
     if (!mouseDown) return;
-    const dx = e.clientX - mouseStartX;
-    const pct = (dx / wrap.offsetWidth) * 100;
+    const pct = ((e.clientX - mouseStartX) / wrap.offsetWidth) * 100;
     track.style.transform = `translateX(${currentTranslate + pct}%)`;
   });
- 
   wrap.addEventListener("mouseup", (e) => {
-    if (!mouseDown) return;
-    mouseDown = false;
-    track.style.transition = "transform 0.4s ease";
+    if (!mouseDown) return; mouseDown = false;
+    track.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
     const dx = e.clientX - dragStartX;
-    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) {
-      irASlide(carruselIdx + 1);
-    } else if (dx > 40 && carruselIdx > 0) {
-      irASlide(carruselIdx - 1);
-    } else {
-      irASlide(carruselIdx);
-    }
+    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) irASlide(carruselIdx + 1);
+    else if (dx > 40 && carruselIdx > 0) irASlide(carruselIdx - 1);
+    else irASlide(carruselIdx);
     iniciarAutoplay();
   });
- 
-  wrap.addEventListener("mouseleave", (e) => {
-    if (mouseDown) {
-      mouseDown = false;
-      track.style.transition = "transform 0.4s ease";
-      irASlide(carruselIdx);
-      iniciarAutoplay();
-    }
+  wrap.addEventListener("mouseleave", () => {
+    if (mouseDown) { mouseDown = false; track.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)"; irASlide(carruselIdx); iniciarAutoplay(); }
   });
 }
- 
+
 function iniciarAutoplay() {
   detenerAutoplay();
   carruselTimer = setInterval(()=>{ irASlide((carruselIdx+1)%TOTAL_SLIDES); }, 4000);
 }
- 
 function detenerAutoplay() {
   if (carruselTimer) { clearInterval(carruselTimer); carruselTimer = null; }
 }
- 
 function irASlide(idx){
   carruselIdx = idx;
   document.getElementById("carruselTrack").style.transform = `translateX(-${idx*100}%)`;
   document.querySelectorAll(".carrusel-dot").forEach((d,i)=>d.classList.toggle("active",i===idx));
 }
- 
-/* Navegar desde carrusel a criptomoneda específica */
+
 function irDesdeCarrusel(pantalla, simbolo) {
   cambiarPantalla(pantalla);
   if (simbolo && pantalla === 'criptomonedas') {
     setTimeout(() => { abrirModalCompra(simbolo); }, 300);
   }
 }
- 
+
 /* ===== LOGIN ===== */
 function login(){
   let input = document.getElementById("usuario").value.trim();
   let p = document.getElementById("password").value.trim();
-  if(!input||!p){ alert("Ingresa cuenta y contraseña"); return; }
+  if(!input||!p){ showToast("⚠️ Ingresa cuenta y contraseña"); return; }
   if(input===ADMIN_CORREO && p===ADMIN_PASS){
     esAdmin=true; cuentaActual=null;
     limpiarSesion();
@@ -794,52 +1006,63 @@ function login(){
       localStorage.setItem("correo",data.correo);
       perfilNombre = data.nombre || "";
       perfilFotoUrl = data.foto || "";
+      perfilFechaRegistro = data.fechaRegistro || "";
       guardarSesion();
+      cargarCarritoLocal();         // ← cargar carrito al login
       cuentaActualSpan();
       cargarPreciosCriptos();
       initCarrusel();
       cargarDatosInicio();
       cambiarPantalla("inicio");
-    } else alert(data.mensaje);
-  }).catch(()=>alert("Error al iniciar sesión"));
+    } else showToast("❌ " + data.mensaje);
+  }).catch(()=>showToast("❌ Error al iniciar sesión"));
 }
- 
+
 function logout(){
   cuentaActual=null; esAdmin=false; todasLasCuentas=[]; carrito={};
-  perfilNombre=""; perfilFotoUrl="";
+  perfilNombre=""; perfilFotoUrl=""; perfilFechaRegistro="";
   limpiarSesion();
   actualizarBadgeCarrito(); cambiarPantalla("login");
 }
- 
+
 /* ===== REGISTRO ===== */
 function crearCuenta(){
   let cuenta=document.getElementById("nuevaCuenta").value.trim();
   let p=document.getElementById("nuevaPassword").value.trim();
   let correo=document.getElementById("nuevoCorreo").value.trim().toLowerCase();
-  if(!cuenta||!p||!correo){alert("Completa todos los campos");return;}
-  if(cuenta.length!==10||!/^\d+$/.test(cuenta)){alert("El número de cuenta debe tener exactamente 10 dígitos");return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){alert("Correo inválido");return;}
+  if(!cuenta||!p||!correo){showToast("⚠️ Completa todos los campos");return;}
+  if(cuenta.length!==10||!/^\d+$/.test(cuenta)){showToast("⚠️ El número de cuenta debe tener exactamente 10 dígitos");return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){showToast("⚠️ Correo inválido");return;}
   fetch(BACKEND+"/crear-cuenta",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo,password:p,cuenta})})
-  .then(r=>r.json()).then(data=>{alert(data.mensaje);if(data.ok)cambiarPantalla("login");});
+  .then(r=>r.json()).then(data=>{showToast(data.ok ? "✅ " + data.mensaje : "❌ " + data.mensaje);if(data.ok)cambiarPantalla("login");});
 }
- 
+
 /* ===== DEPÓSITO ===== */
 function depositar(){
   let monto=parseFloat(document.getElementById("monto").value);
   let destino=document.getElementById("cuentaDestino").value.trim();
-  if(!cuentaActual){alert("Inicia sesión primero");return;}
-  if(!destino||destino.length!==10){alert("Cuenta destino inválida");return;}
-  if(isNaN(monto)||monto<=0){alert("Monto inválido");return;}
-  if(destino===cuentaActual){alert("No puedes depositar a tu misma cuenta");return;}
+  if(!cuentaActual){showToast("⚠️ Inicia sesión primero");return;}
+  if(!destino||destino.length!==10){showToast("⚠️ Cuenta destino inválida");return;}
+  if(isNaN(monto)||monto<=0){showToast("⚠️ Monto inválido");return;}
+  if(destino===cuentaActual){showToast("⚠️ No puedes depositar a tu misma cuenta");return;}
   fetch(BACKEND+"/depositar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({origen:cuentaActual,destino,monto})})
-  .then(r=>r.json()).then(data=>{alert(data.mensaje);if(data.ok){ cargarDatosInicio(); cambiarPantalla("balance"); }})
-  .catch(()=>alert("Error al realizar depósito"));
+  .then(r=>r.json()).then(data=>{
+    showToast(data.ok ? "✅ " + data.mensaje : "❌ " + data.mensaje);
+    if(data.ok){ cargarDatosInicio(); cambiarPantalla("balance"); }
+  }).catch(()=>showToast("❌ Error al realizar depósito"));
 }
- 
+
 /* ===== CAMBIAR PANTALLA ===== */
 function cambiarPantalla(id){
-  document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa"));
-  document.getElementById(id).classList.add("activa");
+  document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa","entrando"));
+  const el = document.getElementById(id);
+  el.classList.add("activa");
+  // Animación de entrada (no en login para evitar flash al inicio)
+  if(id !== "login") {
+    void el.offsetWidth; // forzar reflow
+    el.classList.add("entrando");
+    setTimeout(()=>el.classList.remove("entrando"), 400);
+  }
   guardarPantalla(id);
   if(!esAdmin&&cuentaActual){
     cuentaActualSpan();
@@ -851,66 +1074,98 @@ function cambiarPantalla(id){
     if(id==="comentarios") cargarComentarios();
   }
 }
- 
+
 function cuentaActualSpan(){
   document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e=>e.textContent=cuentaActual);
 }
- 
+
 async function cargarDatosInicio(){
   try{
     let res=await fetch(BACKEND+"/cuenta/"+cuentaActual);
     let data=await res.json();
-    document.getElementById("inicioSaldo").textContent="$"+(data.saldo||0).toLocaleString();
+    const saldoEl = document.getElementById("inicioSaldo");
+    saldoEl.classList.add("actualizando");
+    saldoEl.textContent="$"+(data.saldo||0).toLocaleString();
+    setTimeout(()=>saldoEl.classList.remove("actualizando"),600);
+    // Actualizar fechaRegistro si vino del servidor
+    if(data.fechaRegistro && !perfilFechaRegistro) {
+      perfilFechaRegistro = data.fechaRegistro;
+      guardarSesion();
+    }
   }catch(e){}
   let nombre = perfilNombre || cuentaActual;
   document.getElementById("bienvenidaMsg").textContent = "Hola, " + nombre + " 👋 Bienvenido a Banco Libre";
   let hAvatar = document.getElementById("headerAvatar");
   if(perfilFotoUrl){
-    hAvatar.innerHTML=`<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;">`;
+    hAvatar.innerHTML=`<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">`;
   } else {
-    hAvatar.innerHTML=`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>`;
+    hAvatar.innerHTML=`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">👤</div>`;
   }
-  // Actualizar sesión guardada
   guardarSesion();
 }
- 
+
 function cargarBalance(){
+  document.getElementById("saldo").textContent="...";
   fetch(BACKEND+"/cuenta/"+cuentaActual).then(r=>r.json()).then(data=>{
-    document.getElementById("saldo").textContent=data.saldo;
+    const sEl = document.getElementById("saldo");
+    sEl.classList.add("actualizando");
+    sEl.textContent=data.saldo;
+    setTimeout(()=>sEl.classList.remove("actualizando"),600);
     let mov=document.getElementById("movimientos"); mov.innerHTML="";
     let ul=document.createElement("ul");
-    (data.movimientos||[]).slice().reverse().forEach(m=>{
-      let li=document.createElement("li"); li.textContent=m;
+    (data.movimientos||[]).slice().reverse().forEach((m,i)=>{
+      let li=document.createElement("li");
+      li.style.animationDelay = (i * 0.04)+"s";
+      li.textContent=m;
       let btn=document.createElement("button"); btn.textContent="🖨️ Ticket"; btn.style.cssText="margin-left:8px;padding:4px 8px;font-size:11px;";
       btn.onclick=()=>imprimirTicketMovimiento(m); li.appendChild(btn); ul.appendChild(li);
     }); mov.appendChild(ul);
   });
 }
- 
+
 function imprimirTicketMovimiento(m){
   let v=window.open("","Ticket","width=600,height=400");
   v.document.write(`<h2>Ticket</h2><p><b>Cuenta:</b> ${cuentaActual}</p><p><b>Detalle:</b> ${m}</p>`);
   v.document.close(); v.print();
 }
- 
+
 /* ===== RESET ===== */
 function enviarPin(){
   let correo=document.getElementById("correoReset").value.trim().toLowerCase();
   fetch(BACKEND+"/enviar-pin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo})})
-  .then(r=>r.json()).then(data=>{ if(data.ok){pinTemporal=data.pin;correoTemporal=correo;alert("PIN enviado (Cuenta: "+data.cuenta+")");} else alert(data.mensaje); });
+  .then(r=>r.json()).then(data=>{ if(data.ok){pinTemporal=data.pin;correoTemporal=correo;showToast("📧 PIN enviado a tu correo");} else showToast("❌ "+data.mensaje); });
 }
 function cambiarPassword(){
   if(parseInt(document.getElementById("pinIngresado").value)===pinTemporal){
     fetch(BACKEND+"/cambiar-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo:correoTemporal,nuevaPassword:document.getElementById("nuevaPasswordReset").value})})
-    .then(r=>r.json()).then(data=>{alert(data.mensaje);if(data.ok)cambiarPantalla("login");});
-  } else alert("PIN incorrecto");
+    .then(r=>r.json()).then(data=>{showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);if(data.ok)cambiarPantalla("login");});
+  } else showToast("❌ PIN incorrecto");
 }
- 
+
 /* ===== PERFIL ===== */
 function cargarPerfil(){
   document.getElementById("cuentaPerfil").textContent = cuentaActual;
   document.getElementById("inputNombrePerfil").value = perfilNombre;
   document.getElementById("perfilNombreDisplay").textContent = perfilNombre || "Sin nombre";
+
+  // Chip "Cliente desde"
+  const chipEl = document.getElementById("perfilClienteDesde");
+  const chipTxtEl = document.getElementById("perfilClienteDesdeTxt");
+  if(perfilFechaRegistro) {
+    chipTxtEl.textContent = "Cliente desde " + perfilFechaRegistro;
+    chipEl.style.display = "inline-flex";
+  } else {
+    // Intentar obtener del servidor
+    fetch(BACKEND+"/cuenta/"+cuentaActual).then(r=>r.json()).then(data=>{
+      if(data.fechaRegistro) {
+        perfilFechaRegistro = data.fechaRegistro;
+        guardarSesion();
+        chipTxtEl.textContent = "Cliente desde " + data.fechaRegistro;
+        chipEl.style.display = "inline-flex";
+      }
+    }).catch(()=>{});
+  }
+
   if(perfilFotoUrl){
     document.getElementById("perfilAvatarPlaceholder").style.display="none";
     let img=document.getElementById("perfilAvatarImg");
@@ -920,7 +1175,7 @@ function cargarPerfil(){
     document.getElementById("perfilAvatarImg").style.display="none";
   }
 }
- 
+
 async function guardarPerfil(){
   let nombre = document.getElementById("inputNombrePerfil").value.trim();
   try{
@@ -932,17 +1187,17 @@ async function guardarPerfil(){
     if(data.ok){
       perfilNombre=nombre;
       guardarSesion();
-      alert("Perfil guardado");
+      showToast("✅ Perfil guardado");
       cargarPerfil();
       cargarDatosInicio();
-    } else alert(data.mensaje);
-  }catch(e){alert("Error al guardar perfil");}
+    } else showToast("❌ "+data.mensaje);
+  }catch(e){showToast("❌ Error al guardar perfil");}
 }
- 
+
 async function subirFotoPerfil(event){
   let file = event.target.files[0];
   if(!file) return;
-  if(file.size > 2*1024*1024){ alert("La imagen no debe superar 2MB"); return; }
+  if(file.size > 2*1024*1024){ showToast("⚠️ La imagen no debe superar 2MB"); return; }
   let reader = new FileReader();
   reader.onload = async function(e){
     perfilFotoUrl = e.target.result;
@@ -954,11 +1209,12 @@ async function subirFotoPerfil(event){
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({cuenta:cuentaActual, nombre:perfilNombre, foto:perfilFotoUrl})
       });
+      showToast("📷 Foto actualizada");
     }catch(err){}
   };
   reader.readAsDataURL(file);
 }
- 
+
 /* ===== CRIPTOS ===== */
 async function cargarPreciosCriptos(){
   try {
@@ -967,20 +1223,21 @@ async function cargarPreciosCriptos(){
     if(data.ok&&data.precios) preciosCriptos=data.precios;
   } catch(e) {}
 }
- 
+
 function renderizarCriptos(){
   let grid=document.getElementById("criptoGrid"); grid.innerHTML="";
-  CRIPTOS.forEach(c=>{
+  CRIPTOS.forEach((c,idx)=>{
     let precio=preciosCriptos[c.simbolo]||c.precio;
     let cant=carrito[c.simbolo]||0;
     let card=document.createElement("div");
     card.className="cripto-card"+(cant>0?" en-carrito":"");
+    card.style.setProperty("--ci", idx);
     card.onclick=()=>abrirModalCompra(c.simbolo);
     card.innerHTML=`<span class="cripto-badge">${cant}</span><div class="cripto-emoji">${c.emoji}</div><div class="cripto-nombre">${c.nombre}</div><div class="cripto-simbolo">${c.simbolo}</div><div class="cripto-precio">$${precio.toLocaleString()}</div>`;
     grid.appendChild(card);
   });
 }
- 
+
 function abrirModalCompra(simbolo){
   criptoCompraActual=simbolo; cantidadCompra=1;
   let c=CRIPTOS.find(x=>x.simbolo===simbolo);
@@ -991,51 +1248,74 @@ function abrirModalCompra(simbolo){
   document.getElementById("modalCompraTotal").textContent="Total: $"+precio.toLocaleString();
   document.getElementById("modalCompra").classList.add("active");
 }
- 
+
 function cambiarCantidadCompra(delta){
   cantidadCompra=Math.max(1,cantidadCompra+delta);
   let c=CRIPTOS.find(x=>x.simbolo===criptoCompraActual);
   let precio=preciosCriptos[criptoCompraActual]||c.precio;
-  document.getElementById("qtyNum").textContent=cantidadCompra;
+  const qtyEl = document.getElementById("qtyNum");
+  qtyEl.classList.remove("bump");
+  void qtyEl.offsetWidth;
+  qtyEl.classList.add("bump");
+  qtyEl.textContent=cantidadCompra;
   document.getElementById("modalCompraTotal").textContent="Total: $"+(precio*cantidadCompra).toLocaleString();
 }
- 
+
 function agregarAlCarrito(){
   if(!criptoCompraActual) return;
   carrito[criptoCompraActual]=(carrito[criptoCompraActual]||0)+cantidadCompra;
-  cerrarModal("modalCompra"); actualizarBadgeCarrito(); renderizarCriptos();
+  guardarCarrito();                 // ← persistir
+  cerrarModal("modalCompra");
+  actualizarBadgeCarrito();
+  renderizarCriptos();
+  showToast("🛒 Añadido al carrito");
 }
- 
+
 function actualizarBadgeCarrito(){
   let total=Object.values(carrito).reduce((a,b)=>a+b,0);
   let badge=document.getElementById("cartBadge");
   let dc=document.getElementById("carritoDrawerCount");
-  if(total>0){ badge.textContent=total; badge.classList.add("visible"); dc.textContent=total; dc.style.display="inline-block"; }
-  else { badge.classList.remove("visible"); dc.style.display="none"; }
+  if(total>0){
+    const cambio = badge.textContent !== String(total);
+    badge.textContent=total;
+    badge.classList.add("visible");
+    if(cambio) {
+      badge.classList.remove("bump"); void badge.offsetWidth; badge.classList.add("bump");
+      setTimeout(()=>badge.classList.remove("bump"),400);
+    }
+    dc.textContent=total; dc.style.display="inline-block";
+  } else {
+    badge.classList.remove("visible"); dc.style.display="none";
+  }
 }
- 
+
 /* ===== CARRITO ===== */
 function renderizarCarrito(){
   let contenido=document.getElementById("carritoContenido");
   let items=Object.entries(carrito).filter(([,qty])=>qty>0);
-  if(items.length===0){ contenido.innerHTML=`<p style="color:var(--texto-sub);margin-top:20px;">Tu carrito está vacío 🛒</p><button onclick="cambiarPantalla('criptomonedas')">Ver criptomonedas</button>`; return; }
+  if(items.length===0){
+    contenido.innerHTML=`<div style="animation:fadeInUp 0.3s both;"><p style="color:var(--texto-sub);margin-top:40px;font-size:32px;">🛒</p><p style="color:var(--texto-sub);">Tu carrito está vacío</p><button onclick="cambiarPantalla('criptomonedas')">Ver criptomonedas</button></div>`;
+    return;
+  }
   let total=0, html="";
-  items.forEach(([sim,qty])=>{
+  items.forEach(([sim,qty],i)=>{
     let c=CRIPTOS.find(x=>x.simbolo===sim);
     let precio=preciosCriptos[sim]||c.precio;
     total+=precio*qty;
-    html+=`<div class="carrito-item"><div class="carrito-info"><div class="carrito-nombre">${c.emoji} ${c.nombre}</div><div class="carrito-sub">$${precio.toLocaleString()} c/u</div></div><div class="carrito-ctrl"><button onclick="cambiarQtyCarrito('${sim}',-1)">−</button><span class="carrito-cantidad">${qty}</span><button onclick="cambiarQtyCarrito('${sim}',1)">+</button></div></div>`;
+    html+=`<div class="carrito-item" style="animation-delay:${i*0.06}s"><div class="carrito-info"><div class="carrito-nombre">${c.emoji} ${c.nombre}</div><div class="carrito-sub">$${precio.toLocaleString()} c/u</div></div><div class="carrito-ctrl"><button onclick="cambiarQtyCarrito('${sim}',-1)">−</button><span class="carrito-cantidad" id="cqty-${sim}">${qty}</span><button onclick="cambiarQtyCarrito('${sim}',1)">+</button></div></div>`;
   });
   html+=`<div class="carrito-total-bar"><span>Total: $${total.toLocaleString()}</span><button class="btn-comprar" onclick="comprarCarrito()">Comprar</button></div>`;
   contenido.innerHTML=html;
 }
- 
+
 function cambiarQtyCarrito(sim,delta){
   carrito[sim]=Math.max(0,(carrito[sim]||0)+delta);
   if(carrito[sim]===0) delete carrito[sim];
-  actualizarBadgeCarrito(); renderizarCarrito();
+  guardarCarrito();                 // ← persistir
+  actualizarBadgeCarrito();
+  renderizarCarrito();
 }
- 
+
 async function comprarCarrito(){
   let items=Object.entries(carrito).filter(([,qty])=>qty>0);
   if(items.length===0) return;
@@ -1043,33 +1323,41 @@ async function comprarCarrito(){
   try{
     let res=await fetch(BACKEND+"/comprar-criptos",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cuenta:cuentaActual,items:carrito,total})});
     let data=await res.json();
-    alert(data.mensaje);
-    if(data.ok){ carrito={}; actualizarBadgeCarrito(); cargarDatosInicio(); cambiarPantalla("misCriptos"); }
-  }catch(e){alert("Error al procesar compra");}
+    showToast(data.ok ? "✅ "+data.mensaje : "❌ "+data.mensaje);
+    if(data.ok){
+      limpiarCarritoLocal();        // ← limpiar localStorage también
+      actualizarBadgeCarrito();
+      cargarDatosInicio();
+      cambiarPantalla("misCriptos");
+    }
+  }catch(e){showToast("❌ Error al procesar compra");}
 }
- 
+
 /* ===== MIS CRIPTOS ===== */
 async function cargarMisCriptos(){
   let contenido=document.getElementById("misCriptosContenido");
-  contenido.innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
+  contenido.innerHTML='<div class="loading-spinner"></div>';
   try{
     let res=await fetch(BACKEND+"/cuenta/"+cuentaActual);
     let data=await res.json();
     let criptos=data.criptomonedas||{};
     let keys=Object.keys(criptos).filter(k=>criptos[k]>0);
-    if(keys.length===0){ contenido.innerHTML=`<p style="color:var(--texto-sub);margin-top:20px;">No tienes criptomonedas aún 💎</p><button onclick="cambiarPantalla('criptomonedas')">Ir a comprar</button>`; return; }
+    if(keys.length===0){
+      contenido.innerHTML=`<div style="animation:fadeInUp 0.3s both;"><p style="font-size:32px;margin-top:40px;">💎</p><p style="color:var(--texto-sub);">No tienes criptomonedas aún</p><button onclick="cambiarPantalla('criptomonedas')">Ir a comprar</button></div>`;
+      return;
+    }
     let totalValor=0, html="";
-    keys.forEach(sim=>{
+    keys.forEach((sim,i)=>{
       let c=CRIPTOS.find(x=>x.simbolo===sim); if(!c) return;
       let precio=preciosCriptos[sim]||c.precio;
       let cant=criptos[sim]; let valor=precio*cant; totalValor+=valor;
-      html+=`<div class="mis-cripto-item"><div class="mis-cripto-left"><span class="mis-cripto-emoji">${c.emoji}</span><div><div class="mis-cripto-nombre">${c.nombre}</div><div class="mis-cripto-cant">${cant} ${sim}</div></div></div><div class="mis-cripto-valor">$${valor.toLocaleString()}</div></div>`;
+      html+=`<div class="mis-cripto-item" style="--mi:${i}"><div class="mis-cripto-left"><span class="mis-cripto-emoji">${c.emoji}</span><div><div class="mis-cripto-nombre">${c.nombre}</div><div class="mis-cripto-cant">${cant} ${sim}</div></div></div><div class="mis-cripto-valor">$${valor.toLocaleString()}</div></div>`;
     });
-    html=`<div style="background:var(--azul);color:white;border-radius:14px;padding:12px;margin-bottom:12px;"><div style="font-size:12px;opacity:0.8;">Valor total de criptos</div><div style="font-size:22px;font-weight:bold;">$${totalValor.toLocaleString()}</div></div>`+html;
+    html=`<div style="background:linear-gradient(135deg,var(--azul),#0055cc);color:white;border-radius:14px;padding:16px;margin-bottom:14px;animation:fadeInUp 0.4s both;"><div style="font-size:12px;opacity:0.8;">Valor total de criptos</div><div style="font-size:24px;font-weight:bold;margin-top:4px;">$${totalValor.toLocaleString()}</div></div>`+html;
     contenido.innerHTML=html;
   }catch(e){contenido.innerHTML='<p style="color:#ff3b30;">Error al cargar</p>';}
 }
- 
+
 /* ===== COMENTARIOS ===== */
 function setEstrella(val){
   estrellaSeleccionada=val;
@@ -1077,11 +1365,11 @@ function setEstrella(val){
     e.classList.toggle("activa", i<val);
   });
 }
- 
+
 async function enviarComentario(){
-  if(estrellaSeleccionada===0){ alert("Selecciona una puntuación"); return; }
+  if(estrellaSeleccionada===0){ showToast("⭐ Selecciona una puntuación"); return; }
   let texto=document.getElementById("textoComentario").value.trim();
-  if(!texto){ alert("Escribe tu opinión"); return; }
+  if(!texto){ showToast("✏️ Escribe tu opinión"); return; }
   try{
     let res=await fetch(BACKEND+"/comentarios/nuevo",{
       method:"POST", headers:{"Content-Type":"application/json"},
@@ -1089,34 +1377,38 @@ async function enviarComentario(){
     });
     let data=await res.json();
     if(data.ok){
-      alert("¡Reseña publicada!");
+      showToast("✅ ¡Reseña publicada!");
       document.getElementById("textoComentario").value="";
       setEstrella(0);
       cargarComentarios();
-    } else alert(data.mensaje);
-  }catch(e){alert("Error al publicar reseña");}
+    } else showToast("❌ "+data.mensaje);
+  }catch(e){showToast("❌ Error al publicar reseña");}
 }
- 
+
 async function cargarComentarios(){
   let lista=document.getElementById("listaComentarios");
-  lista.innerHTML='<p style="color:var(--texto-sub);font-size:13px;">Cargando...</p>';
+  lista.innerHTML='<div class="loading-spinner"></div>';
   try{
     let res=await fetch(BACKEND+"/comentarios");
     let data=await res.json();
-    if(!data.ok||data.comentarios.length===0){ lista.innerHTML='<p style="color:var(--texto-sub);font-size:13px;text-align:center;">Sin reseñas aún. ¡Sé el primero!</p>'; return; }
+    if(!data.ok||data.comentarios.length===0){
+      lista.innerHTML='<p style="color:var(--texto-sub);font-size:13px;text-align:center;margin-top:20px;">Sin reseñas aún. ¡Sé el primero! 🌟</p>';
+      return;
+    }
     lista.innerHTML="";
-    data.comentarios.slice().reverse().forEach(c=>{
+    data.comentarios.slice().reverse().forEach((c,i)=>{
       let estrellas="★".repeat(c.estrellas)+"☆".repeat(5-c.estrellas);
       let avatarHtml = c.foto
         ? `<img src="${c.foto}" class="comentario-avatar">`
         : `<div class="comentario-avatar-placeholder">👤</div>`;
       let div=document.createElement("div"); div.className="comentario-card";
+      div.style.animationDelay = (i * 0.05)+"s";
       div.innerHTML=`<div class="comentario-card-header">${avatarHtml}<div><div class="comentario-user">${c.nombre||c.cuenta}</div><div class="comentario-estrellas" style="color:#ff9500;">${estrellas}</div></div></div><p class="comentario-texto">${c.texto}</p><div class="comentario-fecha">${c.fecha||""}</div>`;
       lista.appendChild(div);
     });
   }catch(e){ lista.innerHTML='<p style="color:#ff3b30;">Error al cargar reseñas</p>'; }
 }
- 
+
 /* ===== ADMIN ===== */
 function switchAdminTab(tab){
   document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
@@ -1128,12 +1420,12 @@ function switchAdminTab(tab){
   if(tab==="criptos") renderizarAdminCriptos();
   if(tab==="opiniones") cargarOpinionesAdmin();
 }
- 
+
 async function cargarAdmin(){
   try{
     let res=await fetch(BACKEND+"/admin/cuentas",{headers:{"x-admin-token":ADMIN_PASS}});
     let data=await res.json();
-    if(!data.ok){alert("Error: "+data.mensaje);return;}
+    if(!data.ok){showToast("❌ Error: "+data.mensaje);return;}
     todasLasCuentas=data.cuentas;
     renderizarCuentasAdmin(todasLasCuentas);
     let res2=await fetch(BACKEND+"/criptos/precios");
@@ -1146,7 +1438,7 @@ async function cargarAdmin(){
     document.getElementById("statMovs").textContent=totalMovs;
   }catch(e){document.getElementById("adminListWrap").innerHTML='<p style="color:#ff3b30;text-align:center;">Error al conectar</p>';}
 }
- 
+
 function renderizarCuentasAdmin(lista){
   let wrap=document.getElementById("adminListWrap");
   if(lista.length===0){wrap.innerHTML='<p style="color:var(--texto-sub);text-align:center;">Sin resultados</p>';return;}
@@ -1162,6 +1454,7 @@ function renderizarCuentasAdmin(lista){
         <div class="admin-user-info">
           <div class="admin-cuenta-num">🏦 ${c.cuenta}</div>
           ${c.nombre ? `<div class="admin-nombre-usuario">${c.nombre}</div>` : ""}
+          ${c.fechaRegistro ? `<div style="font-size:10px;color:var(--texto-sub);">📅 ${c.fechaRegistro}</div>` : ""}
         </div>
       </div>
       <div class="admin-saldo">$${(c.saldo||0).toLocaleString()}</div>
@@ -1176,12 +1469,12 @@ function renderizarCuentasAdmin(lista){
     wrap.appendChild(card);
   });
 }
- 
+
 function filtrarCuentas(){
   let q=document.getElementById("adminBuscador").value.trim().toLowerCase();
   renderizarCuentasAdmin(todasLasCuentas.filter(c=>c.cuenta.includes(q)||(c.correo&&c.correo.toLowerCase().includes(q))));
 }
- 
+
 function renderizarAdminCriptos(){
   let lista=document.getElementById("adminCriptosList"); lista.innerHTML="";
   CRIPTOS.forEach(c=>{
@@ -1191,7 +1484,7 @@ function renderizarAdminCriptos(){
     lista.appendChild(row);
   });
 }
- 
+
 function abrirModalPrecioCripto(simbolo){
   criptoParaEditar=simbolo;
   let c=CRIPTOS.find(x=>x.simbolo===simbolo);
@@ -1201,21 +1494,21 @@ function abrirModalPrecioCripto(simbolo){
   document.getElementById("nuevoPrecioInput").value=precio;
   document.getElementById("modalPrecioCripto").classList.add("active");
 }
- 
+
 async function guardarPrecioCripto(){
   let precio=parseFloat(document.getElementById("nuevoPrecioInput").value);
-  if(isNaN(precio)||precio<=0){alert("Precio inválido");return;}
+  if(isNaN(precio)||precio<=0){showToast("⚠️ Precio inválido");return;}
   try{
     let res=await fetch(BACKEND+"/admin/editar-precio-cripto",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({simbolo:criptoParaEditar,precio})});
     let data=await res.json();
-    alert(data.mensaje);
+    showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
     if(data.ok){ preciosCriptos[criptoParaEditar]=precio; let el=document.getElementById("precio-"+criptoParaEditar); if(el) el.textContent="$"+precio.toLocaleString(); cerrarModal("modalPrecioCripto"); }
-  }catch(e){alert("Error al guardar precio");}
+  }catch(e){showToast("❌ Error al guardar precio");}
 }
- 
+
 async function verCriptosUsuario(cuenta){
   document.getElementById("modalUserCriptoCuenta").textContent="Cuenta: "+cuenta;
-  document.getElementById("userCriptosList").innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
+  document.getElementById("userCriptosList").innerHTML='<div class="loading-spinner"></div>';
   document.getElementById("modalUserCriptos").classList.add("active");
   try{
     let res=await fetch(BACKEND+"/cuenta/"+cuenta);
@@ -1235,19 +1528,20 @@ async function verCriptosUsuario(cuenta){
     });
   }catch(e){document.getElementById("userCriptosList").innerHTML='<p style="color:#ff3b30;">Error</p>';}
 }
- 
+
 async function quitarCriptoUsuario(cuenta,simbolo){
   if(!confirm("¿Quitar todas las "+simbolo+" de la cuenta "+cuenta+"?")) return;
   try{
     let res=await fetch(BACKEND+"/admin/quitar-cripto",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta,simbolo})});
-    let data=await res.json(); alert(data.mensaje);
+    let data=await res.json();
+    showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
     if(data.ok) verCriptosUsuario(cuenta);
-  }catch(e){alert("Error");}
+  }catch(e){showToast("❌ Error");}
 }
- 
+
 async function cargarOpinionesAdmin(){
   let lista=document.getElementById("adminOpinionesList");
-  lista.innerHTML='<p style="color:var(--texto-sub);text-align:center;font-size:13px;">Cargando...</p>';
+  lista.innerHTML='<div class="loading-spinner"></div>';
   try{
     let res=await fetch(BACKEND+"/comentarios");
     let data=await res.json();
@@ -1271,19 +1565,20 @@ async function cargarOpinionesAdmin(){
     });
   }catch(e){ lista.innerHTML='<p style="color:#ff3b30;">Error</p>'; }
 }
- 
+
 async function borrarOpinion(id){
   if(!confirm("¿Eliminar esta reseña?")) return;
   try{
     let res=await fetch(BACKEND+"/admin/borrar-opinion",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({id})});
-    let data=await res.json(); alert(data.mensaje);
+    let data=await res.json();
+    showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
     if(data.ok) cargarOpinionesAdmin();
-  }catch(e){alert("Error");}
+  }catch(e){showToast("❌ Error");}
 }
- 
+
 async function verOpinionesUsuario(cuenta){
   document.getElementById("modalOpinionCuenta").textContent="Cuenta: "+cuenta;
-  document.getElementById("opinionesUsuarioLista").innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
+  document.getElementById("opinionesUsuarioLista").innerHTML='<div class="loading-spinner"></div>';
   document.getElementById("modalOpinionesUsuario").classList.add("active");
   try{
     let res=await fetch(BACKEND+"/comentarios/usuario/"+cuenta);
@@ -1300,7 +1595,7 @@ async function verOpinionesUsuario(cuenta){
     });
   }catch(e){ document.getElementById("opinionesUsuarioLista").innerHTML='<p style="color:#ff3b30;">Error</p>'; }
 }
- 
+
 function abrirModalSaldo(cuenta,saldo){
   cuentaParaEditar=cuenta;
   document.getElementById("modalCuentaLabel").textContent="Cuenta: "+cuenta+" | Saldo: $"+saldo;
@@ -1309,15 +1604,16 @@ function abrirModalSaldo(cuenta,saldo){
 }
 async function guardarSaldo(){
   let nuevoSaldo=parseFloat(document.getElementById("nuevoSaldoInput").value);
-  if(isNaN(nuevoSaldo)||nuevoSaldo<0){alert("Saldo inválido");return;}
+  if(isNaN(nuevoSaldo)||nuevoSaldo<0){showToast("⚠️ Saldo inválido");return;}
   let res=await fetch(BACKEND+"/admin/editar-saldo",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta:cuentaParaEditar,nuevoSaldo})});
-  let data=await res.json(); alert(data.mensaje);
+  let data=await res.json();
+  showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
   if(data.ok){cerrarModal("modalSaldo");cargarAdmin();}
 }
- 
+
 async function verHistorial(cuenta){
   document.getElementById("modalHistCuenta").textContent="Cuenta: "+cuenta;
-  document.getElementById("historialLista").innerHTML='<p style="color:var(--texto-sub);">Cargando...</p>';
+  document.getElementById("historialLista").innerHTML='<div class="loading-spinner"></div>';
   document.getElementById("modalHistorial").classList.add("active");
   let res=await fetch(BACKEND+"/cuenta/"+cuenta);
   let data=await res.json();
@@ -1327,7 +1623,7 @@ async function verHistorial(cuenta){
   lista.innerHTML="";
   movs.slice().reverse().forEach(m=>{let p=document.createElement("p");p.textContent=m;lista.appendChild(p);});
 }
- 
+
 function abrirModalBorrar(cuenta,correo){
   cuentaParaBorrar=cuenta;
   document.getElementById("modalBorrarLabel").textContent="¿Eliminar cuenta "+cuenta+" ("+correo+")?";
@@ -1335,13 +1631,24 @@ function abrirModalBorrar(cuenta,correo){
 }
 async function confirmarBorrado(){
   let res=await fetch(BACKEND+"/admin/borrar-cuenta",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta:cuentaParaBorrar})});
-  let data=await res.json(); alert(data.mensaje);
+  let data=await res.json();
+  showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
   if(data.ok){cerrarModal("modalBorrar");cargarAdmin();}
 }
- 
-function cerrarModal(id){document.getElementById(id).classList.remove("active");}
- 
-/* ===== INICIALIZACIÓN: restaurar sesión al cargar ===== */
+
+function cerrarModal(id){
+  const el = document.getElementById(id);
+  el.classList.remove("active");
+}
+
+// Cerrar modal al tocar el overlay
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", function(e) {
+    if(e.target === this) this.classList.remove("active");
+  });
+});
+
+/* ===== INICIALIZACIÓN ===== */
 window.addEventListener("DOMContentLoaded", async () => {
   const restaurado = await restaurarSesion();
   if (!restaurado) {
