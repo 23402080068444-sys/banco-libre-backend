@@ -8,7 +8,6 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
  
 const app = express();
 app.use(cors());
-// Aumentar límite para fotos en base64
 app.use(bodyParser.json({ limit: "5mb" }));
  
 // ===============================
@@ -29,7 +28,8 @@ const Usuario = mongoose.model("Usuario", new mongoose.Schema({
   movimientos: [String],
   criptomonedas: { type: Map, of: Number, default: {} },
   nombre: { type: String, default: "" },
-  foto: { type: String, default: "" }   // base64 o URL
+  foto: { type: String, default: "" },
+  fechaRegistro: { type: String, default: "" }   // ← NUEVO: fecha de alta como cliente
 }));
  
 // ===============================
@@ -131,7 +131,9 @@ app.post("/crear-cuenta", async (req, res) => {
   if (existeCuenta) return res.json({ ok: false, mensaje: "Número de cuenta ya registrado" });
  
   const hash = await bcrypt.hash(password, 10);
-  const nuevo = new Usuario({ correo, password: hash, cuenta, saldo: 10000, movimientos: [], criptomonedas: {} });
+  // Guardar fecha de registro como cliente
+  const fechaRegistro = new Date().toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" });
+  const nuevo = new Usuario({ correo, password: hash, cuenta, saldo: 10000, movimientos: [], criptomonedas: {}, fechaRegistro });
   await nuevo.save();
  
   await enviarCorreo(correo, "Bienvenido a Banco Libre",
@@ -151,14 +153,16 @@ app.post("/login", async (req, res) => {
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) return res.json({ ok: false, mensaje: "Contraseña incorrecta" });
  
-  // Correo de inicio de sesión
   const hora = new Date().toLocaleString();
   await enviarCorreo(user.correo, "Inicio de sesión detectado - Banco Libre",
     `<p>Hola${user.nombre ? " " + user.nombre : ""},</p>
      <p>Se detectó un inicio de sesión en tu cuenta <b>${cuenta}</b> el <b>${hora}</b>.</p>
      <p>Si no fuiste tú, cambia tu contraseña de inmediato.</p>`);
  
-  res.json({ ok: true, cuenta: user.cuenta, correo: user.correo, saldo: user.saldo, nombre: user.nombre || "", foto: user.foto || "" });
+  res.json({
+    ok: true, cuenta: user.cuenta, correo: user.correo, saldo: user.saldo,
+    nombre: user.nombre || "", foto: user.foto || "", fechaRegistro: user.fechaRegistro || ""
+  });
 });
  
 // ===============================
@@ -186,7 +190,6 @@ app.post("/depositar", async (req, res) => {
   await userOrigen.save();
   await userDestino.save();
  
-  // Correos de ticket
   await enviarCorreo(userOrigen.correo, "Ticket: Depósito enviado - Banco Libre",
     `<h2>Ticket de depósito enviado</h2>
      <p><b>Origen:</b> ${origen}</p><p><b>Destino:</b> ${destino}</p>
@@ -217,7 +220,8 @@ app.get("/cuenta/:id", async (req, res) => {
   res.json({
     ok: true, correo: user.correo, cuenta: user.cuenta,
     saldo: user.saldo, movimientos: user.movimientos,
-    criptomonedas: criptos, nombre: user.nombre, foto: user.foto
+    criptomonedas: criptos, nombre: user.nombre, foto: user.foto,
+    fechaRegistro: user.fechaRegistro || ""
   });
 });
  
@@ -320,7 +324,6 @@ app.post("/comprar-criptos", async (req, res) => {
   user.markModified("criptomonedas");
   await user.save();
  
-  // Correo de confirmación de compra
   await enviarCorreo(user.correo, "Confirmación de compra de criptos - Banco Libre",
     `<h2>Compra realizada</h2>
      <p>Has comprado: <b>${resumen.join(", ")}</b></p>
@@ -373,7 +376,7 @@ app.get("/comentarios/usuario/:cuenta", async (req, res) => {
 // ===============================
 app.get("/admin/cuentas", verificarAdmin, async (req, res) => {
   try {
-    const cuentas = await Usuario.find({}, { correo: 1, cuenta: 1, saldo: 1, movimientos: 1, criptomonedas: 1, nombre: 1, foto: 1, _id: 0 });
+    const cuentas = await Usuario.find({}, { correo: 1, cuenta: 1, saldo: 1, movimientos: 1, criptomonedas: 1, nombre: 1, foto: 1, fechaRegistro: 1, _id: 0 });
     res.json({ ok: true, cuentas });
   } catch (err) { res.json({ ok: false, mensaje: "Error del servidor" }); }
 });
@@ -395,7 +398,6 @@ app.post("/admin/editar-saldo", verificarAdmin, async (req, res) => {
   user.movimientos.push(`[ADMIN] Saldo ajustado de $${saldoAnterior} a $${nuevoSaldo} | ${hora}`);
   await user.save();
  
-  // Notificar al usuario
   await enviarCorreo(user.correo, "Tu saldo fue modificado - Banco Libre",
     `<p>Un administrador ajustó tu saldo.</p>
      <p>Saldo anterior: <b>$${saldoAnterior}</b> → Nuevo saldo: <b>$${nuevoSaldo}</b></p>
