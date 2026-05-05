@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Banco Libre</title>
 <style>
 :root {
@@ -268,7 +268,7 @@ ul li {
 .mis-cripto-cant { font-size: 12px; color: var(--texto-sub); }
 .mis-cripto-valor { font-weight: bold; color: var(--azul); font-size: 15px; }
 
-/* ===== PERFIL ===== */
+/* ===== PERFIL - MEJORADO CON CÁMARA ===== */
 .perfil-avatar-wrap { position: relative; display: inline-block; margin: 10px auto; }
 .perfil-avatar {
   width: 90px; height: 90px; border-radius: 50%;
@@ -283,18 +283,43 @@ ul li {
   margin: 10px auto; transition: transform 0.2s;
 }
 .perfil-avatar-placeholder:hover { transform: scale(1.06); }
+
+/* Botón de cámara mejorado */
 .perfil-camara-btn {
   position: absolute; bottom: 2px; right: 2px;
   background: var(--azul); border: none; border-radius: 50%;
-  width: 28px; height: 28px; font-size: 14px; cursor: pointer;
+  width: 32px; height: 32px; font-size: 16px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; color: white;
   transition: transform 0.18s, background 0.18s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .perfil-camara-btn:hover { transform: scale(1.18); background: var(--azul-dark); }
+
+/* Grupo de botones para seleccionar fuente de imagen */
+.perfil-photo-options {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 15px;
+  animation: fadeInUp 0.3s both;
+}
+.perfil-photo-options button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: var(--gris-card);
+  color: var(--texto);
+  border: 1px solid #ddd;
+}
+.perfil-photo-options button:hover {
+  background: var(--azul);
+  color: white;
+  border-color: var(--azul);
+}
+
 .perfil-nombre-display { font-size: 20px; font-weight: bold; color: var(--texto); margin: 4px 0; animation: fadeInUp 0.3s 0.1s both; }
 .perfil-cuenta-display { font-size: 13px; color: var(--texto-sub); margin-bottom: 8px; }
 
-/* Chip de "Cliente desde" */
 .perfil-cliente-desde {
   display: inline-flex; align-items: center; gap: 5px;
   background: linear-gradient(135deg, #007aff15, #007aff25);
@@ -566,27 +591,38 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
     </div>
   </div>
 
-  <!-- PERFIL -->
+  <!-- PERFIL - MEJORADO CON CÁMARA -->
   <div id="perfil" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
     <div class="contenido">
       <div class="perfil-avatar-wrap" id="perfilAvatarWrap">
         <div class="perfil-avatar-placeholder" id="perfilAvatarPlaceholder">👤</div>
         <img id="perfilAvatarImg" class="perfil-avatar" style="display:none;" src="" alt="avatar">
-        <button class="perfil-camara-btn" onclick="document.getElementById('inputFotoPerfil').click()">📷</button>
-        <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" onchange="subirFotoPerfil(event)">
+        <button class="perfil-camara-btn" id="cameraBtn" title="Cambiar foto">📷</button>
       </div>
+      
+      <!-- NUEVO: Opciones para subir o tomar foto -->
+      <div class="perfil-photo-options">
+        <button onclick="subirFotoDesdeArchivo()">🖼️ Subir imagen</button>
+        <button onclick="tomarFotoPerfil()">📸 Tomar foto</button>
+      </div>
+      
       <div class="perfil-nombre-display" id="perfilNombreDisplay">—</div>
       <div class="perfil-cuenta-display" id="cuentaPerfil"></div>
-      <!-- NUEVO: Chip "Cliente desde" -->
+      
+      <!-- Chip "Cliente desde" -->
       <div class="perfil-cliente-desde" id="perfilClienteDesde" style="display:none;">
         🗓️ <span id="perfilClienteDesdeTxt"></span>
       </div>
+      
       <div class="perfil-edit-section">
         <label>Nombre de usuario</label>
         <input id="inputNombrePerfil" placeholder="Tu nombre" style="width:100%;margin:0 0 10px;">
         <button onclick="guardarPerfil()" style="width:100%;margin:0;">💾 Guardar perfil</button>
       </div>
+      
+      <!-- Input oculto para seleccionar archivo -->
+      <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" onchange="procesarFotoPerfil(this.files[0])">
     </div>
   </div>
 
@@ -811,7 +847,102 @@ const overlay = document.getElementById("overlay");
 function toggleMenu(){ drawer.classList.toggle("active"); overlay.classList.toggle("active"); }
 
 /* ==========================================
-   CARRITO — PERSISTENCIA EN localStorage
+   FUNCIONES DE FOTO DE PERFIL (MEJORADAS CON CÁMARA)
+   ========================================== */
+
+// Función para subir foto desde archivo (galería)
+function subirFotoDesdeArchivo() {
+  document.getElementById("inputFotoPerfil").click();
+}
+
+// Función para tomar foto con la cámara
+function tomarFotoPerfil() {
+  // Crear input de tipo file que acepte captura de cámara
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment'; // 'user' para cámara frontal, 'environment' para trasera
+  
+  input.onchange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      procesarFotoPerfil(e.target.files[0]);
+    }
+  };
+  
+  input.click();
+}
+
+// Función unificada para procesar la foto (comprimir y subir)
+function procesarFotoPerfil(file) {
+  if (!file) return;
+  
+  // Validar tamaño (máximo 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    showToast("⚠️ La imagen no debe superar 2MB");
+    return;
+  }
+  
+  // Mostrar loading
+  showToast("📸 Procesando foto...");
+  
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    // Comprimir la imagen si es muy grande
+    const img = new Image();
+    img.onload = async function() {
+      // Redimensionar si es necesario (máximo 500px de ancho)
+      let width = img.width;
+      let height = img.height;
+      const maxWidth = 500;
+      const maxHeight = 500;
+      
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = width * ratio;
+        height = height * ratio;
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Convertir a JPEG con calidad 0.8 para reducir tamaño
+      const fotoDataURL = canvas.toDataURL('image/jpeg', 0.8);
+      
+      // Guardar la foto
+      perfilFotoUrl = fotoDataURL;
+      guardarSesion();
+      cargarPerfil();
+      cargarDatosInicio();
+      
+      try {
+        await fetch(BACKEND + "/perfil/guardar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cuenta: cuentaActual, nombre: perfilNombre, foto: perfilFotoUrl })
+        });
+        showToast("✅ Foto de perfil actualizada");
+      } catch(err) {
+        console.error("Error al guardar foto:", err);
+        showToast("✅ Foto actualizada localmente");
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Función original para compatibilidad (subir desde archivo)
+function subirFotoPerfil(event) {
+  if (event.target.files && event.target.files[0]) {
+    procesarFotoPerfil(event.target.files[0]);
+  }
+}
+
+/* ==========================================
+   PERSISTENCIA DE CARRITO Y SESIÓN
    ========================================== */
 function guardarCarrito() {
   if (cuentaActual) {
@@ -838,9 +969,6 @@ function limpiarCarritoLocal() {
   carrito = {};
 }
 
-/* ==========================================
-   PERSISTENCIA DE SESIÓN con sessionStorage
-   ========================================== */
 function guardarSesion() {
   if (cuentaActual) {
     sessionStorage.setItem("bl_cuenta", cuentaActual);
@@ -874,7 +1002,7 @@ async function restaurarSesion() {
     esAdmin = false;
 
     cuentaActualSpan();
-    cargarCarritoLocal();           // ← restaurar carrito
+    cargarCarritoLocal();
     await cargarPreciosCriptos();
     initCarrusel();
     await cargarDatosInicio();
@@ -896,7 +1024,7 @@ function limpiarSesion() {
   sessionStorage.removeItem("bl_pantalla");
 }
 
-/* ===== CARRUSEL con SWIPE táctil ===== */
+/* ===== CARRUSEL ===== */
 let carruselIdx = 0;
 const TOTAL_SLIDES = 5;
 let carruselTimer = null;
@@ -1008,7 +1136,7 @@ function login(){
       perfilFotoUrl = data.foto || "";
       perfilFechaRegistro = data.fechaRegistro || "";
       guardarSesion();
-      cargarCarritoLocal();         // ← cargar carrito al login
+      cargarCarritoLocal();
       cuentaActualSpan();
       cargarPreciosCriptos();
       initCarrusel();
@@ -1057,9 +1185,8 @@ function cambiarPantalla(id){
   document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa","entrando"));
   const el = document.getElementById(id);
   el.classList.add("activa");
-  // Animación de entrada (no en login para evitar flash al inicio)
   if(id !== "login") {
-    void el.offsetWidth; // forzar reflow
+    void el.offsetWidth;
     el.classList.add("entrando");
     setTimeout(()=>el.classList.remove("entrando"), 400);
   }
@@ -1087,7 +1214,6 @@ async function cargarDatosInicio(){
     saldoEl.classList.add("actualizando");
     saldoEl.textContent="$"+(data.saldo||0).toLocaleString();
     setTimeout(()=>saldoEl.classList.remove("actualizando"),600);
-    // Actualizar fechaRegistro si vino del servidor
     if(data.fechaRegistro && !perfilFechaRegistro) {
       perfilFechaRegistro = data.fechaRegistro;
       guardarSesion();
@@ -1142,20 +1268,18 @@ function cambiarPassword(){
   } else showToast("❌ PIN incorrecto");
 }
 
-/* ===== PERFIL ===== */
+/* ===== PERFIL ACTUALIZADO ===== */
 function cargarPerfil(){
   document.getElementById("cuentaPerfil").textContent = cuentaActual;
   document.getElementById("inputNombrePerfil").value = perfilNombre;
   document.getElementById("perfilNombreDisplay").textContent = perfilNombre || "Sin nombre";
 
-  // Chip "Cliente desde"
   const chipEl = document.getElementById("perfilClienteDesde");
   const chipTxtEl = document.getElementById("perfilClienteDesdeTxt");
   if(perfilFechaRegistro) {
     chipTxtEl.textContent = "Cliente desde " + perfilFechaRegistro;
     chipEl.style.display = "inline-flex";
   } else {
-    // Intentar obtener del servidor
     fetch(BACKEND+"/cuenta/"+cuentaActual).then(r=>r.json()).then(data=>{
       if(data.fechaRegistro) {
         perfilFechaRegistro = data.fechaRegistro;
@@ -1192,27 +1316,6 @@ async function guardarPerfil(){
       cargarDatosInicio();
     } else showToast("❌ "+data.mensaje);
   }catch(e){showToast("❌ Error al guardar perfil");}
-}
-
-async function subirFotoPerfil(event){
-  let file = event.target.files[0];
-  if(!file) return;
-  if(file.size > 2*1024*1024){ showToast("⚠️ La imagen no debe superar 2MB"); return; }
-  let reader = new FileReader();
-  reader.onload = async function(e){
-    perfilFotoUrl = e.target.result;
-    guardarSesion();
-    cargarPerfil();
-    cargarDatosInicio();
-    try{
-      await fetch(BACKEND+"/perfil/guardar",{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({cuenta:cuentaActual, nombre:perfilNombre, foto:perfilFotoUrl})
-      });
-      showToast("📷 Foto actualizada");
-    }catch(err){}
-  };
-  reader.readAsDataURL(file);
 }
 
 /* ===== CRIPTOS ===== */
@@ -1264,7 +1367,7 @@ function cambiarCantidadCompra(delta){
 function agregarAlCarrito(){
   if(!criptoCompraActual) return;
   carrito[criptoCompraActual]=(carrito[criptoCompraActual]||0)+cantidadCompra;
-  guardarCarrito();                 // ← persistir
+  guardarCarrito();
   cerrarModal("modalCompra");
   actualizarBadgeCarrito();
   renderizarCriptos();
@@ -1311,7 +1414,7 @@ function renderizarCarrito(){
 function cambiarQtyCarrito(sim,delta){
   carrito[sim]=Math.max(0,(carrito[sim]||0)+delta);
   if(carrito[sim]===0) delete carrito[sim];
-  guardarCarrito();                 // ← persistir
+  guardarCarrito();
   actualizarBadgeCarrito();
   renderizarCarrito();
 }
@@ -1325,7 +1428,7 @@ async function comprarCarrito(){
     let data=await res.json();
     showToast(data.ok ? "✅ "+data.mensaje : "❌ "+data.mensaje);
     if(data.ok){
-      limpiarCarritoLocal();        // ← limpiar localStorage también
+      limpiarCarritoLocal();
       actualizarBadgeCarrito();
       cargarDatosInicio();
       cambiarPantalla("misCriptos");
@@ -1641,7 +1744,6 @@ function cerrarModal(id){
   el.classList.remove("active");
 }
 
-// Cerrar modal al tocar el overlay
 document.querySelectorAll(".modal-overlay").forEach(overlay => {
   overlay.addEventListener("click", function(e) {
     if(e.target === this) this.classList.remove("active");
