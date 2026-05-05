@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Banco Libre</title>
+<!-- Chart.js para gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
   --azul: #007aff;
@@ -13,6 +15,22 @@
   --gris-card: #f2f2f7;
   --texto: #1c1c1e;
   --texto-sub: #8e8e93;
+  --sombra: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] {
+  --azul: #0a84ff;
+  --azul-dark: #0055cc;
+  --blanco: #1c1c1e;
+  --gris-fondo: #000000;
+  --gris-card: #2c2c2e;
+  --texto: #ffffff;
+  --texto-sub: #98989e;
+  --sombra: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 /* ===== ANIMACIONES GLOBALES ===== */
@@ -36,14 +54,6 @@
   70%  { transform: scale(1.07); opacity: 1; }
   100% { transform: scale(1); }
 }
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0,122,255,0.25); }
-  50%       { box-shadow: 0 0 0 8px rgba(0,122,255,0); }
-}
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   40%       { transform: translateY(-6px); }
@@ -53,9 +63,9 @@
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-@keyframes countUp {
-  from { opacity: 0; transform: scale(0.5); }
-  to   { opacity: 1; transform: scale(1); }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 body {
@@ -66,25 +76,26 @@ body {
 }
 .app {
   width: 390px; height: 667px; background: var(--blanco);
-  border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border-radius: 40px; box-shadow: var(--sombra);
   overflow: hidden; position: relative; display: flex; flex-direction: column;
 }
 .pantalla { display: none; padding: 20px; text-align: center; flex: 1; overflow-y: auto; height: 100%; box-sizing: border-box; }
 .pantalla.activa { display: block; }
+.pantalla.entrando { animation: fadeInUp 0.32s cubic-bezier(0.22,1,0.36,1) both; }
 
-/* Animación al cambiar pantalla */
-.pantalla.entrando {
-  animation: fadeInUp 0.32s cubic-bezier(0.22,1,0.36,1) both;
-}
-
-h1,h2 { color: var(--azul); }
-input {
+h1, h2, h3 { color: var(--azul); }
+input, textarea {
   width: 80%; padding: 12px; margin: 8px 0;
   border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 15px;
   box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
+  outline: none; background: var(--blanco); color: var(--texto);
 }
-input:focus {
+[data-theme="dark"] input, [data-theme="dark"] textarea {
+  border-color: #3a3a3c;
+  background: #2c2c2e;
+  color: #ffffff;
+}
+input:focus, textarea:focus {
   border-color: var(--azul);
   box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
 }
@@ -97,21 +108,8 @@ button {
 button:hover { background: var(--azul-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
 button:active { transform: scale(0.96); }
 
-/* Ripple en botones */
-button::after {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 70%);
-  transform: scale(0); opacity: 0; border-radius: 50%;
-  transition: transform 0.4s, opacity 0.4s;
-}
-button:active::after { transform: scale(3); opacity: 1; transition: 0s; }
-
 ul { list-style: none; padding: 0; margin: 0; }
-ul li {
-  background: var(--gris-card); margin: 5px 0; padding: 10px;
-  border-radius: 8px; font-size: 13px;
-  animation: slideInLeft 0.25s ease both;
-}
+ul li { background: var(--gris-card); margin: 5px 0; padding: 10px; border-radius: 8px; font-size: 13px; animation: slideInLeft 0.25s ease both; color: var(--texto); }
 .logo { width: 90%; max-width: 300px; height: auto; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); transition: transform 0.3s; }
 .logo:hover { transform: scale(1.05); }
 .header {
@@ -125,7 +123,7 @@ ul li {
 .contenido { padding-top: 75px; }
 .drawer {
   position: absolute; top: 0; left: -260px; width: 260px; height: 100%;
-  background: white; box-shadow: 2px 0 10px rgba(0,0,0,.2);
+  background: var(--blanco); box-shadow: 2px 0 10px rgba(0,0,0,.2);
   transition: left 0.28s cubic-bezier(0.22,1,0.36,1);
   padding-top: 60px; z-index: 20; overflow-y: auto;
 }
@@ -136,22 +134,17 @@ ul li {
   font-size: 15px; cursor: pointer;
   transition: background 0.15s, color 0.15s, padding-left 0.15s;
 }
+[data-theme="dark"] .drawer a { border-bottom-color: #2c2c2e; }
 .drawer a:hover { background: #f5f9ff; color: var(--azul); padding-left: 26px; }
+[data-theme="dark"] .drawer a:hover { background: #1c1c1e; }
 .overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,.35); display: none; z-index: 15; }
 .overlay.active { display: block; animation: fadeIn 0.2s; }
-#movimientos { max-height: 350px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 12px; }
 
 /* ===== SALDO ANIMADO ===== */
-.saldo-animado {
-  display: inline-block;
-  transition: transform 0.2s, color 0.3s;
-}
-.saldo-animado.actualizando {
-  animation: bounce 0.4s ease;
-  color: #34c759;
-}
+.saldo-animado { display: inline-block; transition: transform 0.2s, color 0.3s; }
+.saldo-animado.actualizando { animation: bounce 0.4s ease; color: #34c759; }
 
-/* ===== CARRUSEL INICIO ===== */
+/* ===== CARRUSEL ===== */
 .carrusel-wrap { overflow: hidden; position: relative; margin: 0 -20px; touch-action: pan-y; user-select: none; }
 .carrusel-track { display: flex; transition: transform 0.4s cubic-bezier(0.22,1,0.36,1); will-change: transform; }
 .carrusel-slide { min-width: 100%; padding: 0 20px; box-sizing: border-box; }
@@ -178,9 +171,7 @@ ul li {
   background: linear-gradient(135deg, var(--azul), #0055cc);
   border-radius: 18px; padding: 16px 20px; color: white; text-align: left; margin-bottom: 14px;
   animation: fadeInUp 0.4s 0.05s both;
-  transition: transform 0.2s, box-shadow 0.2s;
 }
-.inicio-saldo-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,122,255,0.35); }
 .inicio-saldo-label { font-size: 12px; opacity: 0.8; }
 .inicio-saldo-num { font-size: 28px; font-weight: bold; margin: 4px 0; }
 .inicio-accesos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -188,120 +179,145 @@ ul li {
   background: var(--gris-card); border: none; border-radius: 14px;
   padding: 14px 10px; font-size: 13px; font-weight: bold; color: var(--texto);
   cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;
-  transition: background 0.18s, color 0.18s, transform 0.15s, box-shadow 0.18s;
-  animation: fadeInUp 0.35s calc(var(--i, 0) * 0.07s + 0.1s) both;
+  transition: background 0.18s, color 0.18s, transform 0.15s;
 }
-.inicio-acceso-btn:nth-child(1) { --i: 1; }
-.inicio-acceso-btn:nth-child(2) { --i: 2; }
-.inicio-acceso-btn:nth-child(3) { --i: 3; }
-.inicio-acceso-btn:nth-child(4) { --i: 4; }
-.inicio-acceso-btn:hover { background: #e8f0ff; color: var(--azul); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,122,255,0.15); }
-.inicio-acceso-icon { font-size: 22px; transition: transform 0.2s; }
-.inicio-acceso-btn:hover .inicio-acceso-icon { transform: scale(1.2) rotate(-5deg); }
+.inicio-acceso-btn:hover { background: #e8f0ff; color: var(--azul); transform: translateY(-2px); }
+.inicio-acceso-icon { font-size: 22px; }
 
 /* ===== CRIPTOMONEDAS ===== */
-.cripto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-bottom: 20px; }
+.cripto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 .cripto-card {
   background: var(--gris-card); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer;
   border: 2px solid transparent; transition: all 0.22s; position: relative;
-  animation: fadeInUp 0.3s calc(var(--ci, 0) * 0.05s) both;
 }
-.cripto-card:hover { border-color: var(--azul); background: #f0f6ff; transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,122,255,0.18); }
-.cripto-card.en-carrito { border-color: var(--azul); background: #e8f2ff; animation: pulseGlow 2s infinite; }
-.cripto-card:active { transform: scale(0.95); }
-.cripto-emoji { font-size: 28px; transition: transform 0.2s; }
-.cripto-card:hover .cripto-emoji { transform: scale(1.15) rotate(-5deg); }
-.cripto-nombre { font-weight: bold; font-size: 13px; color: var(--texto); margin: 4px 0 2px; }
+.cripto-card:hover { border-color: var(--azul); background: #f0f6ff; transform: translateY(-3px); }
+[data-theme="dark"] .cripto-card:hover { background: #3a3a3c; }
+.cripto-card.en-carrito { border-color: var(--azul); background: #e8f2ff; }
+.cripto-emoji { font-size: 28px; }
+.cripto-nombre { font-weight: bold; font-size: 13px; color: var(--texto); }
 .cripto-simbolo { font-size: 11px; color: var(--texto-sub); }
 .cripto-precio { font-size: 14px; font-weight: bold; color: var(--azul); margin-top: 6px; }
 .cripto-badge {
   position: absolute; top: 6px; right: 6px; background: var(--azul); color: white;
   font-size: 10px; border-radius: 50%; width: 18px; height: 18px; display: none;
   align-items: center; justify-content: center; font-weight: bold;
-  animation: popIn 0.3s both;
 }
 .cripto-card.en-carrito .cripto-badge { display: flex; }
 .cart-badge {
   background: #ff3b30; color: white; font-size: 11px; border-radius: 50%;
   width: 18px; height: 18px; display: none; align-items: center; justify-content: center;
   font-weight: bold; margin-left: -8px; margin-top: -10px;
-  transition: transform 0.2s;
 }
-.cart-badge.visible { display: flex; animation: popIn 0.3s both; }
-.cart-badge.bump { animation: bounce 0.35s ease; }
+.cart-badge.visible { display: flex; }
+
+/* ===== GRÁFICAS ===== */
+.grafica-container {
+  background: var(--gris-card);
+  border-radius: 14px;
+  padding: 12px;
+  margin: 10px 0;
+  animation: fadeInUp 0.3s both;
+}
+.grafica-titulo {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--texto);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.grafica-canvas {
+  max-height: 120px;
+  width: 100%;
+}
+.grafica-general {
+  margin-bottom: 20px;
+}
+.grafica-general .grafica-canvas {
+  max-height: 180px;
+}
 
 /* ===== CARRITO ===== */
 .carrito-item {
   background: var(--gris-card); border-radius: 12px; padding: 12px; margin: 6px 0;
   display: flex; justify-content: space-between; align-items: center;
-  animation: slideInRight 0.25s ease both;
-  transition: background 0.15s;
+  color: var(--texto);
 }
-.carrito-item:hover { background: #eaf2ff; }
 .carrito-info { text-align: left; }
 .carrito-nombre { font-weight: bold; font-size: 14px; }
 .carrito-sub { font-size: 12px; color: var(--texto-sub); }
 .carrito-ctrl { display: flex; align-items: center; gap: 8px; }
 .carrito-ctrl button { padding: 4px 10px; font-size: 16px; margin: 0; border-radius: 8px; min-width: 32px; }
-.carrito-cantidad { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; transition: transform 0.15s; }
-.carrito-cantidad.bump { animation: bounce 0.3s ease; }
 .carrito-total-bar {
   background: var(--azul); color: white; border-radius: 14px; padding: 14px; margin-top: 10px;
   display: flex; justify-content: space-between; align-items: center;
-  animation: fadeInUp 0.3s ease both;
 }
-.carrito-total-bar span { font-size: 16px; font-weight: bold; }
-.btn-comprar { background: white; color: var(--azul); border: none; border-radius: 10px; padding: 8px 16px; font-weight: bold; font-size: 14px; cursor: pointer; }
-.btn-comprar:hover { background: #e8f2ff; transform: scale(1.04); }
 
 /* ===== MIS CRIPTOS ===== */
 .mis-cripto-item {
   background: var(--gris-card); border-radius: 12px; padding: 12px 14px; margin: 6px 0;
   display: flex; justify-content: space-between; align-items: center;
-  animation: slideInLeft 0.25s calc(var(--mi, 0) * 0.06s) both;
-  transition: background 0.15s, transform 0.15s;
 }
-.mis-cripto-item:hover { background: #eaf2ff; transform: translateX(4px); }
 .mis-cripto-left { display: flex; align-items: center; gap: 10px; }
 .mis-cripto-emoji { font-size: 24px; }
-.mis-cripto-nombre { font-weight: bold; font-size: 14px; }
+.mis-cripto-nombre { font-weight: bold; font-size: 14px; color: var(--texto); }
 .mis-cripto-cant { font-size: 12px; color: var(--texto-sub); }
 .mis-cripto-valor { font-weight: bold; color: var(--azul); font-size: 15px; }
+.btn-vender {
+  background: #ff3b30;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin: 0;
+}
+.btn-vender:hover { background: #cc2020; }
 
-/* ===== PERFIL - MEJORADO CON CÁMARA ===== */
+/* ===== PERFIL ===== */
 .perfil-avatar-wrap { position: relative; display: inline-block; margin: 10px auto; }
 .perfil-avatar {
   width: 90px; height: 90px; border-radius: 50%;
-  object-fit: cover; border: 3px solid var(--azul); background: var(--gris-card); display: block;
-  transition: transform 0.2s, box-shadow 0.2s;
+  object-fit: cover; border: 3px solid var(--azul); background: var(--gris-card);
 }
-.perfil-avatar:hover { transform: scale(1.06); box-shadow: 0 6px 18px rgba(0,122,255,0.3); }
 .perfil-avatar-placeholder {
   width: 90px; height: 90px; border-radius: 50%;
   background: var(--gris-card); border: 3px solid var(--azul);
   display: flex; align-items: center; justify-content: center; font-size: 40px;
-  margin: 10px auto; transition: transform 0.2s;
+  margin: 10px auto;
 }
-.perfil-avatar-placeholder:hover { transform: scale(1.06); }
-
-/* Botón de cámara mejorado */
 .perfil-camara-btn {
   position: absolute; bottom: 2px; right: 2px;
   background: var(--azul); border: none; border-radius: 50%;
   width: 32px; height: 32px; font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; color: white;
-  transition: transform 0.18s, background 0.18s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center; color: white;
 }
-.perfil-camara-btn:hover { transform: scale(1.18); background: var(--azul-dark); }
-
-/* Grupo de botones para seleccionar fuente de imagen */
+.perfil-edit-icon {
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: 8px;
+  color: var(--azul);
+  transition: transform 0.2s;
+}
+.perfil-edit-icon:hover { transform: scale(1.1); }
+.perfil-nombre-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.perfil-nombre-display { font-size: 20px; font-weight: bold; color: var(--texto); }
+.perfil-nombre-input {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  width: auto;
+  margin: 0;
+}
 .perfil-photo-options {
   display: flex;
   gap: 10px;
   justify-content: center;
   margin-bottom: 15px;
-  animation: fadeInUp 0.3s both;
 }
 .perfil-photo-options button {
   flex: 1;
@@ -311,64 +327,63 @@ ul li {
   color: var(--texto);
   border: 1px solid #ddd;
 }
-.perfil-photo-options button:hover {
+.perfil-edit-section { background: var(--gris-card); border-radius: 14px; padding: 14px; text-align: left; margin-top: 10px; }
+
+/* ===== CONFIGURACIÓN ===== */
+.config-item {
+  background: var(--gris-card);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.config-label {
+  font-weight: bold;
+  color: var(--texto);
+}
+.theme-toggle {
   background: var(--azul);
   color: white;
-  border-color: var(--azul);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
 }
-
-.perfil-nombre-display { font-size: 20px; font-weight: bold; color: var(--texto); margin: 4px 0; animation: fadeInUp 0.3s 0.1s both; }
-.perfil-cuenta-display { font-size: 13px; color: var(--texto-sub); margin-bottom: 8px; }
-
-.perfil-cliente-desde {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: linear-gradient(135deg, #007aff15, #007aff25);
-  border: 1px solid #007aff40; border-radius: 20px;
-  padding: 5px 12px; font-size: 12px; color: var(--azul);
-  font-weight: 600; margin-bottom: 14px;
-  animation: popIn 0.4s 0.2s both;
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
 }
-
-.perfil-edit-section { background: var(--gris-card); border-radius: 14px; padding: 14px; text-align: left; margin-top: 10px; animation: fadeInUp 0.35s 0.15s both; }
-.perfil-edit-section label { font-size: 13px; color: var(--texto-sub); display: block; margin-bottom: 4px; }
-.perfil-edit-section input { width: 100%; margin: 0 0 10px; box-sizing: border-box; }
-
-/* ===== COMENTARIOS ===== */
-.estrellas { display: flex; justify-content: center; gap: 8px; margin: 10px 0; }
-.estrella { font-size: 28px; cursor: pointer; transition: transform 0.15s, opacity 0.15s; opacity: 0.4; }
-.estrella.activa { opacity: 1; }
-.estrella:hover { transform: scale(1.25) rotate(-8deg); }
-.comentario-card {
-  background: var(--gris-card); border-radius: 14px; padding: 12px 14px; margin: 8px 0; text-align: left;
-  animation: slideInLeft 0.25s ease both;
-  transition: transform 0.18s, box-shadow 0.18s;
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
 }
-.comentario-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
-.comentario-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.comentario-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #ddd; }
-.comentario-avatar-placeholder { width: 36px; height: 36px; border-radius: 50%; background: var(--azul); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.comentario-user { font-weight: bold; font-size: 13px; }
-.comentario-estrellas { font-size: 13px; }
-.comentario-texto { font-size: 13px; color: var(--texto); margin: 0; }
-.comentario-fecha { font-size: 11px; color: var(--texto-sub); margin-top: 4px; }
-textarea {
-  width: 85%; padding: 12px; margin: 8px 0; border: 1.5px solid #e0e0e0;
-  border-radius: 12px; font-size: 14px; resize: none; font-family: inherit;
-  box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
 }
-textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+input:checked + .slider { background-color: var(--azul); }
+input:checked + .slider:before { transform: translateX(22px); }
 
-/* ===== LOGIN ANIMADO ===== */
-#login .logo { animation: fadeInUp 0.5s 0.1s both; }
-#login h1   { animation: fadeInUp 0.4s 0.2s both; }
-#login input:nth-of-type(1) { animation: fadeInUp 0.4s 0.3s both; }
-#login input:nth-of-type(2) { animation: fadeInUp 0.4s 0.35s both; }
-#login button { animation: fadeInUp 0.4s calc(0.4s + var(--bi, 0) * 0.06s) both; }
-#login button:nth-of-type(1) { --bi: 0; }
-#login button:nth-of-type(2) { --bi: 1; }
-#login button:nth-of-type(3) { --bi: 2; }
-
-/* ===== TOAST NOTIFICATION ===== */
+/* ===== TOAST ===== */
 #toast {
   position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
   background: #1c1c1e; color: white; padding: 10px 20px; border-radius: 20px;
@@ -378,49 +393,13 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 }
 #toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ===== ADMIN ===== */
-#admin { background: #f5f9ff; }
-.admin-header { position: absolute; top: 0; left: 0; width: 100%; height: 60px; background: var(--azul); color: white; display: flex; align-items: center; padding: 0 15px; z-index: 1000; box-sizing: border-box; }
-.admin-badge { background: #ff3b30; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-.admin-tabs { display: flex; gap: 0; margin-bottom: 12px; background: white; border-radius: 12px; padding: 4px; border: 1px solid #e0e0e0; }
-.admin-tab { flex: 1; padding: 8px 2px; font-size: 10px; font-weight: bold; background: transparent; color: var(--texto-sub); border: none; border-radius: 9px; cursor: pointer; transition: all 0.2s; margin: 0; }
-.admin-tab.active { background: var(--azul); color: white; }
-.admin-tab-content { display: none; }
-.admin-tab-content.active { display: block; }
-.admin-stats { display: flex; justify-content: space-around; background: white; border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 1px solid #e8eef5; box-shadow: 0 2px 8px rgba(0,122,255,0.08); }
-.stat-item { text-align: center; }
-.stat-val { font-size: 18px; font-weight: bold; color: var(--azul); }
-.stat-label { font-size: 10px; color: var(--texto-sub); }
-.admin-card { background: white; border: 1px solid #e8eef5; border-radius: 14px; margin: 8px 0; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); animation: fadeInUp 0.25s ease both; }
-.admin-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.admin-user-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--gris-card); border: 2px solid var(--azul); flex-shrink: 0; }
-.admin-user-avatar-placeholder { width: 44px; height: 44px; border-radius: 50%; background: var(--azul); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.admin-user-info { text-align: left; flex: 1; }
-.admin-cuenta-num { font-size: 13px; color: var(--azul); font-weight: bold; letter-spacing: 1px; }
-.admin-nombre-usuario { font-size: 12px; color: var(--texto); font-weight: 600; }
-.admin-saldo { font-size: 20px; font-weight: bold; color: #1c1c1e; margin: 2px 0; }
-.admin-correo { font-size: 11px; color: var(--texto-sub); margin-bottom: 10px; }
-.admin-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.admin-btn { font-size: 11px; padding: 7px 10px; border-radius: 8px; margin: 0; cursor: pointer; border: none; color: white; flex: 1; min-width: 55px; }
-.btn-edit { background: var(--azul); } .btn-edit:hover { background: var(--azul-dark); }
-.btn-delete { background: #ff3b30; } .btn-delete:hover { background: #cc2020; }
-.btn-history { background: #5856d6; } .btn-history:hover { background: #3634a3; }
-.btn-cripto { background: #34c759; } .btn-cripto:hover { background: #28a745; }
-.btn-opinion { background: #ff9500; } .btn-opinion:hover { background: #cc7700; }
-.admin-search { width: 100%; padding: 10px 14px; box-sizing: border-box; background: white; border: 1px solid #e0e0e0; color: var(--texto); border-radius: 12px; font-size: 14px; margin: 6px 0 8px; }
-.admin-list-wrap { max-height: 340px; overflow-y: auto; padding-bottom: 10px; }
-.admin-refresh { background: white; border: 1px solid var(--azul); color: var(--azul); border-radius: 10px; padding: 7px 14px; font-size: 12px; cursor: pointer; margin: 0 0 8px; display: inline-block; }
-.admin-refresh:hover { background: #f0f6ff; }
-.admin-cripto-row { background: white; border: 1px solid #e8eef5; border-radius: 12px; padding: 12px 14px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-.admin-cripto-left { display: flex; align-items: center; gap: 10px; }
-.admin-cripto-emoji { font-size: 24px; }
-.admin-cripto-nombre { font-weight: bold; font-size: 14px; color: var(--texto); }
-.admin-cripto-simbolo { font-size: 11px; color: var(--texto-sub); }
-.admin-cripto-precio { font-size: 15px; font-weight: bold; color: var(--azul); }
-.btn-edit-precio { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; margin: 0; }
-.btn-edit-precio:hover { background: var(--azul-dark); }
+.loading-spinner {
+  width: 28px; height: 28px; border: 3px solid #e0e0e0;
+  border-top-color: var(--azul); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 20px auto;
+}
 
-/* ===== MODALES ===== */
 .modal-overlay {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.5); z-index: 200; display: none;
@@ -428,66 +407,38 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 }
 .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
 .modal-box {
-  background: white; border-radius: 20px; padding: 24px; width: 82%; text-align: center;
+  background: var(--blanco); border-radius: 20px; padding: 24px; width: 82%; text-align: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 85%; overflow-y: auto;
   animation: popIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
 }
 .modal-box h3 { color: var(--azul); margin-top: 0; }
-.modal-box input { background: #f5f9ff; border: 1px solid #d0e0f5; color: var(--texto); border-radius: 10px; width: 85%; padding: 12px; font-size: 15px; margin: 10px 0; }
 .modal-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
-.modal-btn-row button { margin: 0; flex: 1; font-size: 14px; padding: 10px; }
-.history-list { max-height: 200px; overflow-y: auto; background: #f5f9ff; border-radius: 10px; padding: 10px; margin: 10px 0; text-align: left; }
-.history-list p { color: var(--texto); font-size: 11px; margin: 5px 0; border-bottom: 1px solid #e8eef5; padding-bottom: 5px; }
-.admin-user-cripto-item { background: #f5f9ff; border-radius: 10px; padding: 10px 12px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
-.auc-left { display: flex; align-items: center; gap: 8px; }
-.auc-emoji { font-size: 20px; }
-.auc-nombre { font-weight: bold; font-size: 13px; }
-.auc-cant { font-size: 11px; color: var(--texto-sub); }
-.btn-auc-quitar { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin: 0; }
 .qty-selector { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 12px 0; }
 .qty-btn { padding: 8px 16px; font-size: 20px; border-radius: 10px; margin: 0; }
-.qty-num { font-size: 24px; font-weight: bold; color: var(--azul); min-width: 40px; text-align: center; transition: transform 0.15s; }
-.qty-num.bump { animation: bounce 0.3s ease; }
-
-/* Admin opiniones */
-.admin-opinion-card { background: #f5f9ff; border-radius: 12px; padding: 12px; margin: 6px 0; text-align: left; }
-.admin-opinion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.admin-opinion-estrellas { font-size: 14px; }
-.admin-opinion-texto { font-size: 13px; color: var(--texto); margin: 0 0 4px; }
-.admin-opinion-fecha { font-size: 11px; color: var(--texto-sub); }
-.btn-borrar-opinion { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin: 0; }
-
-/* ===== LOADING SPINNER ===== */
-.loading-spinner {
-  width: 28px; height: 28px; border: 3px solid #e0e0e0;
-  border-top-color: var(--azul); border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin: 20px auto;
-}
+.qty-num { font-size: 24px; font-weight: bold; color: var(--azul); min-width: 40px; text-align: center; }
 </style>
 </head>
 <body><div class="app">
 
-  <!-- TOAST -->
   <div id="toast"></div>
 
-  <!-- DRAWER -->
   <div class="drawer" id="drawer">
     <a onclick="cambiarPantalla('inicio');toggleMenu()">🏠 Inicio</a>
     <a onclick="cambiarPantalla('balance');toggleMenu()">💰 Balance</a>
-    <a onclick="cambiarPantalla('depositos');toggleMenu()">💸 Depósitos</a>
+    <a onclick="cambiarPantalla('depositos');toggleMenu()">💸 Transferir</a>
     <a onclick="cambiarPantalla('criptomonedas');toggleMenu()">🪙 Criptomonedas</a>
-    <a onclick="cambiarPantalla('carrito');toggleMenu()">🛒 Carrito <span id="carritoDrawerCount" style="background:var(--azul);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;display:none"></span></a>
-    <a onclick="cambiarPantalla('misCriptos');toggleMenu()">💎 Mis Criptomonedas</a>
+    <a onclick="cambiarPantalla('carrito');toggleMenu()">🛒 Carrito <span id="carritoDrawerCount"></span></a>
+    <a onclick="cambiarPantalla('misCriptos');toggleMenu()">💎 Mis Criptos</a>
     <a onclick="cambiarPantalla('comentarios');toggleMenu()">⭐ Reseñas</a>
     <a onclick="cambiarPantalla('perfil');toggleMenu()">👤 Perfil</a>
+    <a onclick="cambiarPantalla('configuracion');toggleMenu()">⚙️ Configuración</a>
     <a onclick="logout();toggleMenu()">🚪 Cerrar sesión</a>
   </div>
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
   <!-- LOGIN -->
   <div id="login" class="pantalla activa">
-    <img src="bancolibre.jpg.jpeg" class="logo" onerror="this.style.display='none'">
+    <img src="https://placehold.co/300x150/007aff/white?text=BANCO+LIBRE" class="logo">
     <h1>Banco Libre</h1>
     <input id="usuario" placeholder="Número de cuenta">
     <input id="password" type="password" placeholder="Contraseña">
@@ -514,11 +465,11 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
       <div id="headerAvatar" style="cursor:pointer;" onclick="cambiarPantalla('perfil')"></div>
     </div>
     <div class="contenido">
-      <p id="bienvenidaMsg" style="color:var(--texto-sub);font-size:13px;margin:0 0 12px;text-align:left;"></p>
+      <p id="bienvenidaMsg" style="color:var(--texto-sub);font-size:13px;text-align:left;"></p>
       <div class="inicio-saldo-card">
         <div class="inicio-saldo-label">Saldo disponible</div>
         <div class="inicio-saldo-num" id="inicioSaldo">$—</div>
-        <div style="font-size:12px;opacity:0.7;margin-top:4px;">Cuenta: <span id="cuentaActual"></span></div>
+        <div style="font-size:12px;">Cuenta: <span id="cuentaActual"></span></div>
       </div>
       <div class="inicio-accesos">
         <button class="inicio-acceso-btn" onclick="cambiarPantalla('depositos')"><span class="inicio-acceso-icon">💸</span>Transferir</button>
@@ -526,44 +477,11 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
         <button class="inicio-acceso-btn" onclick="cambiarPantalla('misCriptos')"><span class="inicio-acceso-icon">💎</span>Mis Criptos</button>
         <button class="inicio-acceso-btn" onclick="cambiarPantalla('comentarios')"><span class="inicio-acceso-icon">⭐</span>Reseñas</button>
       </div>
-      <!-- CARRUSEL -->
       <div class="carrusel-wrap" id="carruselWrap">
         <div class="carrusel-track" id="carruselTrack">
-          <div class="carrusel-slide">
-            <div class="carrusel-card oferta" onclick="irDesdeCarrusel('criptomonedas','ZRO')">
-              <span class="cc-emoji">⚡</span>
-              <h3>¡Oferta del día!</h3>
-              <p>ZeroCoin (ZRO) con precio mínimo histórico. ¡Toca para comprar!</p>
-            </div>
-          </div>
-          <div class="carrusel-slide">
-            <div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','FNX')">
-              <span class="cc-emoji">🔥</span>
-              <h3>PhoenixCoin en alza</h3>
-              <p>FNX subió un 12% esta semana. ¡Toca para invertir!</p>
-            </div>
-          </div>
-          <div class="carrusel-slide">
-            <div class="carrusel-card tip" onclick="cambiarPantalla('balance')">
-              <span class="cc-emoji">💡</span>
-              <h3>Consejo financiero</h3>
-              <p>Diversifica tu cartera. No pongas todos tus fondos en una sola cripto.</p>
-            </div>
-          </div>
-          <div class="carrusel-slide">
-            <div class="carrusel-card promo" onclick="cambiarPantalla('registro')">
-              <span class="cc-emoji">🎁</span>
-              <h3>Nuevo usuario</h3>
-              <p>Cada cuenta nueva inicia con $10,000. ¡Comparte con un amigo!</p>
-            </div>
-          </div>
-          <div class="carrusel-slide">
-            <div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','NVX')">
-              <span class="cc-emoji">🌟</span>
-              <h3>NovaCoin recomendada</h3>
-              <p>NVX es la cripto más estable del banco. ¡Toca para comprar!</p>
-            </div>
-          </div>
+          <div class="carrusel-slide"><div class="carrusel-card oferta" onclick="irCripto('BLC')"><span class="cc-emoji">⚡</span><h3>¡Oferta!</h3><p>BancoLibreCoin - Precio especial</p></div></div>
+          <div class="carrusel-slide"><div class="carrusel-card cripto" onclick="irCripto('FNX')"><span class="cc-emoji">🔥</span><h3>PhoenixCoin</h3><p>En alza esta semana</p></div></div>
+          <div class="carrusel-slide"><div class="carrusel-card tip" onclick="cambiarPantalla('balance')"><span class="cc-emoji">💡</span><h3>Consejo</h3><p>Diversifica tu cartera</p></div></div>
         </div>
         <div class="carrusel-dots" id="carruselDots"></div>
       </div>
@@ -572,1191 +490,554 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 
   <!-- DEPÓSITOS -->
   <div id="depositos" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Depósitos</div></div>
-    <div class="contenido">
-      <h2>Transferir</h2>
-      <input id="cuentaDestino" placeholder="Cuenta destino">
-      <input id="monto" type="number" placeholder="Monto">
-      <button onclick="depositar()">💸 Depositar</button>
-    </div>
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Transferir</div></div>
+    <div class="contenido"><h2>Transferir</h2><input id="cuentaDestino" placeholder="Cuenta destino"><input id="monto" type="number" placeholder="Monto"><button onclick="depositar()">💸 Depositar</button></div>
   </div>
 
   <!-- BALANCE -->
   <div id="balance" class="pantalla">
     <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Balance</div></div>
-    <div class="contenido">
-      <h2>Saldo: $<span id="saldo" class="saldo-animado">0</span></h2>
-      <h3 style="text-align:left;">Movimientos</h3>
-      <div id="movimientos"><ul id="listaMovimientos"></ul></div>
-    </div>
-  </div>
-
-  <!-- PERFIL - MEJORADO CON CÁMARA -->
-  <div id="perfil" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
-    <div class="contenido">
-      <div class="perfil-avatar-wrap" id="perfilAvatarWrap">
-        <div class="perfil-avatar-placeholder" id="perfilAvatarPlaceholder">👤</div>
-        <img id="perfilAvatarImg" class="perfil-avatar" style="display:none;" src="" alt="avatar">
-      
-      </div>
-      
-      <!-- NUEVO: Opciones para subir o tomar foto -->
-      <div class="perfil-photo-options">
-        <button onclick="subirFotoDesdeArchivo()">🖼️ Subir imagen</button>
-        <button onclick="tomarFotoPerfil()">📸 Tomar foto</button>
-      </div>
-      
-      <div class="perfil-nombre-display" id="perfilNombreDisplay">—</div>
-      <div class="perfil-cuenta-display" id="cuentaPerfil"></div>
-      
-      <!-- Chip "Cliente desde" -->
-      <div class="perfil-cliente-desde" id="perfilClienteDesde" style="display:none;">
-        🗓️ <span id="perfilClienteDesdeTxt"></span>
-      </div>
-      
-      <div class="perfil-edit-section">
-        <label>Nombre de usuario</label>
-        <input id="inputNombrePerfil" placeholder="Tu nombre" style="width:100%;margin:0 0 10px;">
-        <button onclick="guardarPerfil()" style="width:100%;margin:0;">💾 Guardar perfil</button>
-      </div>
-      
-      <!-- Input oculto para seleccionar archivo -->
-      <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" onchange="procesarFotoPerfil(this.files[0])">
-    </div>
-  </div>
-
-  <!-- RESET -->
-  <div id="reset" class="pantalla">
-    <h2>Restablecer contraseña</h2>
-    <input id="correoReset" placeholder="Correo registrado">
-    <button onclick="enviarPin()">Enviar PIN</button>
-    <input id="pinIngresado" placeholder="PIN recibido">
-    <input id="nuevaPasswordReset" type="password" placeholder="Nueva contraseña">
-    <button onclick="cambiarPassword()">Cambiar contraseña</button>
-    <button onclick="cambiarPantalla('login')">Volver</button>
+    <div class="contenido"><h2>Saldo: $<span id="saldo" class="saldo-animado">0</span></h2><h3>Movimientos</h3><div id="movimientos"><ul id="listaMovimientos"></ul></div></div>
   </div>
 
   <!-- CRIPTOMONEDAS -->
   <div id="criptomonedas" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Criptomonedas</div>
-      <div style="display:flex;align-items:flex-start;cursor:pointer;" onclick="cambiarPantalla('carrito')">
-        🛒<span class="cart-badge" id="cartBadge">0</span>
-      </div>
-    </div>
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Criptomonedas</div><div style="cursor:pointer;" onclick="cambiarPantalla('carrito')">🛒<span class="cart-badge" id="cartBadge">0</span></div></div>
     <div class="contenido">
-      <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Toca una moneda para comprar</p>
+      <div class="grafica-container grafica-general">
+        <div class="grafica-titulo">📊 Tendencia General</div>
+        <canvas id="graficaGeneral" class="grafica-canvas"></canvas>
+      </div>
       <div class="cripto-grid" id="criptoGrid"></div>
     </div>
   </div>
 
   <!-- CARRITO -->
-  <div id="carrito" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">🛒 Carrito</div></div>
-    <div class="contenido"><div id="carritoContenido"></div></div>
-  </div>
+  <div id="carrito" class="pantalla"><div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">🛒 Carrito</div></div><div class="contenido"><div id="carritoContenido"></div></div></div>
 
   <!-- MIS CRIPTOS -->
-  <div id="misCriptos" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">💎 Mis Criptos</div></div>
-    <div class="contenido"><div id="misCriptosContenido"><div class="loading-spinner"></div></div></div>
-  </div>
+  <div id="misCriptos" class="pantalla"><div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">💎 Mis Criptos</div></div><div class="contenido"><div id="misCriptosContenido"><div class="loading-spinner"></div></div></div></div>
 
-  <!-- COMENTARIOS / RESEÑAS -->
-  <div id="comentarios" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⭐ Reseñas</div></div>
+  <!-- PERFIL -->
+  <div id="perfil" class="pantalla">
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
     <div class="contenido">
-      <div style="background:var(--gris-card);border-radius:14px;padding:14px;margin-bottom:14px;">
-        <p style="margin:0 0 8px;font-weight:bold;color:var(--texto);font-size:14px;">Deja tu reseña</p>
-        <div class="estrellas" id="estrellasInput">
-          <span class="estrella" data-val="1" onclick="setEstrella(1)">★</span>
-          <span class="estrella" data-val="2" onclick="setEstrella(2)">★</span>
-          <span class="estrella" data-val="3" onclick="setEstrella(3)">★</span>
-          <span class="estrella" data-val="4" onclick="setEstrella(4)">★</span>
-          <span class="estrella" data-val="5" onclick="setEstrella(5)">★</span>
-        </div>
-        <textarea id="textoComentario" rows="3" placeholder="Escribe tu opinión sobre Banco Libre..."></textarea>
-        <button onclick="enviarComentario()" style="width:100%;margin:6px 0 0;">Publicar reseña</button>
+      <div class="perfil-avatar-wrap">
+        <div class="perfil-avatar-placeholder" id="perfilAvatarPlaceholder">👤</div>
+        <img id="perfilAvatarImg" class="perfil-avatar" style="display:none;">
+        <button class="perfil-camara-btn" onclick="subirFotoDesdeArchivo()">📷</button>
       </div>
-      <div id="listaComentarios"><div class="loading-spinner"></div></div>
+      <div class="perfil-photo-options">
+        <button onclick="subirFotoDesdeArchivo()">🖼️ Subir imagen</button>
+        <button onclick="tomarFotoPerfil()">📸 Tomar foto</button>
+      </div>
+      <div class="perfil-nombre-wrapper">
+        <span class="perfil-nombre-display" id="perfilNombreDisplay">—</span>
+        <span class="perfil-edit-icon" onclick="editarNombre()">✏️</span>
+      </div>
+      <input type="text" id="perfilNombreInput" class="perfil-nombre-input" style="display:none;" placeholder="Tu nombre">
+      <div class="perfil-cuenta-display" id="cuentaPerfil"></div>
+      <div class="perfil-edit-section"><label>📧 Correo</label><p id="perfilCorreo" style="color:var(--texto-sub);"></p></div>
+      <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" onchange="procesarFotoPerfil(this.files[0])">
     </div>
   </div>
 
-  <!-- PANEL ADMIN -->
-  <div id="admin" class="pantalla">
-    <div class="admin-header">
-      <div class="menu-icon" onclick="logout()" style="font-size:20px;" title="Salir">⏻</div>
-      <div class="title">Panel Admin</div>
-      <span class="admin-badge">ADMIN</span>
-    </div>
-    <div class="contenido" style="padding: 70px 12px 12px;">
-      <div class="admin-tabs">
-        <button class="admin-tab active" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
-        <button class="admin-tab" onclick="switchAdminTab('criptos')">🪙 Criptos</button>
-        <button class="admin-tab" onclick="switchAdminTab('opiniones')">⭐ Reseñas</button>
-      </div>
-      <div class="admin-tab-content active" id="tabUsuarios">
-        <div class="admin-stats">
-          <div class="stat-item"><div class="stat-val" id="statCuentas">—</div><div class="stat-label">Cuentas</div></div>
-          <div class="stat-item"><div class="stat-val" id="statSaldo">—</div><div class="stat-label">Saldo total</div></div>
-          <div class="stat-item"><div class="stat-val" id="statMovs">—</div><div class="stat-label">Movimientos</div></div>
-        </div>
-        <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
-        <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
-        <div class="admin-list-wrap" id="adminListWrap"><div class="loading-spinner"></div></div>
-      </div>
-      <div class="admin-tab-content" id="tabCriptos">
-        <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Modifica el precio de cada criptomoneda</p>
-        <div id="adminCriptosList" style="max-height:480px;overflow-y:auto;"></div>
-      </div>
-      <div class="admin-tab-content" id="tabOpiniones">
-        <button class="admin-refresh" onclick="cargarOpinionesAdmin()">↻ Actualizar</button>
-        <div id="adminOpinionesList" style="max-height:480px;overflow-y:auto;">
-          <div class="loading-spinner"></div>
-        </div>
-      </div>
+  <!-- CONFIGURACIÓN -->
+  <div id="configuracion" class="pantalla">
+    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⚙️ Configuración</div></div>
+    <div class="contenido">
+      <div class="config-item"><span class="config-label">🌙 Tema oscuro</span><label class="switch"><input type="checkbox" id="temaOscuroSwitch" onchange="toggleTema()"><span class="slider"></span></label></div>
+      <div class="config-item"><span class="config-label">🔔 Notificaciones</span><label class="switch"><input type="checkbox" id="notificacionesSwitch" onchange="toggleNotificaciones()"><span class="slider"></span></label></div>
+      <button onclick="exportarDatos()" style="width:100%;margin-top:10px;">📤 Exportar mis datos</button>
+      <button onclick="cambiarPantalla('reset')" style="width:100%;margin-top:10px;background:#ff3b30;">🔐 Cambiar contraseña</button>
     </div>
   </div>
+
+  <!-- RESET -->
+  <div id="reset" class="pantalla"><h2>Restablecer contraseña</h2><input id="correoReset" placeholder="Correo registrado"><button onclick="enviarPin()">Enviar PIN</button><input id="pinIngresado" placeholder="PIN"><input id="nuevaPasswordReset" type="password" placeholder="Nueva contraseña"><button onclick="cambiarPassword()">Cambiar</button><button onclick="cambiarPantalla('login')">Volver</button></div>
+
+  <!-- COMENTARIOS -->
+  <div id="comentarios" class="pantalla"><div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⭐ Reseñas</div></div><div class="contenido"><div id="listaComentarios"></div></div></div>
 
   <!-- MODALES -->
-  <div class="modal-overlay" id="modalSaldo">
-    <div class="modal-box">
-      <h3>✏️ Editar Saldo</h3>
-      <p id="modalCuentaLabel" style="color:var(--texto-sub);font-size:13px;"></p>
-      <input id="nuevoSaldoInput" type="number" placeholder="Nuevo saldo">
-      <div class="modal-btn-row">
-        <button class="btn-edit" onclick="guardarSaldo()">Guardar</button>
-        <button class="btn-delete" onclick="cerrarModal('modalSaldo')">Cancelar</button>
-      </div>
-    </div>
-  </div>
+  <div class="modal-overlay" id="modalCompra"><div class="modal-box"><h3 id="modalCompraNombre">Comprar</h3><p id="modalCompraPrecio"></p><div class="qty-selector"><button class="qty-btn" onclick="cambiarCantidadCompra(-1)">−</button><span class="qty-num" id="qtyNum">1</span><button class="qty-btn" onclick="cambiarCantidadCompra(1)">+</button></div><p id="modalCompraTotal"></p><div class="modal-btn-row"><button onclick="agregarAlCarrito()">Añadir al carrito</button><button onclick="cerrarModal('modalCompra')">Cancelar</button></div></div></div>
 
-  <div class="modal-overlay" id="modalHistorial">
-    <div class="modal-box">
-      <h3>📋 Historial</h3>
-      <p id="modalHistCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="history-list" id="historialLista"></div>
-      <button onclick="cerrarModal('modalHistorial')" style="width:100%;margin:0;">Cerrar</button>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalBorrar">
-    <div class="modal-box">
-      <h3 style="color:#ff3b30;">⚠️ Eliminar Cuenta</h3>
-      <p id="modalBorrarLabel" style="color:var(--texto-sub);font-size:13px;"></p>
-      <p style="color:#ff3b30;font-size:12px;">Esta acción no se puede deshacer.</p>
-      <div class="modal-btn-row">
-        <button class="btn-delete" onclick="confirmarBorrado()">Eliminar</button>
-        <button class="btn-edit" onclick="cerrarModal('modalBorrar')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalPrecioCripto">
-    <div class="modal-box">
-      <h3 id="modalCriptoNombre">✏️ Editar Precio</h3>
-      <p id="modalCriptoPrecioActual" style="color:var(--texto-sub);font-size:13px;"></p>
-      <input id="nuevoPrecioInput" type="number" placeholder="Nuevo precio ($)">
-      <div class="modal-btn-row">
-        <button class="btn-edit" onclick="guardarPrecioCripto()">Guardar</button>
-        <button class="btn-delete" onclick="cerrarModal('modalPrecioCripto')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalUserCriptos">
-    <div class="modal-box">
-      <h3>🪙 Criptos del usuario</h3>
-      <p id="modalUserCriptoCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="history-list" id="userCriptosList" style="max-height:220px;"></div>
-      <button onclick="cerrarModal('modalUserCriptos')" style="width:100%;margin:8px 0 0;">Cerrar</button>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalCompra">
-    <div class="modal-box">
-      <h3 id="modalCompraNombre">Comprar</h3>
-      <p id="modalCompraPrecio" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="qty-selector">
-        <button class="qty-btn" onclick="cambiarCantidadCompra(-1)">−</button>
-        <span class="qty-num" id="qtyNum">1</span>
-        <button class="qty-btn" onclick="cambiarCantidadCompra(1)">+</button>
-      </div>
-      <p id="modalCompraTotal" style="font-weight:bold;color:var(--azul);font-size:16px;"></p>
-      <div class="modal-btn-row">
-        <button class="btn-cripto" onclick="agregarAlCarrito()">Añadir al carrito</button>
-        <button class="btn-delete" onclick="cerrarModal('modalCompra')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalOpinionesUsuario">
-    <div class="modal-box">
-      <h3>⭐ Reseñas del usuario</h3>
-      <p id="modalOpinionCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="history-list" id="opinionesUsuarioLista" style="max-height:240px;"></div>
-      <button onclick="cerrarModal('modalOpinionesUsuario')" style="width:100%;margin:8px 0 0;">Cerrar</button>
-    </div>
-  </div>
+  <div class="modal-overlay" id="modalVender"><div class="modal-box"><h3 id="modalVenderNombre">Vender</h3><p id="modalVenderInfo"></p><div class="qty-selector"><button class="qty-btn" onclick="cambiarCantidadVenta(-1)">−</button><span class="qty-num" id="qtyVentaNum">1</span><button class="qty-btn" onclick="cambiarCantidadVenta(1)">+</button></div><p id="modalVenderTotal"></p><div class="modal-btn-row"><button class="btn-vender" onclick="confirmarVenta()">Vender</button><button onclick="cerrarModal('modalVender')">Cancelar</button></div></div></div>
 
 <script>
+// ==================== DATOS ====================
 const BACKEND = "https://banco-libre-backend.onrender.com";
-const ADMIN_CORREO = "admin@gmail.com";
 const ADMIN_PASS = "pqrb728px";
 
-let cuentaActual = null, pinTemporal = null, correoTemporal = null;
-let esAdmin = false, todasLasCuentas = [];
-let cuentaParaEditar = null, cuentaParaBorrar = null, criptoParaEditar = null;
-let cantidadCompra = 1, criptoCompraActual = null;
-let carrito = {};
-let estrellaSeleccionada = 0;
-let perfilNombre = "";
-let perfilFotoUrl = "";
-let perfilFechaRegistro = "";
-
 const CRIPTOS = [
-  { simbolo:"BLC", nombre:"BancoLibreCoin",  emoji:"🏦", precio:1200 },
-  { simbolo:"LBX", nombre:"LibrexToken",     emoji:"🔓", precio:850  },
-  { simbolo:"NVX", nombre:"NovaCoin",         emoji:"🌟", precio:3200 },
-  { simbolo:"ZRO", nombre:"ZeroCoin",         emoji:"⚡", precio:450  },
-  { simbolo:"QNT", nombre:"QuantumBit",       emoji:"🔬", precio:5600 },
-  { simbolo:"SLX", nombre:"SolarEx",          emoji:"☀️", precio:980  },
-  { simbolo:"DRK", nombre:"DarkMatter",       emoji:"🌑", precio:2100 },
-  { simbolo:"AQX", nombre:"AquaToken",        emoji:"🌊", precio:670  },
-  { simbolo:"FNX", nombre:"PhoenixCoin",      emoji:"🔥", precio:4300 },
-  { simbolo:"LNR", nombre:"LunarBit",         emoji:"🌙", precio:1550 }
+  { simbolo:"BLC", nombre:"BancoLibreCoin", emoji:"🏦", precio:1200 },
+  { simbolo:"LBX", nombre:"LibrexToken", emoji:"🔓", precio:850 },
+  { simbolo:"NVX", nombre:"NovaCoin", emoji:"🌟", precio:3200 },
+  { simbolo:"ZRO", nombre:"ZeroCoin", emoji:"⚡", precio:450 },
+  { simbolo:"QNT", nombre:"QuantumBit", emoji:"🔬", precio:5600 },
+  { simbolo:"SLX", nombre:"SolarEx", emoji:"☀️", precio:980 },
+  { simbolo:"DRK", nombre:"DarkMatter", emoji:"🌑", precio:2100 },
+  { simbolo:"AQX", nombre:"AquaToken", emoji:"🌊", precio:670 },
+  { simbolo:"FNX", nombre:"PhoenixCoin", emoji:"🔥", precio:4300 },
+  { simbolo:"LNR", nombre:"LunarBit", emoji:"🌙", precio:1550 }
 ];
 
 let preciosCriptos = {};
-CRIPTOS.forEach(c => { preciosCriptos[c.simbolo] = c.precio; });
+let historialPrecios = {}; // Para gráficas
+let carrito = {};
+let cuentaActual = null;
+let perfilNombre = "";
+let perfilFotoUrl = "";
+let perfilCorreo = "";
+let cantidadCompra = 1;
+let cantidadVenta = 1;
+let criptoCompraActual = null;
+let criptoVentaActual = null;
+let criptoCantidadDisponible = 0;
+let graficas = {};
+let intervaloPrecios = null;
 
-/* ===== TOAST ===== */
-let toastTimer = null;
-function showToast(msg, duracion = 2200) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("visible");
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("visible"), duracion);
+// ==================== TEMA ====================
+function toggleTema() {
+  const isDark = document.getElementById("temaOscuroSwitch").checked;
+  if (isDark) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("tema", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.setItem("tema", "light");
+  }
 }
 
-const drawer = document.getElementById("drawer");
-const overlay = document.getElementById("overlay");
-function toggleMenu(){ drawer.classList.toggle("active"); overlay.classList.toggle("active"); }
-
-/* ==========================================
-   FUNCIONES DE FOTO DE PERFIL (MEJORADAS CON CÁMARA)
-   ========================================== */
-
-// Función para subir foto desde archivo (galería)
-function subirFotoDesdeArchivo() {
-  document.getElementById("inputFotoPerfil").click();
+function cargarTema() {
+  const tema = localStorage.getItem("tema");
+  if (tema === "dark") {
+    document.getElementById("temaOscuroSwitch").checked = true;
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
 }
 
-// Función para tomar foto con la cámara
-function tomarFotoPerfil() {
-  // Crear input de tipo file que acepte captura de cámara
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.capture = 'environment'; // 'user' para cámara frontal, 'environment' para trasera
-  
-  input.onchange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      procesarFotoPerfil(e.target.files[0]);
+function toggleNotificaciones() {
+  const enabled = document.getElementById("notificacionesSwitch").checked;
+  localStorage.setItem("notificaciones", enabled);
+}
+
+// ==================== ACTUALIZACIÓN DE PRECIOS CADA 5 MINUTOS ====================
+function iniciarActualizacionPrecios() {
+  if (intervaloPrecios) clearInterval(intervaloPrecios);
+  intervaloPrecios = setInterval(async () => {
+    const nuevosPrecios = {};
+    for (let c of CRIPTOS) {
+      const cambio = (Math.random() * 13) - 5; // -5% a +8%
+      let nuevo = (preciosCriptos[c.simbolo] || c.precio) * (1 + cambio / 100);
+      nuevo = Math.max(1, Math.round(nuevo));
+      nuevosPrecios[c.simbolo] = nuevo;
+      
+      // Guardar historial para gráfica
+      if (!historialPrecios[c.simbolo]) historialPrecios[c.simbolo] = [];
+      historialPrecios[c.simbolo].push(nuevo);
+      if (historialPrecios[c.simbolo].length > 20) historialPrecios[c.simbolo].shift();
     }
-  };
-  
-  input.click();
+    preciosCriptos = nuevosPrecios;
+    actualizarGraficas();
+    if (document.getElementById("criptomonedas").classList.contains("activa")) {
+      renderizarCriptos();
+    }
+    if (document.getElementById("misCriptos").classList.contains("activa")) {
+      cargarMisCriptos();
+    }
+    if (document.getElementById("carrito").classList.contains("activa")) {
+      renderizarCarrito();
+    }
+    if (document.querySelector("#criptomonedas .activa") || document.querySelector("#misCriptos .activa")) {
+      showToast("📈 Los precios de criptomonedas se han actualizado", 1500);
+    }
+  }, 300000); // 5 minutos
 }
 
-// Función unificada para procesar la foto (comprimir y subir)
+// ==================== GRÁFICAS ====================
+function inicializarHistorial() {
+  for (let c of CRIPTOS) {
+    if (!historialPrecios[c.simbolo]) {
+      historialPrecios[c.simbolo] = [];
+      let precio = preciosCriptos[c.simbolo] || c.precio;
+      for (let i = 0; i < 20; i++) {
+        historialPrecios[c.simbolo].push(precio + (Math.random() - 0.5) * 100);
+      }
+    }
+  }
+}
+
+function crearGrafica(simbolo, canvasId) {
+  const ctx = document.getElementById(canvasId)?.getContext("2d");
+  if (!ctx) return;
+  const historial = historialPrecios[simbolo] || Array(20).fill(preciosCriptos[simbolo] || 1000);
+  return new Chart(ctx, {
+    type: 'line',
+    data: { labels: Array(20).fill(''), datasets: [{ data: historial, borderColor: '#007aff', backgroundColor: 'rgba(0,122,255,0.1)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+  });
+}
+
+function actualizarGraficas() {
+  for (let c of CRIPTOS) {
+    if (graficas[c.simbolo] && historialPrecios[c.simbolo]) {
+      graficas[c.simbolo].data.datasets[0].data = historialPrecios[c.simbolo];
+      graficas[c.simbolo].update();
+    }
+  }
+  if (graficas.general && historialPrecios) {
+    const datasets = [];
+    CRIPTOS.forEach(c => {
+      if (historialPrecios[c.simbolo]) {
+        datasets.push({ label: c.simbolo, data: historialPrecios[c.simbolo], borderColor: `hsl(${Math.random() * 360}, 70%, 50%)`, borderWidth: 1.5, fill: false, pointRadius: 0, tension: 0.3 });
+      }
+    });
+    graficas.general.data.datasets = datasets;
+    graficas.general.update();
+  }
+}
+
+// ==================== PERFIL FOTO ====================
+function subirFotoDesdeArchivo() { document.getElementById("inputFotoPerfil").click(); }
+function tomarFotoPerfil() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment'; input.onchange = (e) => { if (e.target.files[0]) procesarFotoPerfil(e.target.files[0]); }; input.click(); }
 function procesarFotoPerfil(file) {
   if (!file) return;
-  
-  // Validar tamaño (máximo 2MB)
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("⚠️ La imagen no debe superar 2MB");
-    return;
-  }
-  
-  // Mostrar loading
-  showToast("📸 Procesando foto...");
-  
+  if (file.size > 2 * 1024 * 1024) { showToast("⚠️ La imagen no debe superar 2MB"); return; }
   const reader = new FileReader();
-  reader.onload = async function(e) {
-    // Comprimir la imagen si es muy grande
+  reader.onload = function(e) {
     const img = new Image();
     img.onload = async function() {
-      // Redimensionar si es necesario (máximo 500px de ancho)
-      let width = img.width;
-      let height = img.height;
-      const maxWidth = 500;
-      const maxHeight = 500;
-      
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width = width * ratio;
-        height = height * ratio;
-      }
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      // Convertir a JPEG con calidad 0.8 para reducir tamaño
-      const fotoDataURL = canvas.toDataURL('image/jpeg', 0.8);
-      
-      // Guardar la foto
-      perfilFotoUrl = fotoDataURL;
-      guardarSesion();
-      cargarPerfil();
-      cargarDatosInicio();
-      
-      try {
-        await fetch(BACKEND + "/perfil/guardar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cuenta: cuentaActual, nombre: perfilNombre, foto: perfilFotoUrl })
-        });
-        showToast("✅ Foto de perfil actualizada");
-      } catch(err) {
-        console.error("Error al guardar foto:", err);
-        showToast("✅ Foto actualizada localmente");
-      }
+      let width = img.width, height = img.height;
+      const maxDim = 500;
+      if (width > maxDim || height > maxDim) { const ratio = Math.min(maxDim / width, maxDim / height); width *= ratio; height *= ratio; }
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      perfilFotoUrl = canvas.toDataURL('image/jpeg', 0.8);
+      await fetch(BACKEND + "/perfil/guardar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cuenta: cuentaActual, nombre: perfilNombre, foto: perfilFotoUrl }) }).catch(()=>{});
+      cargarPerfil(); cargarDatosInicio(); showToast("✅ Foto actualizada");
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// Función original para compatibilidad (subir desde archivo)
-function subirFotoPerfil(event) {
-  if (event.target.files && event.target.files[0]) {
-    procesarFotoPerfil(event.target.files[0]);
-  }
+function editarNombre() {
+  const display = document.getElementById("perfilNombreDisplay");
+  const input = document.getElementById("perfilNombreInput");
+  display.style.display = "none";
+  input.style.display = "inline-block";
+  input.value = perfilNombre;
+  input.focus();
+  input.onblur = async () => {
+    const nuevo = input.value.trim();
+    if (nuevo && nuevo !== perfilNombre) {
+      perfilNombre = nuevo;
+      await fetch(BACKEND + "/perfil/guardar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cuenta: cuentaActual, nombre: perfilNombre, foto: perfilFotoUrl }) });
+      cargarPerfil(); cargarDatosInicio(); showToast("✅ Nombre actualizado");
+    }
+    display.style.display = "inline-block";
+    input.style.display = "none";
+  };
 }
 
-/* ==========================================
-   PERSISTENCIA DE CARRITO Y SESIÓN
-   ========================================== */
-function guardarCarrito() {
-  if (cuentaActual) {
-    try { localStorage.setItem("bl_carrito_" + cuentaActual, JSON.stringify(carrito)); } catch(e) {}
-  }
+// ==================== VENTA DE CRIPTOS ====================
+function abrirModalVenta(simbolo, cantidadDisponible) {
+  criptoVentaActual = simbolo;
+  criptoCantidadDisponible = cantidadDisponible;
+  cantidadVenta = 1;
+  const c = CRIPTOS.find(x => x.simbolo === simbolo);
+  const precio = preciosCriptos[simbolo] || c.precio;
+  document.getElementById("modalVenderNombre").innerHTML = c.emoji + " " + c.nombre;
+  document.getElementById("modalVenderInfo").innerHTML = `Disponibles: ${cantidadDisponible} | Precio actual: $${precio.toLocaleString()}`;
+  document.getElementById("qtyVentaNum").textContent = 1;
+  document.getElementById("modalVenderTotal").textContent = `Recibirás: $${precio.toLocaleString()}`;
+  document.getElementById("modalVender").classList.add("active");
 }
 
-function cargarCarritoLocal() {
-  if (cuentaActual) {
-    try {
-      const raw = localStorage.getItem("bl_carrito_" + cuentaActual);
-      carrito = raw ? JSON.parse(raw) : {};
-    } catch(e) { carrito = {}; }
-  } else {
-    carrito = {};
-  }
-  actualizarBadgeCarrito();
+function cambiarCantidadVenta(delta) {
+  cantidadVenta = Math.max(1, Math.min(criptoCantidadDisponible, cantidadVenta + delta));
+  const c = CRIPTOS.find(x => x.simbolo === criptoVentaActual);
+  const precio = preciosCriptos[criptoVentaActual] || c.precio;
+  document.getElementById("qtyVentaNum").textContent = cantidadVenta;
+  document.getElementById("modalVenderTotal").textContent = `Recibirás: $${(precio * cantidadVenta).toLocaleString()}`;
 }
 
-function limpiarCarritoLocal() {
-  if (cuentaActual) {
-    try { localStorage.removeItem("bl_carrito_" + cuentaActual); } catch(e) {}
-  }
-  carrito = {};
-}
-
-function guardarSesion() {
-  if (cuentaActual) {
-    sessionStorage.setItem("bl_cuenta", cuentaActual);
-    sessionStorage.setItem("bl_nombre", perfilNombre);
-    sessionStorage.setItem("bl_foto", perfilFotoUrl);
-    sessionStorage.setItem("bl_fecha", perfilFechaRegistro);
-  }
-}
-
-function guardarPantalla(id) {
-  const pantallasPublicas = ["login","registro","reset"];
-  if (!pantallasPublicas.includes(id)) {
-    sessionStorage.setItem("bl_pantalla", id);
-  }
-}
-
-async function restaurarSesion() {
-  const cuenta = sessionStorage.getItem("bl_cuenta");
-  const pantalla = sessionStorage.getItem("bl_pantalla");
-  if (!cuenta) return false;
-
+async function confirmarVenta() {
+  if (!criptoVentaActual) return;
+  const c = CRIPTOS.find(x => x.simbolo === criptoVentaActual);
+  const precio = preciosCriptos[criptoVentaActual] || c.precio;
+  const monto = precio * cantidadVenta;
+  
   try {
-    const res = await fetch(BACKEND + "/cuenta/" + cuenta);
+    const res = await fetch(BACKEND + "/vender-cripto", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cuenta: cuentaActual, simbolo: criptoVentaActual, cantidad: cantidadVenta, precio })
+    });
     const data = await res.json();
-    if (!data.ok) { limpiarSesion(); return false; }
-
-    cuentaActual = cuenta;
-    perfilNombre = sessionStorage.getItem("bl_nombre") || data.nombre || "";
-    perfilFotoUrl = sessionStorage.getItem("bl_foto") || data.foto || "";
-    perfilFechaRegistro = sessionStorage.getItem("bl_fecha") || data.fechaRegistro || "";
-    esAdmin = false;
-
-    cuentaActualSpan();
-    cargarCarritoLocal();
-    await cargarPreciosCriptos();
-    initCarrusel();
-    await cargarDatosInicio();
-
-    const irA = pantalla || "inicio";
-    cambiarPantalla(irA);
-    return true;
+    if (data.ok) {
+      showToast(`✅ Vendiste ${cantidadVenta} ${criptoVentaActual} por $${monto.toLocaleString()}`);
+      cargarDatosInicio();
+      cargarMisCriptos();
+      cerrarModal("modalVender");
+    } else {
+      showToast("❌ " + data.mensaje);
+    }
   } catch(e) {
-    limpiarSesion();
-    return false;
+    showToast("❌ Error al vender");
   }
 }
 
-function limpiarSesion() {
-  sessionStorage.removeItem("bl_cuenta");
-  sessionStorage.removeItem("bl_nombre");
-  sessionStorage.removeItem("bl_foto");
-  sessionStorage.removeItem("bl_fecha");
-  sessionStorage.removeItem("bl_pantalla");
-}
-
-/* ===== CARRUSEL ===== */
-let carruselIdx = 0;
-const TOTAL_SLIDES = 5;
-let carruselTimer = null;
-let touchStartX = 0, touchStartY = 0;
-let isDragging = false, dragStartX = 0, currentTranslate = 0;
-
-function initCarrusel(){
-  let dots = document.getElementById("carruselDots");
-  dots.innerHTML = "";
-  for(let i=0;i<TOTAL_SLIDES;i++){
-    let d = document.createElement("div");
-    d.className = "carrusel-dot" + (i===0?" active":"");
-    d.onclick = ()=>irASlide(i);
-    dots.appendChild(d);
-  }
-  iniciarAutoplay();
-
-  const wrap = document.getElementById("carruselWrap");
-  const track = document.getElementById("carruselTrack");
-
-  wrap.addEventListener("touchstart", (e) => {
-    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-    isDragging = true; dragStartX = touchStartX;
-    currentTranslate = -carruselIdx * 100;
-    track.style.transition = "none"; detenerAutoplay();
-  }, { passive: true });
-
-  wrap.addEventListener("touchmove", (e) => {
-    if (!isDragging) return;
-    const dx = e.touches[0].clientX - touchStartX;
-    const dy = e.touches[0].clientY - touchStartY;
-    if (Math.abs(dy) > Math.abs(dx)) return;
-    const pct = (dx / wrap.offsetWidth) * 100;
-    track.style.transform = `translateX(${currentTranslate + pct}%)`;
-  }, { passive: true });
-
-  wrap.addEventListener("touchend", (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    const dx = e.changedTouches[0].clientX - dragStartX;
-    track.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
-    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) irASlide(carruselIdx + 1);
-    else if (dx > 40 && carruselIdx > 0) irASlide(carruselIdx - 1);
-    else irASlide(carruselIdx);
-    iniciarAutoplay();
-  }, { passive: true });
-
-  let mouseDown = false, mouseStartX = 0;
-  wrap.addEventListener("mousedown", (e) => {
-    mouseDown = true; mouseStartX = e.clientX; dragStartX = e.clientX;
-    currentTranslate = -carruselIdx * 100;
-    track.style.transition = "none"; detenerAutoplay(); e.preventDefault();
-  });
-  wrap.addEventListener("mousemove", (e) => {
-    if (!mouseDown) return;
-    const pct = ((e.clientX - mouseStartX) / wrap.offsetWidth) * 100;
-    track.style.transform = `translateX(${currentTranslate + pct}%)`;
-  });
-  wrap.addEventListener("mouseup", (e) => {
-    if (!mouseDown) return; mouseDown = false;
-    track.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
-    const dx = e.clientX - dragStartX;
-    if (dx < -40 && carruselIdx < TOTAL_SLIDES - 1) irASlide(carruselIdx + 1);
-    else if (dx > 40 && carruselIdx > 0) irASlide(carruselIdx - 1);
-    else irASlide(carruselIdx);
-    iniciarAutoplay();
-  });
-  wrap.addEventListener("mouseleave", () => {
-    if (mouseDown) { mouseDown = false; track.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)"; irASlide(carruselIdx); iniciarAutoplay(); }
-  });
-}
-
-function iniciarAutoplay() {
-  detenerAutoplay();
-  carruselTimer = setInterval(()=>{ irASlide((carruselIdx+1)%TOTAL_SLIDES); }, 4000);
-}
-function detenerAutoplay() {
-  if (carruselTimer) { clearInterval(carruselTimer); carruselTimer = null; }
-}
-function irASlide(idx){
-  carruselIdx = idx;
-  document.getElementById("carruselTrack").style.transform = `translateX(-${idx*100}%)`;
-  document.querySelectorAll(".carrusel-dot").forEach((d,i)=>d.classList.toggle("active",i===idx));
-}
-
-function irDesdeCarrusel(pantalla, simbolo) {
-  cambiarPantalla(pantalla);
-  if (simbolo && pantalla === 'criptomonedas') {
-    setTimeout(() => { abrirModalCompra(simbolo); }, 300);
-  }
-}
-
-/* ===== LOGIN ===== */
-function login(){
-  let input = document.getElementById("usuario").value.trim();
-  let p = document.getElementById("password").value.trim();
-  if(!input||!p){ showToast("⚠️ Ingresa cuenta y contraseña"); return; }
-  if(input===ADMIN_CORREO && p===ADMIN_PASS){
-    esAdmin=true; cuentaActual=null;
-    limpiarSesion();
-    cambiarPantalla("admin"); cargarAdmin(); return;
-  }
-  fetch(BACKEND+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cuenta:input,password:p})})
-  .then(r=>r.json()).then(data=>{
-    if(data.ok){
-      esAdmin=false; cuentaActual=data.cuenta;
-      localStorage.setItem("correo",data.correo);
+// ==================== FUNCIONES PRINCIPALES ====================
+async function login() {
+  const input = document.getElementById("usuario").value.trim();
+  const p = document.getElementById("password").value.trim();
+  if (!input || !p) { showToast("⚠️ Ingresa cuenta y contraseña"); return; }
+  try {
+    const res = await fetch(BACKEND + "/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cuenta: input, password: p }) });
+    const data = await res.json();
+    if (data.ok) {
+      cuentaActual = data.cuenta;
       perfilNombre = data.nombre || "";
       perfilFotoUrl = data.foto || "";
-      perfilFechaRegistro = data.fechaRegistro || "";
-      guardarSesion();
-      cargarCarritoLocal();
-      cuentaActualSpan();
-      cargarPreciosCriptos();
-      initCarrusel();
+      perfilCorreo = data.correo || "";
+      await cargarPrecios();
+      inicializarHistorial();
+      iniciarActualizacionPrecios();
       cargarDatosInicio();
       cambiarPantalla("inicio");
     } else showToast("❌ " + data.mensaje);
-  }).catch(()=>showToast("❌ Error al iniciar sesión"));
+  } catch(e) { showToast("❌ Error de conexión"); }
 }
 
-function logout(){
-  cuentaActual=null; esAdmin=false; todasLasCuentas=[]; carrito={};
-  perfilNombre=""; perfilFotoUrl=""; perfilFechaRegistro="";
-  limpiarSesion();
-  actualizarBadgeCarrito(); cambiarPantalla("login");
+function logout() { cuentaActual = null; if (intervaloPrecios) clearInterval(intervaloPrecios); carrito = {}; cambiarPantalla("login"); }
+
+async function cargarPrecios() {
+  try {
+    const res = await fetch(BACKEND + "/criptos/precios");
+    const data = await res.json();
+    if (data.ok && data.precios) preciosCriptos = data.precios;
+    else CRIPTOS.forEach(c => preciosCriptos[c.simbolo] = c.precio);
+  } catch(e) { CRIPTOS.forEach(c => preciosCriptos[c.simbolo] = c.precio); }
 }
 
-/* ===== REGISTRO ===== */
-function crearCuenta(){
-  let cuenta=document.getElementById("nuevaCuenta").value.trim();
-  let p=document.getElementById("nuevaPassword").value.trim();
-  let correo=document.getElementById("nuevoCorreo").value.trim().toLowerCase();
-  if(!cuenta||!p||!correo){showToast("⚠️ Completa todos los campos");return;}
-  if(cuenta.length!==10||!/^\d+$/.test(cuenta)){showToast("⚠️ El número de cuenta debe tener exactamente 10 dígitos");return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){showToast("⚠️ Correo inválido");return;}
-  fetch(BACKEND+"/crear-cuenta",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo,password:p,cuenta})})
-  .then(r=>r.json()).then(data=>{showToast(data.ok ? "✅ " + data.mensaje : "❌ " + data.mensaje);if(data.ok)cambiarPantalla("login");});
-}
+function guardarCarrito() { if (cuentaActual) localStorage.setItem("carrito_" + cuentaActual, JSON.stringify(carrito)); }
+function cargarCarrito() { if (cuentaActual) { const raw = localStorage.getItem("carrito_" + cuentaActual); carrito = raw ? JSON.parse(raw) : {}; actualizarBadge(); } }
 
-/* ===== DEPÓSITO ===== */
-function depositar(){
-  let monto=parseFloat(document.getElementById("monto").value);
-  let destino=document.getElementById("cuentaDestino").value.trim();
-  if(!cuentaActual){showToast("⚠️ Inicia sesión primero");return;}
-  if(!destino||destino.length!==10){showToast("⚠️ Cuenta destino inválida");return;}
-  if(isNaN(monto)||monto<=0){showToast("⚠️ Monto inválido");return;}
-  if(destino===cuentaActual){showToast("⚠️ No puedes depositar a tu misma cuenta");return;}
-  fetch(BACKEND+"/depositar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({origen:cuentaActual,destino,monto})})
-  .then(r=>r.json()).then(data=>{
-    showToast(data.ok ? "✅ " + data.mensaje : "❌ " + data.mensaje);
-    if(data.ok){ cargarDatosInicio(); cambiarPantalla("balance"); }
-  }).catch(()=>showToast("❌ Error al realizar depósito"));
-}
+function actualizarBadge() { const total = Object.values(carrito).reduce((a,b)=>a+b,0); const badge = document.getElementById("cartBadge"); const dc = document.getElementById("carritoDrawerCount"); if (total > 0) { badge.textContent = total; badge.classList.add("visible"); if (dc) { dc.textContent = total; dc.style.display = "inline-block"; } } else { badge.classList.remove("visible"); if (dc) dc.style.display = "none"; } }
 
-/* ===== CAMBIAR PANTALLA ===== */
-function cambiarPantalla(id){
-  document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa","entrando"));
-  const el = document.getElementById(id);
-  el.classList.add("activa");
-  if(id !== "login") {
-    void el.offsetWidth;
-    el.classList.add("entrando");
-    setTimeout(()=>el.classList.remove("entrando"), 400);
-  }
-  guardarPantalla(id);
-  if(!esAdmin&&cuentaActual){
-    cuentaActualSpan();
-    if(id==="balance") cargarBalance();
-    if(id==="criptomonedas") renderizarCriptos();
-    if(id==="carrito") renderizarCarrito();
-    if(id==="misCriptos") cargarMisCriptos();
-    if(id==="perfil") cargarPerfil();
-    if(id==="comentarios") cargarComentarios();
-  }
-}
+function cambiarCantidadCompra(delta) { cantidadCompra = Math.max(1, cantidadCompra + delta); const c = CRIPTOS.find(x => x.simbolo === criptoCompraActual); const precio = preciosCriptos[criptoCompraActual] || c.precio; document.getElementById("qtyNum").textContent = cantidadCompra; document.getElementById("modalCompraTotal").textContent = "Total: $" + (precio * cantidadCompra).toLocaleString(); }
+function agregarAlCarrito() { if (!criptoCompraActual) return; carrito[criptoCompraActual] = (carrito[criptoCompraActual] || 0) + cantidadCompra; guardarCarrito(); cerrarModal("modalCompra"); actualizarBadge(); renderizarCriptos(); showToast("🛒 Añadido al carrito"); }
 
-function cuentaActualSpan(){
-  document.querySelectorAll("#cuentaActual,#cuentaPerfil").forEach(e=>e.textContent=cuentaActual);
-}
-
-async function cargarDatosInicio(){
-  try{
-    let res=await fetch(BACKEND+"/cuenta/"+cuentaActual);
-    let data=await res.json();
-    const saldoEl = document.getElementById("inicioSaldo");
-    saldoEl.classList.add("actualizando");
-    saldoEl.textContent="$"+(data.saldo||0).toLocaleString();
-    setTimeout(()=>saldoEl.classList.remove("actualizando"),600);
-    if(data.fechaRegistro && !perfilFechaRegistro) {
-      perfilFechaRegistro = data.fechaRegistro;
-      guardarSesion();
-    }
-  }catch(e){}
-  let nombre = perfilNombre || cuentaActual;
-  document.getElementById("bienvenidaMsg").textContent = "Hola, " + nombre + " 👋 Bienvenido a Banco Libre";
-  let hAvatar = document.getElementById("headerAvatar");
-  if(perfilFotoUrl){
-    hAvatar.innerHTML=`<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">`;
-  } else {
-    hAvatar.innerHTML=`<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">👤</div>`;
-  }
-  guardarSesion();
-}
-
-function cargarBalance(){
-  document.getElementById("saldo").textContent="...";
-  fetch(BACKEND+"/cuenta/"+cuentaActual).then(r=>r.json()).then(data=>{
-    const sEl = document.getElementById("saldo");
-    sEl.classList.add("actualizando");
-    sEl.textContent=data.saldo;
-    setTimeout(()=>sEl.classList.remove("actualizando"),600);
-    let mov=document.getElementById("movimientos"); mov.innerHTML="";
-    let ul=document.createElement("ul");
-    (data.movimientos||[]).slice().reverse().forEach((m,i)=>{
-      let li=document.createElement("li");
-      li.style.animationDelay = (i * 0.04)+"s";
-      li.textContent=m;
-      let btn=document.createElement("button"); btn.textContent="🖨️ Ticket"; btn.style.cssText="margin-left:8px;padding:4px 8px;font-size:11px;";
-      btn.onclick=()=>imprimirTicketMovimiento(m); li.appendChild(btn); ul.appendChild(li);
-    }); mov.appendChild(ul);
+function renderizarCriptos() {
+  const grid = document.getElementById("criptoGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  CRIPTOS.forEach((c, idx) => {
+    const precio = preciosCriptos[c.simbolo] || c.precio;
+    const cant = carrito[c.simbolo] || 0;
+    const card = document.createElement("div");
+    card.className = "cripto-card" + (cant > 0 ? " en-carrito" : "");
+    card.innerHTML = `<span class="cripto-badge">${cant}</span><div class="cripto-emoji">${c.emoji}</div><div class="cripto-nombre">${c.nombre}</div><div class="cripto-simbolo">${c.simbolo}</div><div class="cripto-precio">$${precio.toLocaleString()}</div><canvas id="grafica-${c.simbolo}" class="grafica-canvas" style="height:60px;margin-top:8px;"></canvas>`;
+    card.onclick = () => { criptoCompraActual = c.simbolo; cantidadCompra = 1; const precio2 = preciosCriptos[c.simbolo] || c.precio; document.getElementById("modalCompraNombre").innerHTML = c.emoji + " " + c.nombre; document.getElementById("modalCompraPrecio").innerHTML = "Precio: $" + precio2.toLocaleString(); document.getElementById("qtyNum").textContent = 1; document.getElementById("modalCompraTotal").textContent = "Total: $" + precio2.toLocaleString(); document.getElementById("modalCompra").classList.add("active"); };
+    grid.appendChild(card);
+    graficas[c.simbolo] = crearGrafica(c.simbolo, "grafica-" + c.simbolo);
   });
 }
 
-function imprimirTicketMovimiento(m){
-  let v=window.open("","Ticket","width=600,height=400");
-  v.document.write(`<h2>Ticket</h2><p><b>Cuenta:</b> ${cuentaActual}</p><p><b>Detalle:</b> ${m}</p>`);
-  v.document.close(); v.print();
-}
-
-/* ===== RESET ===== */
-function enviarPin(){
-  let correo=document.getElementById("correoReset").value.trim().toLowerCase();
-  fetch(BACKEND+"/enviar-pin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo})})
-  .then(r=>r.json()).then(data=>{ if(data.ok){pinTemporal=data.pin;correoTemporal=correo;showToast("📧 PIN enviado a tu correo");} else showToast("❌ "+data.mensaje); });
-}
-function cambiarPassword(){
-  if(parseInt(document.getElementById("pinIngresado").value)===pinTemporal){
-    fetch(BACKEND+"/cambiar-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({correo:correoTemporal,nuevaPassword:document.getElementById("nuevaPasswordReset").value})})
-    .then(r=>r.json()).then(data=>{showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);if(data.ok)cambiarPantalla("login");});
-  } else showToast("❌ PIN incorrecto");
-}
-
-/* ===== PERFIL ACTUALIZADO ===== */
-function cargarPerfil(){
-  document.getElementById("cuentaPerfil").textContent = cuentaActual;
-  document.getElementById("inputNombrePerfil").value = perfilNombre;
-  document.getElementById("perfilNombreDisplay").textContent = perfilNombre || "Sin nombre";
-
-  const chipEl = document.getElementById("perfilClienteDesde");
-  const chipTxtEl = document.getElementById("perfilClienteDesdeTxt");
-  if(perfilFechaRegistro) {
-    chipTxtEl.textContent = "Cliente desde " + perfilFechaRegistro;
-    chipEl.style.display = "inline-flex";
-  } else {
-    fetch(BACKEND+"/cuenta/"+cuentaActual).then(r=>r.json()).then(data=>{
-      if(data.fechaRegistro) {
-        perfilFechaRegistro = data.fechaRegistro;
-        guardarSesion();
-        chipTxtEl.textContent = "Cliente desde " + data.fechaRegistro;
-        chipEl.style.display = "inline-flex";
-      }
-    }).catch(()=>{});
-  }
-
-  if(perfilFotoUrl){
-    document.getElementById("perfilAvatarPlaceholder").style.display="none";
-    let img=document.getElementById("perfilAvatarImg");
-    img.src=perfilFotoUrl; img.style.display="block";
-  } else {
-    document.getElementById("perfilAvatarPlaceholder").style.display="flex";
-    document.getElementById("perfilAvatarImg").style.display="none";
-  }
-}
-
-async function guardarPerfil(){
-  let nombre = document.getElementById("inputNombrePerfil").value.trim();
-  try{
-    let res=await fetch(BACKEND+"/perfil/guardar",{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({cuenta:cuentaActual, nombre, foto:perfilFotoUrl})
-    });
-    let data=await res.json();
-    if(data.ok){
-      perfilNombre=nombre;
-      guardarSesion();
-      showToast("✅ Perfil guardado");
-      cargarPerfil();
-      cargarDatosInicio();
-    } else showToast("❌ "+data.mensaje);
-  }catch(e){showToast("❌ Error al guardar perfil");}
-}
-
-/* ===== CRIPTOS ===== */
-async function cargarPreciosCriptos(){
+async function cargarMisCriptos() {
+  const cont = document.getElementById("misCriptosContenido");
+  if (!cont) return;
+  cont.innerHTML = '<div class="loading-spinner"></div>';
   try {
-    let res = await fetch(BACKEND+"/criptos/precios");
-    let data = await res.json();
-    if(data.ok&&data.precios) preciosCriptos=data.precios;
+    const res = await fetch(BACKEND + "/cuenta/" + cuentaActual);
+    const data = await res.json();
+    const criptos = data.criptomonedas || {};
+    const keys = Object.keys(criptos).filter(k => criptos[k] > 0);
+    if (keys.length === 0) { cont.innerHTML = '<p style="color:var(--texto-sub);text-align:center;">No tienes criptomonedas</p><button onclick="cambiarPantalla(\'criptomonedas\')">Comprar</button>'; return; }
+    let totalValor = 0, html = "";
+    keys.forEach((sim, i) => {
+      const c = CRIPTOS.find(x => x.simbolo === sim);
+      if (!c) return;
+      const precio = preciosCriptos[sim] || c.precio;
+      const cant = criptos[sim];
+      const valor = precio * cant;
+      totalValor += valor;
+      html += `<div class="mis-cripto-item"><div class="mis-cripto-left"><span class="mis-cripto-emoji">${c.emoji}</span><div><div class="mis-cripto-nombre">${c.nombre}</div><div class="mis-cripto-cant">${cant} ${sim}</div></div></div><div class="mis-cripto-valor">$${valor.toLocaleString()}</div><button class="btn-vender" onclick="abrirModalVenta('${sim}', ${cant})">🔄 Vender</button></div>`;
+    });
+    cont.innerHTML = `<div style="background:linear-gradient(135deg,var(--azul),#0055cc);color:white;border-radius:14px;padding:16px;margin-bottom:14px;"><div>Valor total</div><div style="font-size:24px;font-weight:bold;">$${totalValor.toLocaleString()}</div></div>` + html;
+  } catch(e) { cont.innerHTML = '<p style="color:#ff3b30;">Error al cargar</p>'; }
+}
+
+function renderizarCarrito() {
+  const cont = document.getElementById("carritoContenido");
+  if (!cont) return;
+  const items = Object.entries(carrito).filter(([,q]) => q > 0);
+  if (items.length === 0) { cont.innerHTML = '<p style="color:var(--texto-sub);text-align:center;">Carrito vacío</p><button onclick="cambiarPantalla(\'criptomonedas\')">Ver criptos</button>'; return; }
+  let total = 0, html = "";
+  items.forEach(([sim, qty], i) => {
+    const c = CRIPTOS.find(x => x.simbolo === sim);
+    const precio = preciosCriptos[sim] || c.precio;
+    total += precio * qty;
+    html += `<div class="carrito-item"><div class="carrito-info"><div class="carrito-nombre">${c.emoji} ${c.nombre}</div><div class="carrito-sub">$${precio.toLocaleString()} c/u</div></div><div class="carrito-ctrl"><button onclick="cambiarQty('${sim}',-1)">−</button><span>${qty}</span><button onclick="cambiarQty('${sim}',1)">+</button></div></div>`;
+  });
+  html += `<div class="carrito-total-bar"><span>Total: $${total.toLocaleString()}</span><button onclick="comprarCarrito()">Comprar</button></div>`;
+  cont.innerHTML = html;
+}
+
+function cambiarQty(sim, delta) { carrito[sim] = Math.max(0, (carrito[sim] || 0) + delta); if (carrito[sim] === 0) delete carrito[sim]; guardarCarrito(); actualizarBadge(); renderizarCarrito(); renderizarCriptos(); }
+
+async function comprarCarrito() {
+  const items = Object.entries(carrito).filter(([,q]) => q > 0);
+  if (items.length === 0) return;
+  let total = 0;
+  for (let [sim, qty] of items) { const c = CRIPTOS.find(x => x.simbolo === sim); total += (preciosCriptos[sim] || c.precio) * qty; }
+  try {
+    const res = await fetch(BACKEND + "/comprar-criptos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cuenta: cuentaActual, items: carrito, total }) });
+    const data = await res.json();
+    if (data.ok) { carrito = {}; guardarCarrito(); actualizarBadge(); cargarDatosInicio(); cargarMisCriptos(); cambiarPantalla("misCriptos"); showToast("✅ Compra realizada"); }
+    else showToast("❌ " + data.mensaje);
+  } catch(e) { showToast("❌ Error en compra"); }
+}
+
+async function depositar() {
+  const monto = parseFloat(document.getElementById("monto").value);
+  const destino = document.getElementById("cuentaDestino").value.trim();
+  if (!destino || destino.length !== 10) { showToast("⚠️ Cuenta inválida"); return; }
+  if (isNaN(monto) || monto <= 0) { showToast("⚠️ Monto inválido"); return; }
+  if (destino === cuentaActual) { showToast("⚠️ No puedes transferirte a ti mismo"); return; }
+  try {
+    const res = await fetch(BACKEND + "/depositar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ origen: cuentaActual, destino, monto }) });
+    const data = await res.json();
+    if (data.ok) { cargarDatosInicio(); cambiarPantalla("balance"); showToast("✅ Transferencia realizada"); }
+    else showToast("❌ " + data.mensaje);
+  } catch(e) { showToast("❌ Error"); }
+}
+
+async function cargarDatosInicio() {
+  try {
+    const res = await fetch(BACKEND + "/cuenta/" + cuentaActual);
+    const data = await res.json();
+    document.getElementById("inicioSaldo").textContent = "$" + (data.saldo || 0).toLocaleString();
+    document.getElementById("cuentaActual").textContent = cuentaActual;
+    document.getElementById("bienvenidaMsg").textContent = "Hola, " + (perfilNombre || cuentaActual) + " 👋";
+    const avatar = document.getElementById("headerAvatar");
+    if (perfilFotoUrl) avatar.innerHTML = `<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;">`;
+    else avatar.innerHTML = `<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">👤</div>`;
+    document.getElementById("saldo").textContent = data.saldo || 0;
+    const movUl = document.getElementById("listaMovimientos");
+    if (movUl) { movUl.innerHTML = ""; (data.movimientos || []).slice().reverse().forEach(m => { const li = document.createElement("li"); li.textContent = m; movUl.appendChild(li); }); }
   } catch(e) {}
 }
 
-function renderizarCriptos(){
-  let grid=document.getElementById("criptoGrid"); grid.innerHTML="";
-  CRIPTOS.forEach((c,idx)=>{
-    let precio=preciosCriptos[c.simbolo]||c.precio;
-    let cant=carrito[c.simbolo]||0;
-    let card=document.createElement("div");
-    card.className="cripto-card"+(cant>0?" en-carrito":"");
-    card.style.setProperty("--ci", idx);
-    card.onclick=()=>abrirModalCompra(c.simbolo);
-    card.innerHTML=`<span class="cripto-badge">${cant}</span><div class="cripto-emoji">${c.emoji}</div><div class="cripto-nombre">${c.nombre}</div><div class="cripto-simbolo">${c.simbolo}</div><div class="cripto-precio">$${precio.toLocaleString()}</div>`;
-    grid.appendChild(card);
-  });
+function cargarPerfil() {
+  document.getElementById("cuentaPerfil").textContent = cuentaActual;
+  document.getElementById("perfilNombreDisplay").textContent = perfilNombre || "Sin nombre";
+  document.getElementById("perfilCorreo").textContent = perfilCorreo;
+  if (perfilFotoUrl) { document.getElementById("perfilAvatarPlaceholder").style.display = "none"; const img = document.getElementById("perfilAvatarImg"); img.src = perfilFotoUrl; img.style.display = "block"; } 
+  else { document.getElementById("perfilAvatarPlaceholder").style.display = "flex"; document.getElementById("perfilAvatarImg").style.display = "none"; }
 }
 
-function abrirModalCompra(simbolo){
-  criptoCompraActual=simbolo; cantidadCompra=1;
-  let c=CRIPTOS.find(x=>x.simbolo===simbolo);
-  let precio=preciosCriptos[simbolo]||c.precio;
-  document.getElementById("modalCompraNombre").textContent=c.emoji+" "+c.nombre;
-  document.getElementById("modalCompraPrecio").textContent="Precio unitario: $"+precio.toLocaleString();
-  document.getElementById("qtyNum").textContent=1;
-  document.getElementById("modalCompraTotal").textContent="Total: $"+precio.toLocaleString();
-  document.getElementById("modalCompra").classList.add("active");
+function exportarDatos() {
+  const datos = { cuenta: cuentaActual, nombre: perfilNombre, correo: perfilCorreo, fecha: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = `datos_${cuentaActual}.json`; a.click(); URL.revokeObjectURL(url);
+  showToast("📁 Datos exportados");
 }
 
-function cambiarCantidadCompra(delta){
-  cantidadCompra=Math.max(1,cantidadCompra+delta);
-  let c=CRIPTOS.find(x=>x.simbolo===criptoCompraActual);
-  let precio=preciosCriptos[criptoCompraActual]||c.precio;
-  const qtyEl = document.getElementById("qtyNum");
-  qtyEl.classList.remove("bump");
-  void qtyEl.offsetWidth;
-  qtyEl.classList.add("bump");
-  qtyEl.textContent=cantidadCompra;
-  document.getElementById("modalCompraTotal").textContent="Total: $"+(precio*cantidadCompra).toLocaleString();
+async function crearCuenta() {
+  const cuenta = document.getElementById("nuevaCuenta").value.trim();
+  const pass = document.getElementById("nuevaPassword").value.trim();
+  const correo = document.getElementById("nuevoCorreo").value.trim();
+  if (!cuenta || !pass || !correo) { showToast("⚠️ Completa todos los campos"); return; }
+  if (cuenta.length !== 10 || !/^\d+$/.test(cuenta)) { showToast("⚠️ Cuenta debe tener 10 dígitos"); return; }
+  try {
+    const res = await fetch(BACKEND + "/crear-cuenta", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ correo, password: pass, cuenta }) });
+    const data = await res.json();
+    showToast(data.ok ? "✅ Cuenta creada" : "❌ " + data.mensaje);
+    if (data.ok) cambiarPantalla("login");
+  } catch(e) { showToast("❌ Error"); }
 }
 
-function agregarAlCarrito(){
-  if(!criptoCompraActual) return;
-  carrito[criptoCompraActual]=(carrito[criptoCompraActual]||0)+cantidadCompra;
-  guardarCarrito();
-  cerrarModal("modalCompra");
-  actualizarBadgeCarrito();
-  renderizarCriptos();
-  showToast("🛒 Añadido al carrito");
+async function enviarPin() {
+  const correo = document.getElementById("correoReset").value.trim();
+  try {
+    const res = await fetch(BACKEND + "/enviar-pin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ correo }) });
+    const data = await res.json();
+    if (data.ok) { window.pinTemporal = data.pin; showToast("📧 PIN enviado"); }
+    else showToast("❌ " + data.mensaje);
+  } catch(e) { showToast("❌ Error"); }
 }
 
-function actualizarBadgeCarrito(){
-  let total=Object.values(carrito).reduce((a,b)=>a+b,0);
-  let badge=document.getElementById("cartBadge");
-  let dc=document.getElementById("carritoDrawerCount");
-  if(total>0){
-    const cambio = badge.textContent !== String(total);
-    badge.textContent=total;
-    badge.classList.add("visible");
-    if(cambio) {
-      badge.classList.remove("bump"); void badge.offsetWidth; badge.classList.add("bump");
-      setTimeout(()=>badge.classList.remove("bump"),400);
-    }
-    dc.textContent=total; dc.style.display="inline-block";
-  } else {
-    badge.classList.remove("visible"); dc.style.display="none";
-  }
+async function cambiarPassword() {
+  const pin = parseInt(document.getElementById("pinIngresado").value);
+  const nueva = document.getElementById("nuevaPasswordReset").value;
+  const correo = document.getElementById("correoReset").value.trim();
+  if (pin !== window.pinTemporal) { showToast("❌ PIN incorrecto"); return; }
+  try {
+    const res = await fetch(BACKEND + "/cambiar-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ correo, nuevaPassword: nueva }) });
+    const data = await res.json();
+    showToast(data.ok ? "✅ Contraseña cambiada" : "❌ " + data.mensaje);
+    if (data.ok) cambiarPantalla("login");
+  } catch(e) { showToast("❌ Error"); }
 }
 
-/* ===== CARRITO ===== */
-function renderizarCarrito(){
-  let contenido=document.getElementById("carritoContenido");
-  let items=Object.entries(carrito).filter(([,qty])=>qty>0);
-  if(items.length===0){
-    contenido.innerHTML=`<div style="animation:fadeInUp 0.3s both;"><p style="color:var(--texto-sub);margin-top:40px;font-size:32px;">🛒</p><p style="color:var(--texto-sub);">Tu carrito está vacío</p><button onclick="cambiarPantalla('criptomonedas')">Ver criptomonedas</button></div>`;
-    return;
-  }
-  let total=0, html="";
-  items.forEach(([sim,qty],i)=>{
-    let c=CRIPTOS.find(x=>x.simbolo===sim);
-    let precio=preciosCriptos[sim]||c.precio;
-    total+=precio*qty;
-    html+=`<div class="carrito-item" style="animation-delay:${i*0.06}s"><div class="carrito-info"><div class="carrito-nombre">${c.emoji} ${c.nombre}</div><div class="carrito-sub">$${precio.toLocaleString()} c/u</div></div><div class="carrito-ctrl"><button onclick="cambiarQtyCarrito('${sim}',-1)">−</button><span class="carrito-cantidad" id="cqty-${sim}">${qty}</span><button onclick="cambiarQtyCarrito('${sim}',1)">+</button></div></div>`;
-  });
-  html+=`<div class="carrito-total-bar"><span>Total: $${total.toLocaleString()}</span><button class="btn-comprar" onclick="comprarCarrito()">Comprar</button></div>`;
-  contenido.innerHTML=html;
+async function cargarComentarios() {
+  const cont = document.getElementById("listaComentarios");
+  if (!cont) return;
+  cont.innerHTML = '<div class="loading-spinner"></div>';
+  try {
+    const res = await fetch(BACKEND + "/comentarios");
+    const data = await res.json();
+    if (!data.ok || data.comentarios.length === 0) { cont.innerHTML = '<p style="color:var(--texto-sub);text-align:center;">Sin reseñas aún</p><div><textarea id="nuevoComentario" rows="3" placeholder="Escribe tu reseña..."></textarea><div class="estrellas" id="estrellasInput"><span onclick="setEstrella(1)">★</span><span onclick="setEstrella(2)">★</span><span onclick="setEstrella(3)">★</span><span onclick="setEstrella(4)">★</span><span onclick="setEstrella(5)">★</span></div><button onclick="publicarComentario()">Publicar</button></div>'; return; }
+    let html = '<div><textarea id="nuevoComentario" rows="3" placeholder="Escribe tu reseña..."></textarea><div class="estrellas" id="estrellasInput"><span onclick="setEstrella(1)">★</span><span onclick="setEstrella(2)">★</span><span onclick="setEstrella(3)">★</span><span onclick="setEstrella(4)">★</span><span onclick="setEstrella(5)">★</span></div><button onclick="publicarComentario()">Publicar</button></div><hr>';
+    data.comentarios.slice().reverse().forEach(c => { html += `<div style="background:var(--gris-card);border-radius:12px;padding:12px;margin:8px 0;text-align:left;"><b>${c.nombre || c.cuenta}</b> ${"★".repeat(c.estrellas)}${"☆".repeat(5-c.estrellas)}<p>${c.texto}</p><small>${c.fecha || ""}</small></div>`; });
+    cont.innerHTML = html;
+  } catch(e) { cont.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
 }
 
-function cambiarQtyCarrito(sim,delta){
-  carrito[sim]=Math.max(0,(carrito[sim]||0)+delta);
-  if(carrito[sim]===0) delete carrito[sim];
-  guardarCarrito();
-  actualizarBadgeCarrito();
-  renderizarCarrito();
+let estrellaSel = 0;
+function setEstrella(val) { estrellaSel = val; document.querySelectorAll("#estrellasInput span").forEach((s, i) => s.style.opacity = i < val ? "1" : "0.4"); }
+async function publicarComentario() {
+  if (estrellaSel === 0) { showToast("⭐ Selecciona una puntuación"); return; }
+  const texto = document.getElementById("nuevoComentario").value.trim();
+  if (!texto) { showToast("✏️ Escribe tu opinión"); return; }
+  try {
+    const res = await fetch(BACKEND + "/comentarios/nuevo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cuenta: cuentaActual, estrellas: estrellaSel, texto, nombre: perfilNombre, foto: perfilFotoUrl }) });
+    const data = await res.json();
+    if (data.ok) { showToast("✅ Reseña publicada"); document.getElementById("nuevoComentario").value = ""; estrellaSel = 0; setEstrella(0); cargarComentarios(); }
+    else showToast("❌ " + data.mensaje);
+  } catch(e) { showToast("❌ Error"); }
 }
 
-async function comprarCarrito(){
-  let items=Object.entries(carrito).filter(([,qty])=>qty>0);
-  if(items.length===0) return;
-  let total=items.reduce((sum,[sim,qty])=>sum+(preciosCriptos[sim]||CRIPTOS.find(x=>x.simbolo===sim).precio)*qty,0);
-  try{
-    let res=await fetch(BACKEND+"/comprar-criptos",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cuenta:cuentaActual,items:carrito,total})});
-    let data=await res.json();
-    showToast(data.ok ? "✅ "+data.mensaje : "❌ "+data.mensaje);
-    if(data.ok){
-      limpiarCarritoLocal();
-      actualizarBadgeCarrito();
-      cargarDatosInicio();
-      cambiarPantalla("misCriptos");
-    }
-  }catch(e){showToast("❌ Error al procesar compra");}
+function irCripto(simbolo) { cambiarPantalla("criptomonedas"); setTimeout(() => { criptoCompraActual = simbolo; cantidadCompra = 1; const c = CRIPTOS.find(x => x.simbolo === simbolo); const precio = preciosCriptos[simbolo] || c.precio; document.getElementById("modalCompraNombre").innerHTML = c.emoji + " " + c.nombre; document.getElementById("modalCompraPrecio").innerHTML = "Precio: $" + precio.toLocaleString(); document.getElementById("qtyNum").textContent = 1; document.getElementById("modalCompraTotal").textContent = "Total: $" + precio.toLocaleString(); document.getElementById("modalCompra").classList.add("active"); }, 200); }
+
+function cambiarPantalla(id) { document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); if (id === "criptomonedas") renderizarCriptos(); if (id === "carrito") renderizarCarrito(); if (id === "misCriptos") cargarMisCriptos(); if (id === "perfil") cargarPerfil(); if (id === "comentarios") cargarComentarios(); if (id === "balance") cargarDatosInicio(); }
+
+function toggleMenu() { document.getElementById("drawer").classList.toggle("active"); document.getElementById("overlay").classList.toggle("active"); }
+function cerrarModal(id) { document.getElementById(id).classList.remove("active"); }
+function showToast(msg, time = 2000) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("visible"); setTimeout(() => t.classList.remove("visible"), time); }
+
+// Carrusel
+let carruselIdx = 0;
+function initCarrusel() { 
+  const dots = document.getElementById("carruselDots"); 
+  if (!dots) return;
+  dots.innerHTML = ""; 
+  for (let i = 0; i < 3; i++) { const d = document.createElement("div"); d.className = "carrusel-dot" + (i === 0 ? " active" : ""); d.onclick = () => { carruselIdx = i; document.getElementById("carruselTrack").style.transform = `translateX(-${i * 100}%)`; document.querySelectorAll(".carrusel-dot").forEach((dot, idx) => dot.classList.toggle("active", idx === i)); }; dots.appendChild(d); } 
+  setInterval(() => { carruselIdx = (carruselIdx + 1) % 3; document.getElementById("carruselTrack").style.transform = `translateX(-${carruselIdx * 100}%)`; document.querySelectorAll(".carrusel-dot").forEach((dot, idx) => dot.classList.toggle("active", idx === carruselIdx)); }, 5000); 
 }
 
-/* ===== MIS CRIPTOS ===== */
-async function cargarMisCriptos(){
-  let contenido=document.getElementById("misCriptosContenido");
-  contenido.innerHTML='<div class="loading-spinner"></div>';
-  try{
-    let res=await fetch(BACKEND+"/cuenta/"+cuentaActual);
-    let data=await res.json();
-    let criptos=data.criptomonedas||{};
-    let keys=Object.keys(criptos).filter(k=>criptos[k]>0);
-    if(keys.length===0){
-      contenido.innerHTML=`<div style="animation:fadeInUp 0.3s both;"><p style="font-size:32px;margin-top:40px;">💎</p><p style="color:var(--texto-sub);">No tienes criptomonedas aún</p><button onclick="cambiarPantalla('criptomonedas')">Ir a comprar</button></div>`;
-      return;
-    }
-    let totalValor=0, html="";
-    keys.forEach((sim,i)=>{
-      let c=CRIPTOS.find(x=>x.simbolo===sim); if(!c) return;
-      let precio=preciosCriptos[sim]||c.precio;
-      let cant=criptos[sim]; let valor=precio*cant; totalValor+=valor;
-      html+=`<div class="mis-cripto-item" style="--mi:${i}"><div class="mis-cripto-left"><span class="mis-cripto-emoji">${c.emoji}</span><div><div class="mis-cripto-nombre">${c.nombre}</div><div class="mis-cripto-cant">${cant} ${sim}</div></div></div><div class="mis-cripto-valor">$${valor.toLocaleString()}</div></div>`;
-    });
-    html=`<div style="background:linear-gradient(135deg,var(--azul),#0055cc);color:white;border-radius:14px;padding:16px;margin-bottom:14px;animation:fadeInUp 0.4s both;"><div style="font-size:12px;opacity:0.8;">Valor total de criptos</div><div style="font-size:24px;font-weight:bold;margin-top:4px;">$${totalValor.toLocaleString()}</div></div>`+html;
-    contenido.innerHTML=html;
-  }catch(e){contenido.innerHTML='<p style="color:#ff3b30;">Error al cargar</p>';}
+// Inicialización gráfica general
+function initGraficaGeneral() {
+  const canvas = document.getElementById("graficaGeneral");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  graficas.general = new Chart(ctx, { type: 'line', data: { labels: Array(20).fill(''), datasets: [] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top', labels: { font: { size: 8 } } }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } });
 }
 
-/* ===== COMENTARIOS ===== */
-function setEstrella(val){
-  estrellaSeleccionada=val;
-  document.querySelectorAll(".estrella").forEach((e,i)=>{
-    e.classList.toggle("activa", i<val);
-  });
-}
-
-async function enviarComentario(){
-  if(estrellaSeleccionada===0){ showToast("⭐ Selecciona una puntuación"); return; }
-  let texto=document.getElementById("textoComentario").value.trim();
-  if(!texto){ showToast("✏️ Escribe tu opinión"); return; }
-  try{
-    let res=await fetch(BACKEND+"/comentarios/nuevo",{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ cuenta:cuentaActual, estrellas:estrellaSeleccionada, texto, nombre:perfilNombre, foto:perfilFotoUrl })
-    });
-    let data=await res.json();
-    if(data.ok){
-      showToast("✅ ¡Reseña publicada!");
-      document.getElementById("textoComentario").value="";
-      setEstrella(0);
-      cargarComentarios();
-    } else showToast("❌ "+data.mensaje);
-  }catch(e){showToast("❌ Error al publicar reseña");}
-}
-
-async function cargarComentarios(){
-  let lista=document.getElementById("listaComentarios");
-  lista.innerHTML='<div class="loading-spinner"></div>';
-  try{
-    let res=await fetch(BACKEND+"/comentarios");
-    let data=await res.json();
-    if(!data.ok||data.comentarios.length===0){
-      lista.innerHTML='<p style="color:var(--texto-sub);font-size:13px;text-align:center;margin-top:20px;">Sin reseñas aún. ¡Sé el primero! 🌟</p>';
-      return;
-    }
-    lista.innerHTML="";
-    data.comentarios.slice().reverse().forEach((c,i)=>{
-      let estrellas="★".repeat(c.estrellas)+"☆".repeat(5-c.estrellas);
-      let avatarHtml = c.foto
-        ? `<img src="${c.foto}" class="comentario-avatar">`
-        : `<div class="comentario-avatar-placeholder">👤</div>`;
-      let div=document.createElement("div"); div.className="comentario-card";
-      div.style.animationDelay = (i * 0.05)+"s";
-      div.innerHTML=`<div class="comentario-card-header">${avatarHtml}<div><div class="comentario-user">${c.nombre||c.cuenta}</div><div class="comentario-estrellas" style="color:#ff9500;">${estrellas}</div></div></div><p class="comentario-texto">${c.texto}</p><div class="comentario-fecha">${c.fecha||""}</div>`;
-      lista.appendChild(div);
-    });
-  }catch(e){ lista.innerHTML='<p style="color:#ff3b30;">Error al cargar reseñas</p>'; }
-}
-
-/* ===== ADMIN ===== */
-function switchAdminTab(tab){
-  document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
-  document.querySelectorAll(".admin-tab-content").forEach(t=>t.classList.remove("active"));
-  const tabs=["usuarios","criptos","opiniones"];
-  let idx=tabs.indexOf(tab);
-  document.querySelectorAll(".admin-tab")[idx].classList.add("active");
-  document.getElementById("tab"+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add("active");
-  if(tab==="criptos") renderizarAdminCriptos();
-  if(tab==="opiniones") cargarOpinionesAdmin();
-}
-
-async function cargarAdmin(){
-  try{
-    let res=await fetch(BACKEND+"/admin/cuentas",{headers:{"x-admin-token":ADMIN_PASS}});
-    let data=await res.json();
-    if(!data.ok){showToast("❌ Error: "+data.mensaje);return;}
-    todasLasCuentas=data.cuentas;
-    renderizarCuentasAdmin(todasLasCuentas);
-    let res2=await fetch(BACKEND+"/criptos/precios");
-    let data2=await res2.json();
-    if(data2.ok&&data2.precios) preciosCriptos=data2.precios;
-    let totalSaldo=todasLasCuentas.reduce((a,c)=>a+(c.saldo||0),0);
-    let totalMovs=todasLasCuentas.reduce((a,c)=>a+((c.movimientos||[]).length),0);
-    document.getElementById("statCuentas").textContent=todasLasCuentas.length;
-    document.getElementById("statSaldo").textContent="$"+totalSaldo.toLocaleString();
-    document.getElementById("statMovs").textContent=totalMovs;
-  }catch(e){document.getElementById("adminListWrap").innerHTML='<p style="color:#ff3b30;text-align:center;">Error al conectar</p>';}
-}
-
-function renderizarCuentasAdmin(lista){
-  let wrap=document.getElementById("adminListWrap");
-  if(lista.length===0){wrap.innerHTML='<p style="color:var(--texto-sub);text-align:center;">Sin resultados</p>';return;}
-  wrap.innerHTML="";
-  lista.forEach(c=>{
-    let avatarHtml = c.foto
-      ? `<img src="${c.foto}" class="admin-user-avatar">`
-      : `<div class="admin-user-avatar-placeholder">👤</div>`;
-    let card=document.createElement("div"); card.className="admin-card";
-    card.innerHTML=`
-      <div class="admin-card-top">
-        ${avatarHtml}
-        <div class="admin-user-info">
-          <div class="admin-cuenta-num">🏦 ${c.cuenta}</div>
-          ${c.nombre ? `<div class="admin-nombre-usuario">${c.nombre}</div>` : ""}
-          ${c.fechaRegistro ? `<div style="font-size:10px;color:var(--texto-sub);">📅 ${c.fechaRegistro}</div>` : ""}
-        </div>
-      </div>
-      <div class="admin-saldo">$${(c.saldo||0).toLocaleString()}</div>
-      <div class="admin-correo">📧 ${c.correo}</div>
-      <div class="admin-btn-row">
-        <button class="admin-btn btn-edit" onclick="abrirModalSaldo('${c.cuenta}',${c.saldo})">✏️ Saldo</button>
-        <button class="admin-btn btn-history" onclick="verHistorial('${c.cuenta}')">📋 Hist.</button>
-        <button class="admin-btn btn-cripto" onclick="verCriptosUsuario('${c.cuenta}')">🪙</button>
-        <button class="admin-btn btn-opinion" onclick="verOpinionesUsuario('${c.cuenta}')">⭐</button>
-        <button class="admin-btn btn-delete" onclick="abrirModalBorrar('${c.cuenta}','${c.correo}')">🗑️</button>
-      </div>`;
-    wrap.appendChild(card);
-  });
-}
-
-function filtrarCuentas(){
-  let q=document.getElementById("adminBuscador").value.trim().toLowerCase();
-  renderizarCuentasAdmin(todasLasCuentas.filter(c=>c.cuenta.includes(q)||(c.correo&&c.correo.toLowerCase().includes(q))));
-}
-
-function renderizarAdminCriptos(){
-  let lista=document.getElementById("adminCriptosList"); lista.innerHTML="";
-  CRIPTOS.forEach(c=>{
-    let precio=preciosCriptos[c.simbolo]||c.precio;
-    let row=document.createElement("div"); row.className="admin-cripto-row";
-    row.innerHTML=`<div class="admin-cripto-left"><span class="admin-cripto-emoji">${c.emoji}</span><div><div class="admin-cripto-nombre">${c.nombre}</div><div class="admin-cripto-simbolo">${c.simbolo}</div></div></div><div style="display:flex;align-items:center;gap:8px;"><span class="admin-cripto-precio" id="precio-${c.simbolo}">$${precio.toLocaleString()}</span><button class="btn-edit-precio" onclick="abrirModalPrecioCripto('${c.simbolo}')">✏️</button></div>`;
-    lista.appendChild(row);
-  });
-}
-
-function abrirModalPrecioCripto(simbolo){
-  criptoParaEditar=simbolo;
-  let c=CRIPTOS.find(x=>x.simbolo===simbolo);
-  let precio=preciosCriptos[simbolo]||c.precio;
-  document.getElementById("modalCriptoNombre").textContent=c.emoji+" "+c.nombre;
-  document.getElementById("modalCriptoPrecioActual").textContent="Precio actual: $"+precio.toLocaleString();
-  document.getElementById("nuevoPrecioInput").value=precio;
-  document.getElementById("modalPrecioCripto").classList.add("active");
-}
-
-async function guardarPrecioCripto(){
-  let precio=parseFloat(document.getElementById("nuevoPrecioInput").value);
-  if(isNaN(precio)||precio<=0){showToast("⚠️ Precio inválido");return;}
-  try{
-    let res=await fetch(BACKEND+"/admin/editar-precio-cripto",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({simbolo:criptoParaEditar,precio})});
-    let data=await res.json();
-    showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
-    if(data.ok){ preciosCriptos[criptoParaEditar]=precio; let el=document.getElementById("precio-"+criptoParaEditar); if(el) el.textContent="$"+precio.toLocaleString(); cerrarModal("modalPrecioCripto"); }
-  }catch(e){showToast("❌ Error al guardar precio");}
-}
-
-async function verCriptosUsuario(cuenta){
-  document.getElementById("modalUserCriptoCuenta").textContent="Cuenta: "+cuenta;
-  document.getElementById("userCriptosList").innerHTML='<div class="loading-spinner"></div>';
-  document.getElementById("modalUserCriptos").classList.add("active");
-  try{
-    let res=await fetch(BACKEND+"/cuenta/"+cuenta);
-    let data=await res.json();
-    let criptos=data.criptomonedas||{};
-    let lista=document.getElementById("userCriptosList");
-    let keys=Object.keys(criptos).filter(k=>criptos[k]>0);
-    if(keys.length===0){lista.innerHTML='<p style="color:var(--texto-sub);">Sin criptomonedas</p>';return;}
-    lista.innerHTML="";
-    keys.forEach(sim=>{
-      let c=CRIPTOS.find(x=>x.simbolo===sim); if(!c) return;
-      let precio=preciosCriptos[sim]||c.precio;
-      let cant=criptos[sim];
-      let div=document.createElement("div"); div.className="admin-user-cripto-item";
-      div.innerHTML=`<div class="auc-left"><span class="auc-emoji">${c.emoji}</span><div><div class="auc-nombre">${c.nombre}</div><div class="auc-cant">${cant} ${sim} · $${(precio*cant).toLocaleString()}</div></div></div><button class="btn-auc-quitar" onclick="quitarCriptoUsuario('${cuenta}','${sim}')">Quitar</button>`;
-      lista.appendChild(div);
-    });
-  }catch(e){document.getElementById("userCriptosList").innerHTML='<p style="color:#ff3b30;">Error</p>';}
-}
-
-async function quitarCriptoUsuario(cuenta,simbolo){
-  if(!confirm("¿Quitar todas las "+simbolo+" de la cuenta "+cuenta+"?")) return;
-  try{
-    let res=await fetch(BACKEND+"/admin/quitar-cripto",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta,simbolo})});
-    let data=await res.json();
-    showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
-    if(data.ok) verCriptosUsuario(cuenta);
-  }catch(e){showToast("❌ Error");}
-}
-
-async function cargarOpinionesAdmin(){
-  let lista=document.getElementById("adminOpinionesList");
-  lista.innerHTML='<div class="loading-spinner"></div>';
-  try{
-    let res=await fetch(BACKEND+"/comentarios");
-    let data=await res.json();
-    if(!data.ok||data.comentarios.length===0){ lista.innerHTML='<p style="color:var(--texto-sub);text-align:center;">Sin reseñas</p>'; return; }
-    lista.innerHTML="";
-    data.comentarios.slice().reverse().forEach(c=>{
-      let estrellas="★".repeat(c.estrellas)+"☆".repeat(5-c.estrellas);
-      let avatarHtml = c.foto
-        ? `<img src="${c.foto}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`
-        : `<div style="width:30px;height:30px;border-radius:50%;background:var(--azul);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;">👤</div>`;
-      let div=document.createElement("div"); div.className="admin-opinion-card";
-      div.innerHTML=`
-        <div class="admin-opinion-header">
-          <div style="display:flex;align-items:center;gap:8px;">${avatarHtml}<div><b style="font-size:12px;">${c.nombre||c.cuenta}</b><div style="font-size:10px;color:var(--texto-sub);">${c.cuenta}</div></div></div>
-          <button class="btn-borrar-opinion" onclick="borrarOpinion('${c._id}')">🗑️</button>
-        </div>
-        <div class="admin-opinion-estrellas" style="color:#ff9500;">${estrellas}</div>
-        <p class="admin-opinion-texto">${c.texto}</p>
-        <div class="admin-opinion-fecha">${c.fecha||""}</div>`;
-      lista.appendChild(div);
-    });
-  }catch(e){ lista.innerHTML='<p style="color:#ff3b30;">Error</p>'; }
-}
-
-async function borrarOpinion(id){
-  if(!confirm("¿Eliminar esta reseña?")) return;
-  try{
-    let res=await fetch(BACKEND+"/admin/borrar-opinion",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({id})});
-    let data=await res.json();
-    showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
-    if(data.ok) cargarOpinionesAdmin();
-  }catch(e){showToast("❌ Error");}
-}
-
-async function verOpinionesUsuario(cuenta){
-  document.getElementById("modalOpinionCuenta").textContent="Cuenta: "+cuenta;
-  document.getElementById("opinionesUsuarioLista").innerHTML='<div class="loading-spinner"></div>';
-  document.getElementById("modalOpinionesUsuario").classList.add("active");
-  try{
-    let res=await fetch(BACKEND+"/comentarios/usuario/"+cuenta);
-    let data=await res.json();
-    let lista=document.getElementById("opinionesUsuarioLista");
-    if(!data.ok||data.comentarios.length===0){ lista.innerHTML='<p style="color:var(--texto-sub);">Sin reseñas</p>'; return; }
-    lista.innerHTML="";
-    data.comentarios.forEach(c=>{
-      let estrellas="★".repeat(c.estrellas)+"☆".repeat(5-c.estrellas);
-      let p=document.createElement("p");
-      p.style.cssText="margin:0 0 8px;font-size:12px;border-bottom:1px solid #e8eef5;padding-bottom:8px;";
-      p.innerHTML=`<span style="color:#ff9500;">${estrellas}</span> — ${c.texto} <span style="color:var(--texto-sub);font-size:10px;">${c.fecha||""}</span>`;
-      lista.appendChild(p);
-    });
-  }catch(e){ document.getElementById("opinionesUsuarioLista").innerHTML='<p style="color:#ff3b30;">Error</p>'; }
-}
-
-function abrirModalSaldo(cuenta,saldo){
-  cuentaParaEditar=cuenta;
-  document.getElementById("modalCuentaLabel").textContent="Cuenta: "+cuenta+" | Saldo: $"+saldo;
-  document.getElementById("nuevoSaldoInput").value=saldo;
-  document.getElementById("modalSaldo").classList.add("active");
-}
-async function guardarSaldo(){
-  let nuevoSaldo=parseFloat(document.getElementById("nuevoSaldoInput").value);
-  if(isNaN(nuevoSaldo)||nuevoSaldo<0){showToast("⚠️ Saldo inválido");return;}
-  let res=await fetch(BACKEND+"/admin/editar-saldo",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta:cuentaParaEditar,nuevoSaldo})});
-  let data=await res.json();
-  showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
-  if(data.ok){cerrarModal("modalSaldo");cargarAdmin();}
-}
-
-async function verHistorial(cuenta){
-  document.getElementById("modalHistCuenta").textContent="Cuenta: "+cuenta;
-  document.getElementById("historialLista").innerHTML='<div class="loading-spinner"></div>';
-  document.getElementById("modalHistorial").classList.add("active");
-  let res=await fetch(BACKEND+"/cuenta/"+cuenta);
-  let data=await res.json();
-  let lista=document.getElementById("historialLista");
-  let movs=data.movimientos||[];
-  if(movs.length===0){lista.innerHTML='<p style="color:var(--texto-sub);">Sin movimientos</p>';return;}
-  lista.innerHTML="";
-  movs.slice().reverse().forEach(m=>{let p=document.createElement("p");p.textContent=m;lista.appendChild(p);});
-}
-
-function abrirModalBorrar(cuenta,correo){
-  cuentaParaBorrar=cuenta;
-  document.getElementById("modalBorrarLabel").textContent="¿Eliminar cuenta "+cuenta+" ("+correo+")?";
-  document.getElementById("modalBorrar").classList.add("active");
-}
-async function confirmarBorrado(){
-  let res=await fetch(BACKEND+"/admin/borrar-cuenta",{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":ADMIN_PASS},body:JSON.stringify({cuenta:cuentaParaBorrar})});
-  let data=await res.json();
-  showToast(data.ok?"✅ "+data.mensaje:"❌ "+data.mensaje);
-  if(data.ok){cerrarModal("modalBorrar");cargarAdmin();}
-}
-
-function cerrarModal(id){
-  const el = document.getElementById(id);
-  el.classList.remove("active");
-}
-
-document.querySelectorAll(".modal-overlay").forEach(overlay => {
-  overlay.addEventListener("click", function(e) {
-    if(e.target === this) this.classList.remove("active");
-  });
-});
-
-/* ===== INICIALIZACIÓN ===== */
-window.addEventListener("DOMContentLoaded", async () => {
-  const restaurado = await restaurarSesion();
-  if (!restaurado) {
-    cambiarPantalla("login");
-  }
-});
+window.onload = () => { cargarTema(); initCarrusel(); initGraficaGeneral(); };
 </script>
 </div></body>
 </html>
