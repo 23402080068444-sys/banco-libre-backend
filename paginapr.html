@@ -1508,7 +1508,7 @@ function cambiarCantidadCompra(delta) {
   if (totalEl) totalEl.textContent = 'Total: $' + (precio * cantidadCompra).toLocaleString();
 }
 
-// ==================== VENTA DE CRIPTOMONEDAS ====================
+// ==================== VENTA DE CRIPTOMONEDAS - CORREGIDA ====================
 function abrirModalVenta(simbolo, maxQty) {
   criptoVentaActual = simbolo;
   maxVenta = maxQty;
@@ -1537,12 +1537,43 @@ function cambiarCantidadVenta(delta) {
 
 async function confirmarVenta() {
   if (!criptoVentaActual || cantidadVenta < 1) return;
+  
   const precio = preciosCriptos[criptoVentaActual];
   const total = precio * cantidadVenta;
-  showToast('✅ Venta registrada: +$' + total.toLocaleString());
-  cerrarModal('modalVenta');
-  cargarDatosInicio();
-  cargarMisCriptos();
+  
+  showToast('⏳ Procesando venta...');
+  
+  try {
+    const res = await fetch(BACKEND + '/vender-criptos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cuenta: cuentaActual,
+        simbolo: criptoVentaActual,
+        cantidad: cantidadVenta,
+        precio: precio,
+        total: total
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data && data.ok) {
+      showToast('✅ ' + data.mensaje);
+      cerrarModal('modalVenta');
+      // Recargar todos los datos actualizados
+      await cargarDatosInicio();
+      await cargarMisCriptos();
+      if (document.getElementById('balance').classList.contains('activa')) {
+        cargarBalance();
+      }
+    } else {
+      showToast('❌ ' + (data?.mensaje || 'Error al vender'));
+    }
+  } catch(e) {
+    console.error('Error en venta:', e);
+    showToast('❌ Error al conectar con el servidor');
+  }
 }
 
 async function cargarMisCriptos() {
