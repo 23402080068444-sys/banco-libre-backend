@@ -116,10 +116,6 @@
   70%  { transform: scale(1.07); opacity: 1; }
   100% { transform: scale(1); }
 }
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
 @keyframes pulseGlow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(0,122,255,0.25); }
   50%       { box-shadow: 0 0 0 8px rgba(0,122,255,0); }
@@ -132,16 +128,6 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
-}
-@keyframes tickerUp {
-  0% { color: var(--texto); }
-  50% { color: #34c759; }
-  100% { color: var(--texto); }
-}
-@keyframes tickerDown {
-  0% { color: var(--texto); }
-  50% { color: #ff3b30; }
-  100% { color: var(--texto); }
 }
 
 body {
@@ -177,14 +163,6 @@ button {
 }
 button:hover { background: var(--azul-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
 button:active { transform: scale(0.96); }
-button::after {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 70%);
-  transform: scale(0); opacity: 0; border-radius: 50%;
-  transition: transform 0.4s, opacity 0.4s;
-}
-button:active::after { transform: scale(3); opacity: 1; transition: 0s; }
-
 ul { list-style: none; padding: 0; margin: 0; }
 ul li {
   background: var(--gris-card); margin: 5px 0; padding: 10px;
@@ -301,8 +279,6 @@ ul li {
   animation: popIn 0.3s both;
 }
 .cripto-card.en-carrito .cripto-badge { display: flex; }
-
-/* Mini sparkline en cada cripto card */
 .cripto-sparkline { width: 100%; height: 30px; margin-top: 6px; }
 
 .cart-badge {
@@ -311,7 +287,6 @@ ul li {
   font-weight: bold; margin-left: -8px; margin-top: -10px;
 }
 .cart-badge.visible { display: flex; animation: popIn 0.3s both; }
-.cart-badge.bump { animation: bounce 0.35s ease; }
 
 /* CARRITO */
 .carrito-item {
@@ -350,7 +325,7 @@ ul li {
 }
 .btn-vender:hover { background: #cc2020; transform: scale(1.05); }
 
-/* ===== PERFIL MEJORADO ===== */
+/* PERFIL */
 .perfil-avatar-wrap { position: relative; display: inline-block; margin: 10px auto; }
 .perfil-avatar {
   width: 90px; height: 90px; border-radius: 50%;
@@ -372,8 +347,6 @@ ul li {
   box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 5;
 }
 .perfil-edit-btn-float:hover { transform: scale(1.18); background: var(--azul-dark); }
-
-/* Nombre editable con lápiz inline */
 .perfil-nombre-row {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   margin: 6px 0 2px;
@@ -393,7 +366,6 @@ ul li {
   background: #34c759; border: none; color: white; font-size: 13px; border-radius: 8px;
   cursor: pointer; padding: 4px 8px; margin: 0; display: none;
 }
-
 .perfil-cuenta-display { font-size: 13px; color: var(--texto-sub); margin-bottom: 8px; }
 .perfil-cliente-desde {
   display: inline-flex; align-items: center; gap: 5px;
@@ -425,8 +397,6 @@ ul li {
 .config-row:last-child { border-bottom: none; padding-bottom: 0; }
 .config-label { font-size: 14px; color: var(--texto); }
 .config-sub { font-size: 11px; color: var(--texto-sub); margin-top: 2px; }
-
-/* Toggle switch */
 .toggle-switch { position: relative; width: 44px; height: 26px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
@@ -439,13 +409,11 @@ ul li {
 }
 .toggle-switch input:checked + .toggle-slider { background: var(--azul); }
 .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
-
-/* Temas de color */
 .temas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .tema-btn {
   padding: 8px; border-radius: 12px; border: 2px solid transparent;
   cursor: pointer; font-size: 12px; font-weight: bold; margin: 0;
-  transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
 .tema-btn.activo { border-color: var(--texto); transform: scale(1.05); }
 .tema-dot { width: 20px; height: 20px; border-radius: 50%; }
@@ -462,6 +430,7 @@ ul li {
   border: 1px solid var(--azul); border-radius: 10px; padding: 6px 12px; font-size: 12px;
   cursor: pointer; margin: 0; z-index: 10;
 }
+.grafica-back-btn:hover { background: var(--azul); color: white; }
 .chart-container { position: relative; width: 100%; margin-bottom: 16px; }
 .chart-tabs {
   display: flex; gap: 6px; margin-bottom: 12px;
@@ -486,7 +455,7 @@ ul li {
   font-size: 12px; overflow: hidden; border: 1px solid var(--border);
 }
 .ticker-scroll {
-  display: flex; gap: 14px; animation: none; white-space: nowrap;
+  display: flex; gap: 14px; white-space: nowrap;
 }
 .ticker-item { display: flex; align-items: center; gap: 4px; font-size: 11px; }
 .ticker-sym { font-weight: bold; color: var(--texto); }
@@ -494,7 +463,6 @@ ul li {
 .ticker-chg.pos { color: #34c759; }
 .ticker-chg.neg { color: #ff3b30; }
 
-/* PERFIL FOTO OPCIONES */
 .perfil-photo-options {
   display: flex; gap: 8px; justify-content: center; margin-bottom: 12px;
 }
@@ -612,7 +580,6 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 .btn-borrar-opinion { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin: 0; }
 .loading-spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--azul); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 20px auto; }
 
-/* FUENTE TAMAÑO */
 [data-font="grande"] { font-size: 17px; }
 [data-font="grande"] input, [data-font="grande"] button { font-size: 16px; }
 [data-font="pequeno"] { font-size: 13px; }
@@ -621,471 +588,329 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 </head>
 <body><div class="app" id="appRoot">
 
-  <div id="toast"></div>
+<div id="toast"></div>
 
-  <!-- DRAWER -->
-  <div class="drawer" id="drawer">
-    <a onclick="cambiarPantalla('inicio');toggleMenu()">🏠 Inicio</a>
-    <a onclick="cambiarPantalla('balance');toggleMenu()">💰 Balance</a>
-    <a onclick="cambiarPantalla('depositos');toggleMenu()">💸 Depósitos</a>
-    <a onclick="cambiarPantalla('criptomonedas');toggleMenu()">🪙 Criptomonedas</a>
-    <a onclick="cambiarPantalla('carrito');toggleMenu()">🛒 Carrito <span id="carritoDrawerCount" style="background:var(--azul);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;display:none"></span></a>
-    <a onclick="cambiarPantalla('misCriptos');toggleMenu()">💎 Mis Criptomonedas</a>
-    <a onclick="cambiarPantalla('comentarios');toggleMenu()">⭐ Reseñas</a>
-    <a onclick="cambiarPantalla('perfil');toggleMenu()">👤 Perfil</a>
-    <a onclick="cambiarPantalla('configuracion');toggleMenu()">⚙️ Configuración</a>
-    <a onclick="logout();toggleMenu()">🚪 Cerrar sesión</a>
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <a onclick="cambiarPantalla('inicio');toggleMenu()">🏠 Inicio</a>
+  <a onclick="cambiarPantalla('balance');toggleMenu()">💰 Balance</a>
+  <a onclick="cambiarPantalla('depositos');toggleMenu()">💸 Depósitos</a>
+  <a onclick="cambiarPantalla('criptomonedas');toggleMenu()">🪙 Criptomonedas</a>
+  <a onclick="cambiarPantalla('carrito');toggleMenu()">🛒 Carrito <span id="carritoDrawerCount" style="background:var(--azul);color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;display:none"></span></a>
+  <a onclick="cambiarPantalla('misCriptos');toggleMenu()">💎 Mis Criptomonedas</a>
+  <a onclick="cambiarPantalla('comentarios');toggleMenu()">⭐ Reseñas</a>
+  <a onclick="cambiarPantalla('perfil');toggleMenu()">👤 Perfil</a>
+  <a onclick="cambiarPantalla('configuracion');toggleMenu()">⚙️ Configuración</a>
+  <a onclick="logout();toggleMenu()">🚪 Cerrar sesión</a>
+</div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<!-- LOGIN -->
+<div id="login" class="pantalla activa">
+  <img src="bancolibre.jpg.jpeg" class="logo" onerror="this.style.display='none'">
+  <h1>Banco Libre</h1>
+  <input id="usuario" placeholder="Número de cuenta">
+  <input id="password" type="password" placeholder="Contraseña">
+  <button onclick="login()">Ingresar</button>
+  <button onclick="cambiarPantalla('registro')">Crear cuenta</button>
+  <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
+</div>
+
+<!-- REGISTRO -->
+<div id="registro" class="pantalla">
+  <h2>Crear cuenta</h2>
+  <input id="nuevaCuenta" placeholder="Número de cuenta (10 dígitos)">
+  <input id="nuevaPassword" type="password" placeholder="Contraseña">
+  <input id="nuevoCorreo" type="email" placeholder="Correo electrónico">
+  <button onclick="crearCuenta()">Registrar</button>
+  <button onclick="cambiarPantalla('login')">Volver</button>
+</div>
+
+<!-- INICIO -->
+<div id="inicio" class="pantalla">
+  <div class="header">
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    <div class="title">Banco Libre</div>
+    <div id="headerAvatar" style="cursor:pointer;" onclick="cambiarPantalla('perfil')"></div>
   </div>
-  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-
-  <!-- LOGIN -->
-  <div id="login" class="pantalla activa">
-    <img src="bancolibre.jpg.jpeg" class="logo" onerror="this.style.display='none'">
-    <h1>Banco Libre</h1>
-    <input id="usuario" placeholder="Número de cuenta">
-    <input id="password" type="password" placeholder="Contraseña">
-    <button onclick="login()">Ingresar</button>
-    <button onclick="cambiarPantalla('registro')">Crear cuenta</button>
-    <button onclick="cambiarPantalla('reset')">¿Olvidaste tu contraseña?</button>
-  </div>
-
-  <!-- REGISTRO -->
-  <div id="registro" class="pantalla">
-    <h2>Crear cuenta</h2>
-    <input id="nuevaCuenta" placeholder="Número de cuenta (10 dígitos)">
-    <input id="nuevaPassword" type="password" placeholder="Contraseña">
-    <input id="nuevoCorreo" type="email" placeholder="Correo electrónico">
-    <button onclick="crearCuenta()">Registrar</button>
-    <button onclick="cambiarPantalla('login')">Volver</button>
-  </div>
-
-  <!-- INICIO -->
-  <div id="inicio" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Banco Libre</div>
-      <div id="headerAvatar" style="cursor:pointer;" onclick="cambiarPantalla('perfil')"></div>
+  <div class="contenido">
+    <p id="bienvenidaMsg" style="color:var(--texto-sub);font-size:13px;margin:0 0 12px;text-align:left;"></p>
+    <div class="precio-ticker" id="precioTicker">
+      <span style="font-size:11px;color:var(--azul);font-weight:bold;white-space:nowrap;">📊</span>
+      <div class="ticker-scroll" id="tickerScroll"></div>
     </div>
-    <div class="contenido">
-      <p id="bienvenidaMsg" style="color:var(--texto-sub);font-size:13px;margin:0 0 12px;text-align:left;"></p>
-      <!-- Ticker de precios -->
-      <div class="precio-ticker" id="precioTicker">
-        <span style="font-size:11px;color:var(--azul);font-weight:bold;white-space:nowrap;">📊</span>
-        <div class="ticker-scroll" id="tickerScroll"></div>
+    <div class="inicio-saldo-card">
+      <div class="inicio-saldo-label">Saldo disponible</div>
+      <div class="inicio-saldo-num" id="inicioSaldo">$—</div>
+      <div style="font-size:12px;opacity:0.7;margin-top:4px;">Cuenta: <span id="cuentaActual"></span></div>
+    </div>
+    <div class="inicio-accesos">
+      <button class="inicio-acceso-btn" onclick="cambiarPantalla('depositos')"><span class="inicio-acceso-icon">💸</span>Transferir</button>
+      <button class="inicio-acceso-btn" onclick="cambiarPantalla('criptomonedas')"><span class="inicio-acceso-icon">🪙</span>Criptos</button>
+      <button class="inicio-acceso-btn" onclick="cambiarPantalla('misCriptos')"><span class="inicio-acceso-icon">💎</span>Mis Criptos</button>
+      <button class="inicio-acceso-btn" onclick="cambiarPantalla('comentarios')"><span class="inicio-acceso-icon">⭐</span>Reseñas</button>
+    </div>
+    <div class="carrusel-wrap" id="carruselWrap">
+      <div class="carrusel-track" id="carruselTrack">
+        <div class="carrusel-slide"><div class="carrusel-card oferta" onclick="irDesdeCarrusel('criptomonedas','ZRO')"><span class="cc-emoji">⚡</span><h3>¡Oferta del día!</h3><p>ZeroCoin (ZRO) con precio mínimo histórico. ¡Toca para comprar!</p></div></div>
+        <div class="carrusel-slide"><div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','FNX')"><span class="cc-emoji">🔥</span><h3>PhoenixCoin en alza</h3><p>FNX subió un 12% esta semana. ¡Toca para invertir!</p></div></div>
+        <div class="carrusel-slide"><div class="carrusel-card tip" onclick="cambiarPantalla('balance')"><span class="cc-emoji">💡</span><h3>Consejo financiero</h3><p>Diversifica tu cartera. No pongas todos tus fondos en una sola cripto.</p></div></div>
+        <div class="carrusel-slide"><div class="carrusel-card promo" onclick="cambiarPantalla('registro')"><span class="cc-emoji">🎁</span><h3>Nuevo usuario</h3><p>Cada cuenta nueva inicia con $10,000. ¡Comparte con un amigo!</p></div></div>
+        <div class="carrusel-slide"><div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','NVX')"><span class="cc-emoji">🌟</span><h3>NovaCoin recomendada</h3><p>NVX es la cripto más estable del banco. ¡Toca para comprar!</p></div></div>
       </div>
-      <div class="inicio-saldo-card">
-        <div class="inicio-saldo-label">Saldo disponible</div>
-        <div class="inicio-saldo-num" id="inicioSaldo">$—</div>
-        <div style="font-size:12px;opacity:0.7;margin-top:4px;">Cuenta: <span id="cuentaActual"></span></div>
-      </div>
-      <div class="inicio-accesos">
-        <button class="inicio-acceso-btn" onclick="cambiarPantalla('depositos')"><span class="inicio-acceso-icon">💸</span>Transferir</button>
-        <button class="inicio-acceso-btn" onclick="cambiarPantalla('criptomonedas')"><span class="inicio-acceso-icon">🪙</span>Criptos</button>
-        <button class="inicio-acceso-btn" onclick="cambiarPantalla('misCriptos')"><span class="inicio-acceso-icon">💎</span>Mis Criptos</button>
-        <button class="inicio-acceso-btn" onclick="cambiarPantalla('comentarios')"><span class="inicio-acceso-icon">⭐</span>Reseñas</button>
-      </div>
-      <div class="carrusel-wrap" id="carruselWrap">
-        <div class="carrusel-track" id="carruselTrack">
-          <div class="carrusel-slide"><div class="carrusel-card oferta" onclick="irDesdeCarrusel('criptomonedas','ZRO')"><span class="cc-emoji">⚡</span><h3>¡Oferta del día!</h3><p>ZeroCoin (ZRO) con precio mínimo histórico. ¡Toca para comprar!</p></div></div>
-          <div class="carrusel-slide"><div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','FNX')"><span class="cc-emoji">🔥</span><h3>PhoenixCoin en alza</h3><p>FNX subió un 12% esta semana. ¡Toca para invertir!</p></div></div>
-          <div class="carrusel-slide"><div class="carrusel-card tip" onclick="cambiarPantalla('balance')"><span class="cc-emoji">💡</span><h3>Consejo financiero</h3><p>Diversifica tu cartera. No pongas todos tus fondos en una sola cripto.</p></div></div>
-          <div class="carrusel-slide"><div class="carrusel-card promo" onclick="cambiarPantalla('registro')"><span class="cc-emoji">🎁</span><h3>Nuevo usuario</h3><p>Cada cuenta nueva inicia con $10,000. ¡Comparte con un amigo!</p></div></div>
-          <div class="carrusel-slide"><div class="carrusel-card cripto" onclick="irDesdeCarrusel('criptomonedas','NVX')"><span class="cc-emoji">🌟</span><h3>NovaCoin recomendada</h3><p>NVX es la cripto más estable del banco. ¡Toca para comprar!</p></div></div>
-        </div>
-        <div class="carrusel-dots" id="carruselDots"></div>
-      </div>
+      <div class="carrusel-dots" id="carruselDots"></div>
     </div>
   </div>
+</div>
 
-  <!-- DEPÓSITOS -->
-  <div id="depositos" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Depósitos</div></div>
-    <div class="contenido">
-      <h2>Transferir</h2>
-      <input id="cuentaDestino" placeholder="Cuenta destino">
-      <input id="monto" type="number" placeholder="Monto">
-      <button onclick="depositar()">💸 Depositar</button>
+<!-- DEPÓSITOS -->
+<div id="depositos" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Depósitos</div></div>
+  <div class="contenido">
+    <h2>Transferir</h2>
+    <input id="cuentaDestino" placeholder="Cuenta destino">
+    <input id="monto" type="number" placeholder="Monto">
+    <button onclick="depositar()">💸 Depositar</button>
+  </div>
+</div>
+
+<!-- BALANCE -->
+<div id="balance" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Balance</div></div>
+  <div class="contenido">
+    <h2 style="color:var(--texto)">Saldo: $<span id="saldo" class="saldo-animado" style="color:var(--azul)">0</span></h2>
+    <h3 style="text-align:left;color:var(--texto)">Movimientos</h3>
+    <div id="movimientos"><ul id="listaMovimientos"></ul></div>
+  </div>
+</div>
+
+<!-- PERFIL -->
+<div id="perfil" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
+  <div class="contenido">
+    <div class="perfil-avatar-wrap" id="perfilAvatarWrap">
+      <div class="perfil-avatar-placeholder" id="perfilAvatarPlaceholder">👤</div>
+      <img id="perfilAvatarImg" class="perfil-avatar" style="display:none;" src="" alt="avatar">
+      <button class="perfil-edit-btn-float" onclick="mostrarOpcionesFoto()" title="Cambiar foto">✏️</button>
     </div>
-  </div>
-
-  <!-- BALANCE -->
-  <div id="balance" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Balance</div></div>
-    <div class="contenido">
-      <h2 style="color:var(--texto)">Saldo: $<span id="saldo" class="saldo-animado" style="color:var(--azul)">0</span></h2>
-      <h3 style="text-align:left;color:var(--texto)">Movimientos</h3>
-      <div id="movimientos"><ul id="listaMovimientos"></ul></div>
+    <div class="perfil-photo-options" id="perfilPhotoOpts" style="display:none;">
+      <button onclick="subirFotoDesdeArchivo()">🖼️ Galería</button>
+      <button onclick="tomarFotoPerfil()">📸 Cámara</button>
+      <button onclick="ocultarOpcionesFoto()" style="background:var(--gris-card);color:var(--texto);border:1px solid var(--border);">✕</button>
     </div>
-  </div>
-
-  <!-- PERFIL MEJORADO -->
-  <div id="perfil" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">Perfil</div></div>
-    <div class="contenido">
-      <!-- Avatar con lápiz -->
-      <div class="perfil-avatar-wrap" id="perfilAvatarWrap">
-        <div class="perfil-avatar-placeholder" id="perfilAvatarPlaceholder">👤</div>
-        <img id="perfilAvatarImg" class="perfil-avatar" style="display:none;" src="" alt="avatar">
-        <button class="perfil-edit-btn-float" onclick="mostrarOpcionesFoto()" title="Cambiar foto">✏️</button>
-      </div>
-      
-      <!-- Opciones foto (se muestran al tocar el lápiz) -->
-      <div class="perfil-photo-options" id="perfilPhotoOpts" style="display:none;">
-        <button onclick="subirFotoDesdeArchivo()">🖼️ Galería</button>
-        <button onclick="tomarFotoPerfil()">📸 Cámara</button>
-        <button onclick="ocultarOpcionesFoto()" style="background:var(--gris-card);color:var(--texto);border:1px solid var(--border);">✕</button>
-      </div>
-      
-      <!-- Nombre editable inline con lápiz -->
-      <div class="perfil-nombre-row">
-        <span class="perfil-nombre-display" id="perfilNombreDisplay">—</span>
-        <input class="perfil-nombre-input-inline" id="perfilNombreInline" placeholder="Tu nombre">
-        <button class="btn-edit-pencil" id="btnLapizNombre" onclick="activarEditNombre()" title="Editar nombre">✏️</button>
-        <button class="btn-save-check" id="btnGuardarNombre" onclick="guardarNombreInline()">✓</button>
-      </div>
-      
-      <div class="perfil-cuenta-display" id="cuentaPerfil"></div>
-      <div class="perfil-cliente-desde" id="perfilClienteDesde" style="display:none;">
-        🗓️ <span id="perfilClienteDesdeTxt"></span>
-      </div>
-      
-      <!-- Stats del perfil -->
-      <div class="perfil-stats-row" id="perfilStats"></div>
-      
-      <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" onchange="procesarFotoPerfil(this.files[0])">
+    <div class="perfil-nombre-row">
+      <span class="perfil-nombre-display" id="perfilNombreDisplay">—</span>
+      <input class="perfil-nombre-input-inline" id="perfilNombreInline" placeholder="Tu nombre">
+      <button class="btn-edit-pencil" id="btnLapizNombre" onclick="activarEditNombre()" title="Editar nombre">✏️</button>
+      <button class="btn-save-check" id="btnGuardarNombre" onclick="guardarNombreInline()">✓</button>
     </div>
-  </div>
-
-  <!-- CONFIGURACIÓN -->
-  <div id="configuracion" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⚙️ Configuración</div></div>
-    <div class="contenido">
-
-      <!-- Apariencia -->
-      <div class="config-section">
-        <h4>🎨 Apariencia</h4>
-        <div class="config-row">
-          <div><div class="config-label">Modo oscuro</div><div class="config-sub">Fondo negro, texto claro</div></div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="toggleOscuro" onchange="cambiarModoOscuro(this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="config-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
-          <div class="config-label">Color principal</div>
-          <div class="temas-grid" style="width:100%;">
-            <button class="tema-btn" style="background:#e8f2ff;" onclick="cambiarTema('default')">
-              <div class="tema-dot" style="background:#007aff;"></div>
-              <span style="color:#007aff;font-size:11px;">Azul</span>
-            </button>
-            <button class="tema-btn" style="background:#e8f5e9;" onclick="cambiarTema('verde')">
-              <div class="tema-dot" style="background:#34c759;"></div>
-              <span style="color:#34c759;font-size:11px;">Verde</span>
-            </button>
-            <button class="tema-btn" style="background:#f3eaff;" onclick="cambiarTema('purpura')">
-              <div class="tema-dot" style="background:#af52de;"></div>
-              <span style="color:#af52de;font-size:11px;">Púrpura</span>
-            </button>
-            <button class="tema-btn" style="background:#fff0f0;" onclick="cambiarTema('rojo')">
-              <div class="tema-dot" style="background:#ff3b30;"></div>
-              <span style="color:#ff3b30;font-size:11px;">Rojo</span>
-            </button>
-            <button class="tema-btn" style="background:#fff8e8;" onclick="cambiarTema('naranja')">
-              <div class="tema-dot" style="background:#ff9500;"></div>
-              <span style="color:#ff9500;font-size:11px;">Naranja</span>
-            </button>
-            <button class="tema-btn" style="background:#1c1c1e;border:1px solid #555;" onclick="cambiarTema('oscuro-total')">
-              <div class="tema-dot" style="background:#0a84ff;"></div>
-              <span style="color:#aaa;font-size:11px;">Dark</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Texto -->
-      <div class="config-section">
-        <h4>🔤 Texto</h4>
-        <div class="config-row">
-          <div class="config-label">Tamaño de fuente</div>
-          <div style="display:flex;gap:6px;">
-            <button onclick="cambiarFuente('pequeno')" style="padding:5px 10px;font-size:12px;margin:0;">A</button>
-            <button onclick="cambiarFuente('normal')" style="padding:5px 10px;font-size:14px;margin:0;">A</button>
-            <button onclick="cambiarFuente('grande')" style="padding:5px 10px;font-size:17px;margin:0;">A</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Notificaciones -->
-      <div class="config-section">
-        <h4>🔔 Preferencias</h4>
-        <div class="config-row">
-          <div><div class="config-label">Ticker de precios</div><div class="config-sub">Mostrar precios en tiempo real</div></div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="toggleTicker" checked onchange="cambiarTicker(this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="config-row">
-          <div><div class="config-label">Variación en criptos</div><div class="config-sub">Mostrar % de cambio de precio</div></div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="toggleVariacion" checked onchange="cambiarVariacion(this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Seguridad -->
-      <div class="config-section">
-        <h4>🔒 Cuenta</h4>
-        <div class="config-row" style="cursor:pointer;" onclick="cambiarPantalla('reset');toggleMenu && null">
-          <div><div class="config-label">Cambiar contraseña</div><div class="config-sub">Actualiza tu contraseña</div></div>
-          <span style="color:var(--azul);">›</span>
-        </div>
-        <div class="config-row" style="cursor:pointer;" onclick="logout()">
-          <div class="config-label" style="color:#ff3b30;">Cerrar sesión</div>
-          <span style="color:#ff3b30;">›</span>
-        </div>
-      </div>
-
-      <p style="font-size:11px;color:var(--texto-sub);margin-top:10px;">Banco Libre v2.0 · Los precios se actualizan cada 5 min</p>
+    <div class="perfil-cuenta-display" id="cuentaPerfil"></div>
+    <div class="perfil-cliente-desde" id="perfilClienteDesde" style="display:none;">
+      🗓️ <span id="perfilClienteDesdeTxt"></span>
     </div>
+    <div class="perfil-stats-row" id="perfilStats"></div>
+    <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;" onchange="procesarFotoPerfil(this.files[0])">
   </div>
+</div>
 
-  <!-- RESET -->
-  <div id="reset" class="pantalla">
-    <h2>Restablecer contraseña</h2>
-    <input id="correoReset" placeholder="Correo registrado">
-    <button onclick="enviarPin()">Enviar PIN</button>
-    <input id="pinIngresado" placeholder="PIN recibido">
-    <input id="nuevaPasswordReset" type="password" placeholder="Nueva contraseña">
-    <button onclick="cambiarPassword()">Cambiar contraseña</button>
-    <button onclick="cambiarPantalla('login')">Volver</button>
-  </div>
-
-  <!-- CRIPTOMONEDAS -->
-  <div id="criptomonedas" class="pantalla">
-    <div class="header">
-      <div class="menu-icon" onclick="toggleMenu()">☰</div>
-      <div class="title">Criptomonedas</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span style="cursor:pointer;font-size:18px;color:white;" onclick="abrirGraficaGeneral()" title="Gráfica general">📊</span>
-        <div style="display:flex;align-items:flex-start;cursor:pointer;" onclick="cambiarPantalla('carrito')">
-          🛒<span class="cart-badge" id="cartBadge">0</span>
+<!-- CONFIGURACIÓN -->
+<div id="configuracion" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⚙️ Configuración</div></div>
+  <div class="contenido">
+    <div class="config-section">
+      <h4>🎨 Apariencia</h4>
+      <div class="config-row">
+        <div><div class="config-label">Modo oscuro</div><div class="config-sub">Fondo negro, texto claro</div></div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleOscuro" onchange="cambiarModoOscuro(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="config-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+        <div class="config-label">Color principal</div>
+        <div class="temas-grid" style="width:100%;">
+          <button class="tema-btn" style="background:#e8f2ff;" onclick="cambiarTema('default')"><div class="tema-dot" style="background:#007aff;"></div><span style="color:#007aff;font-size:11px;">Azul</span></button>
+          <button class="tema-btn" style="background:#e8f5e9;" onclick="cambiarTema('verde')"><div class="tema-dot" style="background:#34c759;"></div><span style="color:#34c759;font-size:11px;">Verde</span></button>
+          <button class="tema-btn" style="background:#f3eaff;" onclick="cambiarTema('purpura')"><div class="tema-dot" style="background:#af52de;"></div><span style="color:#af52de;font-size:11px;">Púrpura</span></button>
+          <button class="tema-btn" style="background:#fff0f0;" onclick="cambiarTema('rojo')"><div class="tema-dot" style="background:#ff3b30;"></div><span style="color:#ff3b30;font-size:11px;">Rojo</span></button>
+          <button class="tema-btn" style="background:#fff8e8;" onclick="cambiarTema('naranja')"><div class="tema-dot" style="background:#ff9500;"></div><span style="color:#ff9500;font-size:11px;">Naranja</span></button>
+          <button class="tema-btn" style="background:#1c1c1e;border:1px solid #555;" onclick="cambiarTema('oscuro-total')"><div class="tema-dot" style="background:#0a84ff;"></div><span style="color:#aaa;font-size:11px;">Dark</span></button>
         </div>
       </div>
     </div>
-    <div class="contenido">
-      <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Toca una moneda para comprar · 📊 para gráfica general</p>
-      <div class="cripto-grid" id="criptoGrid"></div>
-    </div>
-  </div>
-
-  <!-- GRÁFICA INDIVIDUAL (fullscreen sobre criptomonedas) -->
-  <div class="grafica-fullscreen" id="graficaIndividual">
-    <div class="grafica-header">
-      <button class="grafica-back-btn" onclick="cerrarGraficaIndividual()">← Volver</button>
-      <div class="grafica-title" id="graficaIndividualTitle">—</div>
-    </div>
-    <div style="padding-top:10px;">
-      <div class="chart-tabs" id="graficaTabs">
-        <button class="chart-tab" onclick="cambiarPeriodoGrafica('1h', this)">1h</button>
-        <button class="chart-tab active" onclick="cambiarPeriodoGrafica('24h', this)">24h</button>
-        <button class="chart-tab" onclick="cambiarPeriodoGrafica('7d', this)">7d</button>
-        <button class="chart-tab" onclick="cambiarPeriodoGrafica('30d', this)">30d</button>
-      </div>
-      <div class="chart-container" style="height:220px;">
-        <canvas id="chartIndividual"></canvas>
-      </div>
-      <div id="graficaInfoCard" style="background:var(--gris-card);border-radius:14px;padding:14px;margin-top:8px;text-align:left;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div>
-            <div style="font-size:22px;font-weight:bold;color:var(--texto);" id="gInfoPrecio">—</div>
-            <div style="font-size:12px;color:var(--texto-sub);" id="gInfoSim">—</div>
-          </div>
-          <div style="text-align:right;">
-            <div id="gInfoCambio" style="font-size:14px;font-weight:bold;"></div>
-            <div style="font-size:11px;color:var(--texto-sub);">Variación</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;">
-          <button onclick="abrirModalCompraDesdeGrafica()" style="flex:1;margin:0;font-size:13px;padding:10px;">🛒 Comprar</button>
-          <button onclick="abrirModalVentaDesdeGrafica()" style="flex:1;margin:0;font-size:13px;padding:10px;background:#ff3b30;">💰 Vender</button>
+    <div class="config-section">
+      <h4>🔤 Texto</h4>
+      <div class="config-row">
+        <div class="config-label">Tamaño de fuente</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="cambiarFuente('pequeno')" style="padding:5px 10px;font-size:12px;margin:0;">A</button>
+          <button onclick="cambiarFuente('normal')" style="padding:5px 10px;font-size:14px;margin:0;">A</button>
+          <button onclick="cambiarFuente('grande')" style="padding:5px 10px;font-size:17px;margin:0;">A</button>
         </div>
       </div>
     </div>
+    <div class="config-section">
+      <h4>🔔 Preferencias</h4>
+      <div class="config-row">
+        <div><div class="config-label">Ticker de precios</div><div class="config-sub">Mostrar precios en tiempo real</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="toggleTicker" checked onchange="cambiarTicker(this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Variación en criptos</div><div class="config-sub">Mostrar % de cambio de precio</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="toggleVariacion" checked onchange="cambiarVariacion(this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="config-section">
+      <h4>🔒 Cuenta</h4>
+      <div class="config-row" style="cursor:pointer;" onclick="cambiarPantalla('reset');toggleMenu && null"><div><div class="config-label">Cambiar contraseña</div><div class="config-sub">Actualiza tu contraseña</div></div><span style="color:var(--azul);">›</span></div>
+      <div class="config-row" style="cursor:pointer;" onclick="logout()"><div class="config-label" style="color:#ff3b30;">Cerrar sesión</div><span style="color:#ff3b30;">›</span></div>
+    </div>
+    <p style="font-size:11px;color:var(--texto-sub);margin-top:10px;">Banco Libre v2.0 · Los precios se actualizan cada 5 min</p>
   </div>
+</div>
 
-  <!-- GRÁFICA GENERAL (fullscreen) -->
-  <div class="grafica-fullscreen" id="graficaGeneral">
-    <div class="grafica-header">
-      <button class="grafica-back-btn" onclick="cerrarGraficaGeneral()">← Volver</button>
-      <div class="grafica-title">📊 Todas las criptos</div>
-    </div>
-    <div style="padding-top:10px;">
-      <div class="chart-container" style="height:240px;">
-        <canvas id="chartGeneral"></canvas>
-      </div>
-      <p style="font-size:11px;color:var(--texto-sub);text-align:center;margin:4px 0 10px;">Precio actual de todas las criptomonedas</p>
-      <div id="generalLeyenda" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
-    </div>
-  </div>
+<!-- RESET -->
+<div id="reset" class="pantalla">
+  <h2>Restablecer contraseña</h2>
+  <input id="correoReset" placeholder="Correo registrado">
+  <button onclick="enviarPin()">Enviar PIN</button>
+  <input id="pinIngresado" placeholder="PIN recibido">
+  <input id="nuevaPasswordReset" type="password" placeholder="Nueva contraseña">
+  <button onclick="cambiarPassword()">Cambiar contraseña</button>
+  <button onclick="cambiarPantalla('login')">Volver</button>
+</div>
 
-  <!-- CARRITO -->
-  <div id="carrito" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">🛒 Carrito</div></div>
-    <div class="contenido"><div id="carritoContenido"></div></div>
+<!-- CRIPTOMONEDAS -->
+<div id="criptomonedas" class="pantalla">
+  <div class="header">
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    <div class="title">Criptomonedas</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="cursor:pointer;font-size:18px;color:white;" onclick="abrirGraficaGeneral()" title="Gráfica general">📊</span>
+      <div style="display:flex;align-items:flex-start;cursor:pointer;" onclick="cambiarPantalla('carrito')">🛒<span class="cart-badge" id="cartBadge">0</span></div>
+    </div>
   </div>
+  <div class="contenido">
+    <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Toca una moneda para comprar · 📊 para gráfica general</p>
+    <div class="cripto-grid" id="criptoGrid"></div>
+  </div>
+</div>
 
-  <!-- MIS CRIPTOS -->
-  <div id="misCriptos" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">💎 Mis Criptos</div></div>
-    <div class="contenido"><div id="misCriptosContenido"><div class="loading-spinner"></div></div></div>
+<!-- GRÁFICA INDIVIDUAL -->
+<div class="grafica-fullscreen" id="graficaIndividual">
+  <div class="grafica-header">
+    <button class="grafica-back-btn" onclick="cerrarGraficaIndividual()">← Volver</button>
+    <div class="grafica-title" id="graficaIndividualTitle">—</div>
   </div>
+  <div style="padding-top:10px;">
+    <div class="chart-tabs" id="graficaTabs">
+      <button class="chart-tab" onclick="cambiarPeriodoGrafica('1h', this)">1h</button>
+      <button class="chart-tab active" onclick="cambiarPeriodoGrafica('24h', this)">24h</button>
+      <button class="chart-tab" onclick="cambiarPeriodoGrafica('7d', this)">7d</button>
+      <button class="chart-tab" onclick="cambiarPeriodoGrafica('30d', this)">30d</button>
+    </div>
+    <div class="chart-container" style="height:220px;"><canvas id="chartIndividual"></canvas></div>
+    <div id="graficaInfoCard" style="background:var(--gris-card);border-radius:14px;padding:14px;margin-top:8px;text-align:left;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div><div style="font-size:22px;font-weight:bold;color:var(--texto);" id="gInfoPrecio">—</div><div style="font-size:12px;color:var(--texto-sub);" id="gInfoSim">—</div></div>
+        <div style="text-align:right;"><div id="gInfoCambio" style="font-size:14px;font-weight:bold;"></div><div style="font-size:11px;color:var(--texto-sub);">Variación</div></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="abrirModalCompraDesdeGrafica()" style="flex:1;margin:0;font-size:13px;padding:10px;">🛒 Comprar</button>
+        <button onclick="abrirModalVentaDesdeGrafica()" style="flex:1;margin:0;font-size:13px;padding:10px;background:#ff3b30;">💰 Vender</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <!-- COMENTARIOS -->
-  <div id="comentarios" class="pantalla">
-    <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⭐ Reseñas</div></div>
-    <div class="contenido">
-      <div style="background:var(--gris-card);border-radius:14px;padding:14px;margin-bottom:14px;">
-        <p style="margin:0 0 8px;font-weight:bold;color:var(--texto);font-size:14px;">Deja tu reseña</p>
-        <div class="estrellas" id="estrellasInput">
-          <span class="estrella" onclick="setEstrella(1)">★</span>
-          <span class="estrella" onclick="setEstrella(2)">★</span>
-          <span class="estrella" onclick="setEstrella(3)">★</span>
-          <span class="estrella" onclick="setEstrella(4)">★</span>
-          <span class="estrella" onclick="setEstrella(5)">★</span>
-        </div>
-        <textarea id="textoComentario" rows="3" placeholder="Escribe tu opinión sobre Banco Libre..."></textarea>
-        <button onclick="enviarComentario()" style="width:100%;margin:6px 0 0;">Publicar reseña</button>
-      </div>
-      <div id="listaComentarios"><div class="loading-spinner"></div></div>
-    </div>
+<!-- GRÁFICA GENERAL -->
+<div class="grafica-fullscreen" id="graficaGeneral">
+  <div class="grafica-header">
+    <button class="grafica-back-btn" onclick="cerrarGraficaGeneral()">← Volver</button>
+    <div class="grafica-title">📊 Todas las criptos</div>
   </div>
+  <div style="padding-top:10px;">
+    <div class="chart-container" style="height:240px;"><canvas id="chartGeneral"></canvas></div>
+    <p style="font-size:11px;color:var(--texto-sub);text-align:center;margin:4px 0 10px;">Precio actual de todas las criptomonedas</p>
+    <div id="generalLeyenda" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+  </div>
+</div>
 
-  <!-- ADMIN -->
-  <div id="admin" class="pantalla">
-    <div class="admin-header">
-      <div class="menu-icon" onclick="logout()" style="font-size:20px;">⏻</div>
-      <div class="title">Panel Admin</div>
-      <span class="admin-badge">ADMIN</span>
-    </div>
-    <div class="contenido" style="padding: 70px 12px 12px;">
-      <div class="admin-tabs">
-        <button class="admin-tab active" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
-        <button class="admin-tab" onclick="switchAdminTab('criptos')">🪙 Criptos</button>
-        <button class="admin-tab" onclick="switchAdminTab('opiniones')">⭐ Reseñas</button>
-      </div>
-      <div class="admin-tab-content active" id="tabUsuarios">
-        <div class="admin-stats">
-          <div class="stat-item"><div class="stat-val" id="statCuentas">—</div><div class="stat-label">Cuentas</div></div>
-          <div class="stat-item"><div class="stat-val" id="statSaldo">—</div><div class="stat-label">Saldo total</div></div>
-          <div class="stat-item"><div class="stat-val" id="statMovs">—</div><div class="stat-label">Movimientos</div></div>
-        </div>
-        <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
-        <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
-        <div class="admin-list-wrap" id="adminListWrap"><div class="loading-spinner"></div></div>
-      </div>
-      <div class="admin-tab-content" id="tabCriptos">
-        <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Modifica el precio de cada criptomoneda</p>
-        <div id="adminCriptosList" style="max-height:480px;overflow-y:auto;"></div>
-      </div>
-      <div class="admin-tab-content" id="tabOpiniones">
-        <button class="admin-refresh" onclick="cargarOpinionesAdmin()">↻ Actualizar</button>
-        <div id="adminOpinionesList" style="max-height:480px;overflow-y:auto;"><div class="loading-spinner"></div></div>
-      </div>
-    </div>
-  </div>
+<!-- CARRITO -->
+<div id="carrito" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">🛒 Carrito</div></div>
+  <div class="contenido"><div id="carritoContenido"></div></div>
+</div>
 
-  <!-- MODALES -->
-  <div class="modal-overlay" id="modalSaldo">
-    <div class="modal-box">
-      <h3>✏️ Editar Saldo</h3>
-      <p id="modalCuentaLabel" style="color:var(--texto-sub);font-size:13px;"></p>
-      <input id="nuevoSaldoInput" type="number" placeholder="Nuevo saldo">
-      <div class="modal-btn-row">
-        <button class="btn-edit" onclick="guardarSaldo()">Guardar</button>
-        <button class="btn-delete" onclick="cerrarModal('modalSaldo')">Cancelar</button>
+<!-- MIS CRIPTOS -->
+<div id="misCriptos" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">💎 Mis Criptos</div></div>
+  <div class="contenido"><div id="misCriptosContenido"><div class="loading-spinner"></div></div></div>
+</div>
+
+<!-- COMENTARIOS -->
+<div id="comentarios" class="pantalla">
+  <div class="header"><div class="menu-icon" onclick="toggleMenu()">☰</div><div class="title">⭐ Reseñas</div></div>
+  <div class="contenido">
+    <div style="background:var(--gris-card);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <p style="margin:0 0 8px;font-weight:bold;color:var(--texto);font-size:14px;">Deja tu reseña</p>
+      <div class="estrellas" id="estrellasInput">
+        <span class="estrella" onclick="setEstrella(1)">★</span>
+        <span class="estrella" onclick="setEstrella(2)">★</span>
+        <span class="estrella" onclick="setEstrella(3)">★</span>
+        <span class="estrella" onclick="setEstrella(4)">★</span>
+        <span class="estrella" onclick="setEstrella(5)">★</span>
       </div>
+      <textarea id="textoComentario" rows="3" placeholder="Escribe tu opinión sobre Banco Libre..."></textarea>
+      <button onclick="enviarComentario()" style="width:100%;margin:6px 0 0;">Publicar reseña</button>
     </div>
+    <div id="listaComentarios"><div class="loading-spinner"></div></div>
   </div>
-  <div class="modal-overlay" id="modalHistorial">
-    <div class="modal-box">
-      <h3>📋 Historial</h3>
-      <p id="modalHistCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="history-list" id="historialLista"></div>
-      <button onclick="cerrarModal('modalHistorial')" style="width:100%;margin:0;">Cerrar</button>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="pantalla">
+  <div class="admin-header">
+    <div class="menu-icon" onclick="logout()" style="font-size:20px;">⏻</div>
+    <div class="title">Panel Admin</div>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div class="contenido" style="padding: 70px 12px 12px;">
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
+      <button class="admin-tab" onclick="switchAdminTab('criptos')">🪙 Criptos</button>
+      <button class="admin-tab" onclick="switchAdminTab('opiniones')">⭐ Reseñas</button>
     </div>
-  </div>
-  <div class="modal-overlay" id="modalBorrar">
-    <div class="modal-box">
-      <h3 style="color:#ff3b30;">⚠️ Eliminar Cuenta</h3>
-      <p id="modalBorrarLabel" style="color:var(--texto-sub);font-size:13px;"></p>
-      <p style="color:#ff3b30;font-size:12px;">Esta acción no se puede deshacer.</p>
-      <div class="modal-btn-row">
-        <button class="btn-delete" onclick="confirmarBorrado()">Eliminar</button>
-        <button class="btn-edit" onclick="cerrarModal('modalBorrar')">Cancelar</button>
+    <div class="admin-tab-content active" id="tabUsuarios">
+      <div class="admin-stats">
+        <div class="stat-item"><div class="stat-val" id="statCuentas">—</div><div class="stat-label">Cuentas</div></div>
+        <div class="stat-item"><div class="stat-val" id="statSaldo">—</div><div class="stat-label">Saldo total</div></div>
+        <div class="stat-item"><div class="stat-val" id="statMovs">—</div><div class="stat-label">Movimientos</div></div>
       </div>
+      <input class="admin-search" id="adminBuscador" placeholder="🔍 Buscar cuenta o correo..." oninput="filtrarCuentas()">
+      <button class="admin-refresh" onclick="cargarAdmin()">↻ Actualizar</button>
+      <div class="admin-list-wrap" id="adminListWrap"><div class="loading-spinner"></div></div>
+    </div>
+    <div class="admin-tab-content" id="tabCriptos">
+      <p style="color:var(--texto-sub);font-size:13px;margin:0 0 10px;">Modifica el precio de cada criptomoneda</p>
+      <div id="adminCriptosList" style="max-height:480px;overflow-y:auto;"></div>
+    </div>
+    <div class="admin-tab-content" id="tabOpiniones">
+      <button class="admin-refresh" onclick="cargarOpinionesAdmin()">↻ Actualizar</button>
+      <div id="adminOpinionesList" style="max-height:480px;overflow-y:auto;"><div class="loading-spinner"></div></div>
     </div>
   </div>
-  <div class="modal-overlay" id="modalPrecioCripto">
-    <div class="modal-box">
-      <h3 id="modalCriptoNombre">✏️ Editar Precio</h3>
-      <p id="modalCriptoPrecioActual" style="color:var(--texto-sub);font-size:13px;"></p>
-      <input id="nuevoPrecioInput" type="number" placeholder="Nuevo precio ($)">
-      <div class="modal-btn-row">
-        <button class="btn-edit" onclick="guardarPrecioCripto()">Guardar</button>
-        <button class="btn-delete" onclick="cerrarModal('modalPrecioCripto')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="modalUserCriptos">
-    <div class="modal-box">
-      <h3>🪙 Criptos del usuario</h3>
-      <p id="modalUserCriptoCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="history-list" id="userCriptosList" style="max-height:220px;"></div>
-      <button onclick="cerrarModal('modalUserCriptos')" style="width:100%;margin:8px 0 0;">Cerrar</button>
-    </div>
-  </div>
-  <div class="modal-overlay" id="modalCompra">
-    <div class="modal-box">
-      <h3 id="modalCompraNombre">Comprar</h3>
-      <p id="modalCompraPrecio" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="qty-selector">
-        <button class="qty-btn" onclick="cambiarCantidadCompra(-1)">−</button>
-        <span class="qty-num" id="qtyNum">1</span>
-        <button class="qty-btn" onclick="cambiarCantidadCompra(1)">+</button>
-      </div>
-      <p id="modalCompraTotal" style="font-weight:bold;color:var(--azul);font-size:16px;"></p>
-      <div class="modal-btn-row">
-        <button class="btn-cripto" onclick="agregarAlCarrito()">Añadir al carrito</button>
-        <button class="btn-delete" onclick="cerrarModal('modalCompra')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="modalVenta">
-    <div class="modal-box">
-      <h3 id="modalVentaNombre">💰 Vender</h3>
-      <p id="modalVentaInfo" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="qty-selector">
-        <button class="qty-btn" onclick="cambiarCantidadVenta(-1)">−</button>
-        <span class="qty-num" id="qtyVentaNum">1</span>
-        <button class="qty-btn" onclick="cambiarCantidadVenta(1)">+</button>
-      </div>
-      <p id="modalVentaTotal" style="font-weight:bold;color:#34c759;font-size:16px;"></p>
-      <div class="modal-btn-row">
-        <button style="background:#34c759;" onclick="confirmarVenta()">✅ Vender</button>
-        <button class="btn-delete" onclick="cerrarModal('modalVenta')">Cancelar</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="modalOpinionesUsuario">
-    <div class="modal-box">
-      <h3>⭐ Reseñas del usuario</h3>
-      <p id="modalOpinionCuenta" style="color:var(--texto-sub);font-size:13px;"></p>
-      <div class="history-list" id="opinionesUsuarioLista" style="max-height:240px;"></div>
-      <button onclick="cerrarModal('modalOpinionesUsuario')" style="width:100%;margin:8px 0 0;">Cerrar</button>
-    </div>
-  </div>
+</div>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="modalSaldo"><div class="modal-box"><h3>✏️ Editar Saldo</h3><p id="modalCuentaLabel" style="color:var(--texto-sub);font-size:13px;"></p><input id="nuevoSaldoInput" type="number" placeholder="Nuevo saldo"><div class="modal-btn-row"><button class="btn-edit" onclick="guardarSaldo()">Guardar</button><button class="btn-delete" onclick="cerrarModal('modalSaldo')">Cancelar</button></div></div></div>
+<div class="modal-overlay" id="modalHistorial"><div class="modal-box"><h3>📋 Historial</h3><p id="modalHistCuenta" style="color:var(--texto-sub);font-size:13px;"></p><div class="history-list" id="historialLista"></div><button onclick="cerrarModal('modalHistorial')" style="width:100%;margin:0;">Cerrar</button></div></div>
+<div class="modal-overlay" id="modalBorrar"><div class="modal-box"><h3 style="color:#ff3b30;">⚠️ Eliminar Cuenta</h3><p id="modalBorrarLabel" style="color:var(--texto-sub);font-size:13px;"></p><p style="color:#ff3b30;font-size:12px;">Esta acción no se puede deshacer.</p><div class="modal-btn-row"><button class="btn-delete" onclick="confirmarBorrado()">Eliminar</button><button class="btn-edit" onclick="cerrarModal('modalBorrar')">Cancelar</button></div></div></div>
+<div class="modal-overlay" id="modalPrecioCripto"><div class="modal-box"><h3 id="modalCriptoNombre">✏️ Editar Precio</h3><p id="modalCriptoPrecioActual" style="color:var(--texto-sub);font-size:13px;"></p><input id="nuevoPrecioInput" type="number" placeholder="Nuevo precio ($)"><div class="modal-btn-row"><button class="btn-edit" onclick="guardarPrecioCripto()">Guardar</button><button class="btn-delete" onclick="cerrarModal('modalPrecioCripto')">Cancelar</button></div></div></div>
+<div class="modal-overlay" id="modalUserCriptos"><div class="modal-box"><h3>🪙 Criptos del usuario</h3><p id="modalUserCriptoCuenta" style="color:var(--texto-sub);font-size:13px;"></p><div class="history-list" id="userCriptosList" style="max-height:220px;"></div><button onclick="cerrarModal('modalUserCriptos')" style="width:100%;margin:8px 0 0;">Cerrar</button></div></div>
+<div class="modal-overlay" id="modalCompra"><div class="modal-box"><h3 id="modalCompraNombre">Comprar</h3><p id="modalCompraPrecio" style="color:var(--texto-sub);font-size:13px;"></p><div class="qty-selector"><button class="qty-btn" onclick="cambiarCantidadCompra(-1)">−</button><span class="qty-num" id="qtyNum">1</span><button class="qty-btn" onclick="cambiarCantidadCompra(1)">+</button></div><p id="modalCompraTotal" style="font-weight:bold;color:var(--azul);font-size:16px;"></p><div class="modal-btn-row"><button class="btn-cripto" onclick="agregarAlCarrito()">Añadir al carrito</button><button class="btn-delete" onclick="cerrarModal('modalCompra')">Cancelar</button></div></div></div>
+<div class="modal-overlay" id="modalVenta"><div class="modal-box"><h3 id="modalVentaNombre">💰 Vender</h3><p id="modalVentaInfo" style="color:var(--texto-sub);font-size:13px;"></p><div class="qty-selector"><button class="qty-btn" onclick="cambiarCantidadVenta(-1)">−</button><span class="qty-num" id="qtyVentaNum">1</span><button class="qty-btn" onclick="cambiarCantidadVenta(1)">+</button></div><p id="modalVentaTotal" style="font-weight:bold;color:#34c759;font-size:16px;"></p><div class="modal-btn-row"><button style="background:#34c759;" onclick="confirmarVenta()">✅ Vender</button><button class="btn-delete" onclick="cerrarModal('modalVenta')">Cancelar</button></div></div></div>
+<div class="modal-overlay" id="modalOpinionesUsuario"><div class="modal-box"><h3>⭐ Reseñas del usuario</h3><p id="modalOpinionCuenta" style="color:var(--texto-sub);font-size:13px;"></p><div class="history-list" id="opinionesUsuarioLista" style="max-height:240px;"></div><button onclick="cerrarModal('modalOpinionesUsuario')" style="width:100%;margin:8px 0 0;">Cerrar</button></div></div>
 
 <script>
 // ==================== CONFIGURACIÓN INICIAL ====================
@@ -1107,16 +932,16 @@ let mostrarVariacion = true, mostrarTicker = true;
 
 // ==================== DATOS DE CRIPTOMONEDAS ====================
 const CRIPTOS = [
-  { simbolo:"BLC", nombre:"BancoLibreCoin",  emoji:"🏦", precio:1200 },
-  { simbolo:"LBX", nombre:"LibrexToken",     emoji:"🔓", precio:850  },
-  { simbolo:"NVX", nombre:"NovaCoin",         emoji:"🌟", precio:3200 },
-  { simbolo:"ZRO", nombre:"ZeroCoin",         emoji:"⚡", precio:450  },
-  { simbolo:"QNT", nombre:"QuantumBit",       emoji:"🔬", precio:5600 },
-  { simbolo:"SLX", nombre:"SolarEx",          emoji:"☀️", precio:980  },
-  { simbolo:"DRK", nombre:"DarkMatter",       emoji:"🌑", precio:2100 },
-  { simbolo:"AQX", nombre:"AquaToken",        emoji:"🌊", precio:670  },
-  { simbolo:"FNX", nombre:"PhoenixCoin",      emoji:"🔥", precio:4300 },
-  { simbolo:"LNR", nombre:"LunarBit",         emoji:"🌙", precio:1550 }
+  { simbolo:"BLC", nombre:"BancoLibreCoin", emoji:"🏦", precio:1200 },
+  { simbolo:"LBX", nombre:"LibrexToken", emoji:"🔓", precio:850 },
+  { simbolo:"NVX", nombre:"NovaCoin", emoji:"🌟", precio:3200 },
+  { simbolo:"ZRO", nombre:"ZeroCoin", emoji:"⚡", precio:450 },
+  { simbolo:"QNT", nombre:"QuantumBit", emoji:"🔬", precio:5600 },
+  { simbolo:"SLX", nombre:"SolarEx", emoji:"☀️", precio:980 },
+  { simbolo:"DRK", nombre:"DarkMatter", emoji:"🌑", precio:2100 },
+  { simbolo:"AQX", nombre:"AquaToken", emoji:"🌊", precio:670 },
+  { simbolo:"FNX", nombre:"PhoenixCoin", emoji:"🔥", precio:4300 },
+  { simbolo:"LNR", nombre:"LunarBit", emoji:"🌙", precio:1550 }
 ];
 
 let preciosCriptos = {};
@@ -1135,7 +960,6 @@ function generarHistorialSintetico(precioActual, puntos) {
   let hist = [];
   let precio = precioActual * (0.85 + Math.random() * 0.3);
   for (let i = 0; i < puntos; i++) {
-    let t = i / puntos;
     let variacion = (Math.random() - 0.48) * 0.04;
     let tendencia = (precioActual - precio) / precioActual * 0.1;
     precio = precio * (1 + variacion + tendencia);
@@ -1157,13 +981,13 @@ function variarPrecios() {
     historialPrecios[sim].push(nuevoPrecio);
     if (historialPrecios[sim].length > 100) historialPrecios[sim].shift();
   });
-  
   const pantallaActiva = document.querySelector('.pantalla.activa');
   if (pantallaActiva && pantallaActiva.id === 'criptomonedas') renderizarCriptos();
   actualizarTicker();
   if (graficaSimboloActual && document.getElementById('graficaIndividual').classList.contains('activa')) {
     renderizarGraficaIndividual(graficaSimboloActual, graficaPeriodoActual, false);
   }
+  if (document.getElementById('graficaGeneral').classList.contains('activa')) renderizarGraficaGeneral();
   showToast("📊 Precios actualizados");
 }
 
@@ -1205,7 +1029,7 @@ function cambiarModoOscuro(activo) {
       root.removeAttribute('data-theme');
     }
   }
-  try { localStorage.setItem('bl_modo_oscuro', activo ? '1' : '0'); } catch(e){}
+  localStorage.setItem('bl_modo_oscuro', activo ? '1' : '0');
 }
 
 function cambiarTema(tema) {
@@ -1229,7 +1053,7 @@ function cambiarTema(tema) {
     const activeBtn = event.target.closest('.tema-btn');
     if (activeBtn) activeBtn.classList.add('activo');
   }
-  try { localStorage.setItem('bl_tema', tema); } catch(e){}
+  localStorage.setItem('bl_tema', tema);
   if (chartIndividual) chartIndividual.update();
   if (chartGeneral) chartGeneral.update();
 }
@@ -1238,18 +1062,20 @@ function cambiarFuente(tam) {
   const root = document.getElementById('appRoot');
   root.removeAttribute('data-font');
   if (tam !== 'normal') root.setAttribute('data-font', tam);
-  try { localStorage.setItem('bl_fuente', tam); } catch(e){}
+  localStorage.setItem('bl_fuente', tam);
 }
 
 function cambiarTicker(val) {
   mostrarTicker = val;
-  document.getElementById('precioTicker').style.display = val ? '' : 'none';
-  try { localStorage.setItem('bl_ticker', val ? '1' : '0'); } catch(e){}
+  const tickerEl = document.getElementById('precioTicker');
+  if (tickerEl) tickerEl.style.display = val ? '' : 'none';
+  if (val) actualizarTicker();
+  localStorage.setItem('bl_ticker', val ? '1' : '0');
 }
 
 function cambiarVariacion(val) {
   mostrarVariacion = val;
-  try { localStorage.setItem('bl_variacion', val ? '1' : '0'); } catch(e){}
+  localStorage.setItem('bl_variacion', val ? '1' : '0');
   if (document.getElementById('criptomonedas').classList.contains('activa')) renderizarCriptos();
 }
 
@@ -1289,6 +1115,7 @@ let touchStartX = 0, isDragging = false, dragStartX = 0, currentTranslate = 0;
 
 function initCarrusel() {
   let dots = document.getElementById('carruselDots');
+  if (!dots) return;
   dots.innerHTML = '';
   for (let i = 0; i < TOTAL_SLIDES; i++) {
     let d = document.createElement('div');
@@ -1299,6 +1126,7 @@ function initCarrusel() {
   iniciarAutoplay();
   const wrap = document.getElementById('carruselWrap');
   const track = document.getElementById('carruselTrack');
+  if (!wrap || !track) return;
   wrap.addEventListener('touchstart', e => {
     touchStartX = e.touches[0].clientX;
     isDragging = true;
@@ -1336,7 +1164,8 @@ function detenerAutoplay() {
 
 function irASlide(idx) {
   carruselIdx = idx;
-  document.getElementById('carruselTrack').style.transform = `translateX(-${idx * 100}%)`;
+  const track = document.getElementById('carruselTrack');
+  if (track) track.style.transform = `translateX(-${idx * 100}%)`;
   document.querySelectorAll('.carrusel-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
 }
 
@@ -1347,7 +1176,7 @@ function irDesdeCarrusel(pantalla, simbolo) {
   }
 }
 
-// ==================== GRÁFICAS ====================
+// ==================== GRÁFICAS - CORREGIDAS ====================
 function getPuntosGrafica(simbolo, periodo) {
   const hist = historialPrecios[simbolo] || [];
   switch(periodo) {
@@ -1374,19 +1203,26 @@ function getLabelsGrafica(n, periodo) {
 }
 
 function abrirGraficaIndividual(simbolo) {
-  if (document.getElementById('graficaGeneral').classList.contains('activa')) cerrarGraficaGeneral();
+  if (document.getElementById('graficaGeneral').classList.contains('activa')) {
+    cerrarGraficaGeneral();
+  }
   graficaSimboloActual = simbolo;
   const c = CRIPTOS.find(x => x.simbolo === simbolo);
-  document.getElementById('graficaIndividualTitle').textContent = c.emoji + ' ' + c.nombre;
-  document.getElementById('graficaIndividual').classList.add('activa');
+  const titleEl = document.getElementById('graficaIndividualTitle');
+  if (titleEl) titleEl.textContent = c.emoji + ' ' + c.nombre;
+  const graficaDiv = document.getElementById('graficaIndividual');
+  if (graficaDiv) graficaDiv.classList.add('activa');
   graficaPeriodoActual = '24h';
   renderizarGraficaIndividual(simbolo, '24h', true);
 }
 
-function cerrarGraficaIndividual() {
-  document.getElementById('graficaIndividual').classList.remove('activa');
+function cerrarGraficaIndividual(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const graficaDiv = document.getElementById('graficaIndividual');
+  if (graficaDiv) graficaDiv.classList.remove('activa');
   graficaSimboloActual = null;
   if (chartIndividual) { chartIndividual.destroy(); chartIndividual = null; }
+  document.body.style.overflow = '';
 }
 
 function cambiarPeriodoGrafica(periodo, btn) {
@@ -1397,17 +1233,23 @@ function cambiarPeriodoGrafica(periodo, btn) {
 }
 
 function renderizarGraficaIndividual(simbolo, periodo, primera) {
+  if (!simbolo) return;
   const c = CRIPTOS.find(x => x.simbolo === simbolo);
+  if (!c) return;
   const precio = preciosCriptos[simbolo];
   const anterior = preciosAnteriores[simbolo] || precio;
   const cambio = ((precio - anterior) / anterior * 100).toFixed(2);
   const signo = cambio >= 0 ? '+' : '';
   
-  document.getElementById('gInfoPrecio').textContent = '$' + precio.toLocaleString();
-  document.getElementById('gInfoSim').textContent = c.nombre + ' · ' + simbolo;
+  const precioEl = document.getElementById('gInfoPrecio');
+  const simEl = document.getElementById('gInfoSim');
   const cambioEl = document.getElementById('gInfoCambio');
-  cambioEl.textContent = signo + cambio + '%';
-  cambioEl.style.color = cambio >= 0 ? '#34c759' : '#ff3b30';
+  if (precioEl) precioEl.textContent = '$' + precio.toLocaleString();
+  if (simEl) simEl.textContent = c.nombre + ' · ' + simbolo;
+  if (cambioEl) {
+    cambioEl.textContent = signo + cambio + '%';
+    cambioEl.style.color = cambio >= 0 ? '#34c759' : '#ff3b30';
+  }
 
   const puntos = getPuntosGrafica(simbolo, periodo);
   const labels = getLabelsGrafica(puntos.length, periodo);
@@ -1415,6 +1257,7 @@ function renderizarGraficaIndividual(simbolo, periodo, primera) {
   const color = esSube ? '#34c759' : '#ff3b30';
 
   const canvas = document.getElementById('chartIndividual');
+  if (!canvas) return;
   if (chartIndividual) { chartIndividual.destroy(); chartIndividual = null; }
   
   chartIndividual = new Chart(canvas, {
@@ -1427,19 +1270,26 @@ function renderizarGraficaIndividual(simbolo, periodo, primera) {
 }
 
 function abrirGraficaGeneral() {
-  if (document.getElementById('graficaIndividual').classList.contains('activa')) cerrarGraficaIndividual();
-  document.getElementById('graficaGeneral').classList.add('activa');
-  renderizarGraficaGeneral();
+  if (document.getElementById('graficaIndividual').classList.contains('activa')) {
+    cerrarGraficaIndividual();
+  }
+  const graficaDiv = document.getElementById('graficaGeneral');
+  if (graficaDiv) graficaDiv.classList.add('activa');
+  setTimeout(() => { renderizarGraficaGeneral(); }, 50);
 }
 
-function cerrarGraficaGeneral() {
-  document.getElementById('graficaGeneral').classList.remove('activa');
+function cerrarGraficaGeneral(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const graficaDiv = document.getElementById('graficaGeneral');
+  if (graficaDiv) graficaDiv.classList.remove('activa');
   if (chartGeneral) { chartGeneral.destroy(); chartGeneral = null; }
+  document.body.style.overflow = '';
 }
 
 function renderizarGraficaGeneral() {
   const colores = ['#007aff','#34c759','#ff9500','#ff3b30','#5856d6','#ff6b35','#00c6ff','#bf5af2','#30d158','#ffd60a'];
   const canvas = document.getElementById('chartGeneral');
+  if (!canvas) return;
   if (chartGeneral) { chartGeneral.destroy(); chartGeneral = null; }
 
   chartGeneral = new Chart(canvas, {
@@ -1451,6 +1301,7 @@ function renderizarGraficaGeneral() {
   });
 
   const ley = document.getElementById('generalLeyenda');
+  if (!ley) return;
   ley.innerHTML = CRIPTOS.map((c, i) => {
     const precio = preciosCriptos[c.simbolo];
     const anterior = preciosAnteriores[c.simbolo] || precio;
@@ -1470,34 +1321,51 @@ function renderizarGraficaGeneral() {
   }).join('');
 }
 
+function abrirModalCompraDesdeGrafica() {
+  const sim = graficaSimboloActual;
+  cerrarGraficaIndividual();
+  setTimeout(() => abrirModalCompra(sim), 200);
+}
+
+function abrirModalVentaDesdeGrafica() {
+  if (!graficaSimboloActual) return;
+  fetch(BACKEND + '/cuenta/' + cuentaActual).then(r => r.json()).then(data => {
+    const criptos = data.criptomonedas || {};
+    const cant = criptos[graficaSimboloActual] || 0;
+    if (cant === 0) { showToast('❌ No tienes ' + graficaSimboloActual); return; }
+    cerrarGraficaIndividual();
+    setTimeout(() => abrirModalVenta(graficaSimboloActual, cant), 200);
+  });
+}
+
 // ==================== GESTIÓN DEL CARRITO ====================
 function actualizarBadgeCarrito() {
   let total = Object.values(carrito).reduce((a, b) => a + b, 0);
   let badge = document.getElementById('cartBadge');
   let dc = document.getElementById('carritoDrawerCount');
   if (total > 0) {
-    badge.textContent = total;
-    badge.classList.add('visible');
+    if (badge) { badge.textContent = total; badge.classList.add('visible'); }
     if (dc) { dc.textContent = total; dc.style.display = 'inline-block'; }
   } else {
-    badge.classList.remove('visible');
+    if (badge) badge.classList.remove('visible');
     if (dc) dc.style.display = 'none';
   }
 }
 
 function guardarCarrito() {
-  if (cuentaActual) try { localStorage.setItem('bl_carrito_' + cuentaActual, JSON.stringify(carrito)); } catch(e) {}
+  if (cuentaActual) localStorage.setItem('bl_carrito_' + cuentaActual, JSON.stringify(carrito));
 }
 
 function cargarCarritoLocal() {
   if (cuentaActual) {
-    try { const r = localStorage.getItem('bl_carrito_' + cuentaActual); carrito = r ? JSON.parse(r) : {}; } catch(e) { carrito = {}; }
+    const r = localStorage.getItem('bl_carrito_' + cuentaActual);
+    carrito = r ? JSON.parse(r) : {};
   } else { carrito = {}; }
   actualizarBadgeCarrito();
 }
 
 function limpiarCarritoLocal() {
-  if (cuentaActual) try { localStorage.removeItem('bl_carrito_' + cuentaActual); } catch(e) {}
+  if (cuentaActual) localStorage.removeItem('bl_carrito_' + cuentaActual);
   carrito = {};
   actualizarBadgeCarrito();
 }
@@ -1514,6 +1382,7 @@ function agregarAlCarrito() {
 
 function renderizarCarrito() {
   let contenido = document.getElementById('carritoContenido');
+  if (!contenido) return;
   let items = Object.entries(carrito).filter(([, qty]) => qty > 0);
   if (items.length === 0) {
     contenido.innerHTML = `<div style="animation:fadeInUp 0.3s both;"><p style="color:var(--texto-sub);margin-top:40px;font-size:32px;">🛒</p><p style="color:var(--texto-sub);">Tu carrito está vacío</p><button onclick="cambiarPantalla('criptomonedas')">Ver criptomonedas</button></div>`;
@@ -1566,7 +1435,9 @@ async function cargarPreciosCriptos() {
 }
 
 function renderizarCriptos() {
-  let grid = document.getElementById('criptoGrid'); grid.innerHTML = '';
+  let grid = document.getElementById('criptoGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
   CRIPTOS.forEach((c, idx) => {
     const precio = preciosCriptos[c.simbolo] || c.precio;
     const anterior = preciosAnteriores[c.simbolo] || precio;
@@ -1610,10 +1481,14 @@ function abrirModalCompra(simbolo) {
   criptoCompraActual = simbolo; cantidadCompra = 1;
   const c = CRIPTOS.find(x => x.simbolo === simbolo);
   const precio = preciosCriptos[simbolo] || c.precio;
-  document.getElementById('modalCompraNombre').textContent = c.emoji + ' ' + c.nombre;
-  document.getElementById('modalCompraPrecio').textContent = 'Precio unitario: $' + precio.toLocaleString();
-  document.getElementById('qtyNum').textContent = 1;
-  document.getElementById('modalCompraTotal').textContent = 'Total: $' + precio.toLocaleString();
+  const nombreEl = document.getElementById('modalCompraNombre');
+  const precioEl = document.getElementById('modalCompraPrecio');
+  const qtyNumEl = document.getElementById('qtyNum');
+  const totalEl = document.getElementById('modalCompraTotal');
+  if (nombreEl) nombreEl.textContent = c.emoji + ' ' + c.nombre;
+  if (precioEl) precioEl.textContent = 'Precio unitario: $' + precio.toLocaleString();
+  if (qtyNumEl) qtyNumEl.textContent = 1;
+  if (totalEl) totalEl.textContent = 'Total: $' + precio.toLocaleString();
   document.getElementById('modalCompra').classList.add('active');
 }
 
@@ -1621,14 +1496,10 @@ function cambiarCantidadCompra(delta) {
   cantidadCompra = Math.max(1, cantidadCompra + delta);
   const c = CRIPTOS.find(x => x.simbolo === criptoCompraActual);
   const precio = preciosCriptos[criptoCompraActual] || c.precio;
-  document.getElementById('qtyNum').textContent = cantidadCompra;
-  document.getElementById('modalCompraTotal').textContent = 'Total: $' + (precio * cantidadCompra).toLocaleString();
-}
-
-function abrirModalCompraDesdeGrafica() {
-  const sim = graficaSimboloActual;
-  cerrarGraficaIndividual();
-  setTimeout(() => abrirModalCompra(sim), 200);
+  const qtyNumEl = document.getElementById('qtyNum');
+  const totalEl = document.getElementById('modalCompraTotal');
+  if (qtyNumEl) qtyNumEl.textContent = cantidadCompra;
+  if (totalEl) totalEl.textContent = 'Total: $' + (precio * cantidadCompra).toLocaleString();
 }
 
 // ==================== VENTA DE CRIPTOMONEDAS ====================
@@ -1638,18 +1509,24 @@ function abrirModalVenta(simbolo, maxQty) {
   cantidadVenta = 1;
   const c = CRIPTOS.find(x => x.simbolo === simbolo);
   const precio = preciosCriptos[simbolo];
-  document.getElementById('modalVentaNombre').textContent = c.emoji + ' Vender ' + c.nombre;
-  document.getElementById('modalVentaInfo').textContent = `Tienes ${maxQty} ${simbolo} · Precio: $${precio.toLocaleString()}`;
-  document.getElementById('qtyVentaNum').textContent = 1;
-  document.getElementById('modalVentaTotal').textContent = 'Recibirás: $' + precio.toLocaleString();
+  const nombreEl = document.getElementById('modalVentaNombre');
+  const infoEl = document.getElementById('modalVentaInfo');
+  const qtyNumEl = document.getElementById('qtyVentaNum');
+  const totalEl = document.getElementById('modalVentaTotal');
+  if (nombreEl) nombreEl.textContent = c.emoji + ' Vender ' + c.nombre;
+  if (infoEl) infoEl.textContent = `Tienes ${maxQty} ${simbolo} · Precio: $${precio.toLocaleString()}`;
+  if (qtyNumEl) qtyNumEl.textContent = 1;
+  if (totalEl) totalEl.textContent = 'Recibirás: $' + precio.toLocaleString();
   document.getElementById('modalVenta').classList.add('active');
 }
 
 function cambiarCantidadVenta(delta) {
   cantidadVenta = Math.min(maxVenta, Math.max(1, cantidadVenta + delta));
   const precio = preciosCriptos[criptoVentaActual];
-  document.getElementById('qtyVentaNum').textContent = cantidadVenta;
-  document.getElementById('modalVentaTotal').textContent = 'Recibirás: $' + (precio * cantidadVenta).toLocaleString();
+  const qtyNumEl = document.getElementById('qtyVentaNum');
+  const totalEl = document.getElementById('modalVentaTotal');
+  if (qtyNumEl) qtyNumEl.textContent = cantidadVenta;
+  if (totalEl) totalEl.textContent = 'Recibirás: $' + (precio * cantidadVenta).toLocaleString();
 }
 
 async function confirmarVenta() {
@@ -1662,19 +1539,9 @@ async function confirmarVenta() {
   cargarMisCriptos();
 }
 
-function abrirModalVentaDesdeGrafica() {
-  if (!graficaSimboloActual) return;
-  fetch(BACKEND + '/cuenta/' + cuentaActual).then(r => r.json()).then(data => {
-    const criptos = data.criptomonedas || {};
-    const cant = criptos[graficaSimboloActual] || 0;
-    if (cant === 0) { showToast('❌ No tienes ' + graficaSimboloActual); return; }
-    cerrarGraficaIndividual();
-    setTimeout(() => abrirModalVenta(graficaSimboloActual, cant), 200);
-  });
-}
-
 async function cargarMisCriptos() {
   let contenido = document.getElementById('misCriptosContenido');
+  if (!contenido) return;
   contenido.innerHTML = '<div class="loading-spinner"></div>';
   try {
     let res = await fetch(BACKEND + '/cuenta/' + cuentaActual);
@@ -1716,57 +1583,44 @@ async function cargarMisCriptos() {
 // ==================== PERFIL DE USUARIO ====================
 function mostrarOpcionesFoto() {
   const opts = document.getElementById('perfilPhotoOpts');
-  opts.style.display = opts.style.display === 'none' ? 'flex' : 'none';
+  if (opts) opts.style.display = opts.style.display === 'none' ? 'flex' : 'none';
 }
-
 function ocultarOpcionesFoto() {
-  document.getElementById('perfilPhotoOpts').style.display = 'none';
+  const opts = document.getElementById('perfilPhotoOpts');
+  if (opts) opts.style.display = 'none';
 }
-
 function activarEditNombre() {
   const display = document.getElementById('perfilNombreDisplay');
   const input = document.getElementById('perfilNombreInline');
   const btnLapiz = document.getElementById('btnLapizNombre');
   const btnGuardar = document.getElementById('btnGuardarNombre');
-  display.style.display = 'none';
-  input.value = perfilNombre;
-  input.style.display = 'inline-block';
-  input.focus();
-  btnLapiz.style.display = 'none';
-  btnGuardar.style.display = 'inline-block';
+  if (display) display.style.display = 'none';
+  if (input) { input.value = perfilNombre; input.style.display = 'inline-block'; input.focus(); }
+  if (btnLapiz) btnLapiz.style.display = 'none';
+  if (btnGuardar) btnGuardar.style.display = 'inline-block';
 }
-
 async function guardarNombreInline() {
   const nombre = document.getElementById('perfilNombreInline').value.trim();
   const display = document.getElementById('perfilNombreDisplay');
   const input = document.getElementById('perfilNombreInline');
   const btnLapiz = document.getElementById('btnLapizNombre');
   const btnGuardar = document.getElementById('btnGuardarNombre');
-  
   if (nombre) {
     try {
-      await fetch(BACKEND + '/perfil/guardar', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cuenta: cuentaActual, nombre, foto: perfilFotoUrl })
-      });
+      await fetch(BACKEND + '/perfil/guardar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cuenta: cuentaActual, nombre, foto: perfilFotoUrl }) });
       perfilNombre = nombre;
       guardarSesion();
       cargarDatosInicio();
       showToast('✅ Nombre actualizado');
     } catch(e) { showToast('❌ Error al guardar'); }
   }
-  display.textContent = perfilNombre || 'Sin nombre';
-  display.style.display = 'inline';
-  input.style.display = 'none';
-  btnLapiz.style.display = 'inline-block';
-  btnGuardar.style.display = 'none';
+  if (display) display.textContent = perfilNombre || 'Sin nombre';
+  if (display) display.style.display = 'inline';
+  if (input) input.style.display = 'none';
+  if (btnLapiz) btnLapiz.style.display = 'inline-block';
+  if (btnGuardar) btnGuardar.style.display = 'none';
 }
-
-function subirFotoDesdeArchivo() {
-  document.getElementById('inputFotoPerfil').click();
-  ocultarOpcionesFoto();
-}
-
+function subirFotoDesdeArchivo() { document.getElementById('inputFotoPerfil').click(); ocultarOpcionesFoto(); }
 function tomarFotoPerfil() {
   const input = document.createElement('input');
   input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
@@ -1774,7 +1628,6 @@ function tomarFotoPerfil() {
   input.click();
   ocultarOpcionesFoto();
 }
-
 function procesarFotoPerfil(file) {
   if (!file) return;
   if (file.size > 2*1024*1024) { showToast('⚠️ Imagen máx. 2MB'); return; }
@@ -1802,39 +1655,45 @@ function procesarFotoPerfil(file) {
   };
   reader.readAsDataURL(file);
 }
-
 function cargarPerfil() {
-  document.getElementById('cuentaPerfil').textContent = cuentaActual;
+  const cuentaPerfilEl = document.getElementById('cuentaPerfil');
+  if (cuentaPerfilEl) cuentaPerfilEl.textContent = cuentaActual;
   const display = document.getElementById('perfilNombreDisplay');
-  display.textContent = perfilNombre || 'Sin nombre';
-  display.style.display = 'inline';
-  document.getElementById('perfilNombreInline').style.display = 'none';
-  document.getElementById('btnLapizNombre').style.display = 'inline-block';
-  document.getElementById('btnGuardarNombre').style.display = 'none';
-  document.getElementById('perfilPhotoOpts').style.display = 'none';
-
+  if (display) display.textContent = perfilNombre || 'Sin nombre';
+  const displayStyle = document.getElementById('perfilNombreDisplay');
+  if (displayStyle) displayStyle.style.display = 'inline';
+  const inputInline = document.getElementById('perfilNombreInline');
+  if (inputInline) inputInline.style.display = 'none';
+  const lapizBtn = document.getElementById('btnLapizNombre');
+  if (lapizBtn) lapizBtn.style.display = 'inline-block';
+  const guardarBtn = document.getElementById('btnGuardarNombre');
+  if (guardarBtn) guardarBtn.style.display = 'none';
+  const photoOpts = document.getElementById('perfilPhotoOpts');
+  if (photoOpts) photoOpts.style.display = 'none';
   const chipEl = document.getElementById('perfilClienteDesde');
   const chipTxt = document.getElementById('perfilClienteDesdeTxt');
   if (perfilFechaRegistro) {
-    chipTxt.textContent = 'Cliente desde ' + perfilFechaRegistro;
-    chipEl.style.display = 'inline-flex';
+    if (chipTxt) chipTxt.textContent = 'Cliente desde ' + perfilFechaRegistro;
+    if (chipEl) chipEl.style.display = 'inline-flex';
   } else {
     fetch(BACKEND + '/cuenta/' + cuentaActual).then(r => r.json()).then(data => {
-      if (data.fechaRegistro) { perfilFechaRegistro = data.fechaRegistro; guardarSesion(); chipTxt.textContent = 'Cliente desde ' + data.fechaRegistro; chipEl.style.display = 'inline-flex'; }
+      if (data.fechaRegistro) { perfilFechaRegistro = data.fechaRegistro; guardarSesion(); if (chipTxt) chipTxt.textContent = 'Cliente desde ' + data.fechaRegistro; if (chipEl) chipEl.style.display = 'inline-flex'; }
     }).catch(() => {});
   }
+  const placeholder = document.getElementById('perfilAvatarPlaceholder');
+  const avatarImg = document.getElementById('perfilAvatarImg');
   if (perfilFotoUrl) {
-    document.getElementById('perfilAvatarPlaceholder').style.display = 'none';
-    let img = document.getElementById('perfilAvatarImg'); img.src = perfilFotoUrl; img.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+    if (avatarImg) { avatarImg.src = perfilFotoUrl; avatarImg.style.display = 'block'; }
   } else {
-    document.getElementById('perfilAvatarPlaceholder').style.display = 'flex';
-    document.getElementById('perfilAvatarImg').style.display = 'none';
+    if (placeholder) placeholder.style.display = 'flex';
+    if (avatarImg) avatarImg.style.display = 'none';
   }
-  
   fetch(BACKEND + '/cuenta/' + cuentaActual).then(r => r.json()).then(data => {
     const movs = (data.movimientos || []).length;
     const criptos = Object.keys(data.criptomonedas || {}).filter(k => data.criptomonedas[k] > 0).length;
-    document.getElementById('perfilStats').innerHTML = `
+    const statsRow = document.getElementById('perfilStats');
+    if (statsRow) statsRow.innerHTML = `
       <div class="perfil-stat-card"><div class="perfil-stat-val">${movs}</div><div class="perfil-stat-label">Movimientos</div></div>
       <div class="perfil-stat-card"><div class="perfil-stat-val">${criptos}</div><div class="perfil-stat-label">Tipos cripto</div></div>
       <div class="perfil-stat-card"><div class="perfil-stat-val">$${(data.saldo || 0).toLocaleString()}</div><div class="perfil-stat-label">Saldo</div></div>
@@ -1847,7 +1706,6 @@ function setEstrella(val) {
   estrellaSeleccionada = val;
   document.querySelectorAll('.estrella').forEach((e, i) => e.classList.toggle('activa', i < val));
 }
-
 async function enviarComentario() {
   if (estrellaSeleccionada === 0) { showToast('⭐ Selecciona puntuación'); return; }
   let texto = document.getElementById('textoComentario').value.trim();
@@ -1859,9 +1717,10 @@ async function enviarComentario() {
     else showToast('❌ ' + data.mensaje);
   } catch(e) { showToast('❌ Error'); }
 }
-
 async function cargarComentarios() {
-  let lista = document.getElementById('listaComentarios'); lista.innerHTML = '<div class="loading-spinner"></div>';
+  let lista = document.getElementById('listaComentarios'); 
+  if (!lista) return;
+  lista.innerHTML = '<div class="loading-spinner"></div>';
   try {
     let res = await fetch(BACKEND + '/comentarios'); let data = await res.json();
     if (!data.ok || data.comentarios.length === 0) { lista.innerHTML = '<p style="color:var(--texto-sub);font-size:13px;text-align:center;margin-top:20px;">Sin reseñas aún. ¡Sé el primero! 🌟</p>'; return; }
@@ -1885,12 +1744,10 @@ function guardarSesion() {
     sessionStorage.setItem('bl_fecha', perfilFechaRegistro);
   }
 }
-
 function guardarPantalla(id) {
   const publicas = ['login', 'registro', 'reset'];
   if (!publicas.includes(id)) sessionStorage.setItem('bl_pantalla', id);
 }
-
 async function restaurarSesion() {
   const cuenta = sessionStorage.getItem('bl_cuenta');
   const pantalla = sessionStorage.getItem('bl_pantalla');
@@ -1914,11 +1771,9 @@ async function restaurarSesion() {
     return true;
   } catch(e) { limpiarSesion(); return false; }
 }
-
 function limpiarSesion() {
   ['bl_cuenta', 'bl_nombre', 'bl_foto', 'bl_fecha', 'bl_pantalla'].forEach(k => sessionStorage.removeItem(k));
 }
-
 function login() {
   let input = document.getElementById('usuario').value.trim();
   let p = document.getElementById('password').value.trim();
@@ -1936,7 +1791,6 @@ function login() {
       } else showToast('❌ ' + data.mensaje);
     }).catch(() => showToast('❌ Error al iniciar sesión'));
 }
-
 function logout() {
   cuentaActual = null; esAdmin = false; todasLasCuentas = []; carrito = {};
   perfilNombre = ''; perfilFotoUrl = ''; perfilFechaRegistro = '';
@@ -1945,7 +1799,6 @@ function logout() {
   actualizarBadgeCarrito();
   cambiarPantalla('login');
 }
-
 function crearCuenta() {
   let cuenta = document.getElementById('nuevaCuenta').value.trim();
   let p = document.getElementById('nuevaPassword').value.trim();
@@ -1956,7 +1809,6 @@ function crearCuenta() {
   fetch(BACKEND + '/crear-cuenta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ correo, password: p, cuenta }) })
     .then(r => r.json()).then(data => { showToast(data.ok ? '✅ ' + data.mensaje : '❌ ' + data.mensaje); if (data.ok) cambiarPantalla('login'); });
 }
-
 function depositar() {
   let monto = parseFloat(document.getElementById('monto').value);
   let destino = document.getElementById('cuentaDestino').value.trim();
@@ -1967,14 +1819,14 @@ function depositar() {
   fetch(BACKEND + '/depositar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: cuentaActual, destino, monto }) })
     .then(r => r.json()).then(data => { showToast(data.ok ? '✅ ' + data.mensaje : '❌ ' + data.mensaje); if (data.ok) { cargarDatosInicio(); cambiarPantalla('balance'); } }).catch(() => showToast('❌ Error'));
 }
-
 function cargarBalance() {
-  document.getElementById('saldo').textContent = '...';
+  const saldoEl = document.getElementById('saldo');
+  if (saldoEl) saldoEl.textContent = '...';
   fetch(BACKEND + '/cuenta/' + cuentaActual).then(r => r.json()).then(data => {
-    const sEl = document.getElementById('saldo');
-    sEl.classList.add('actualizando'); sEl.textContent = data.saldo;
-    setTimeout(() => sEl.classList.remove('actualizando'), 600);
-    let mov = document.getElementById('movimientos'); mov.innerHTML = '';
+    if (saldoEl) { saldoEl.classList.add('actualizando'); saldoEl.textContent = data.saldo; setTimeout(() => saldoEl.classList.remove('actualizando'), 600); }
+    let mov = document.getElementById('movimientos'); 
+    if (!mov) return;
+    mov.innerHTML = '';
     let ul = document.createElement('ul');
     (data.movimientos || []).slice().reverse().forEach((m, i) => {
       let li = document.createElement('li'); li.style.animationDelay = (i * 0.04) + 's'; li.textContent = m;
@@ -1983,31 +1835,29 @@ function cargarBalance() {
     }); mov.appendChild(ul);
   });
 }
-
 function imprimirTicketMovimiento(m) {
   let v = window.open('', 'Ticket', 'width=600,height=400');
   v.document.write(`<h2>Ticket</h2><p><b>Cuenta:</b> ${cuentaActual}</p><p><b>Detalle:</b> ${m}</p>`);
   v.document.close(); v.print();
 }
-
 function enviarPin() {
   let correo = document.getElementById('correoReset').value.trim().toLowerCase();
   fetch(BACKEND + '/enviar-pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ correo }) })
     .then(r => r.json()).then(data => { if (data.ok) { pinTemporal = data.pin; correoTemporal = correo; showToast('📧 PIN enviado'); } else showToast('❌ ' + data.mensaje); });
 }
-
 function cambiarPassword() {
   if (parseInt(document.getElementById('pinIngresado').value) === pinTemporal) {
     fetch(BACKEND + '/cambiar-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ correo: correoTemporal, nuevaPassword: document.getElementById('nuevaPasswordReset').value }) })
       .then(r => r.json()).then(data => { showToast(data.ok ? '✅ ' + data.mensaje : '❌ ' + data.mensaje); if (data.ok) cambiarPantalla('login'); });
   } else showToast('❌ PIN incorrecto');
 }
-
 function cambiarPantalla(id) {
   document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa', 'entrando'));
   const el = document.getElementById(id);
-  el.classList.add('activa');
-  if (id !== 'login') { void el.offsetWidth; el.classList.add('entrando'); setTimeout(() => el.classList.remove('entrando'), 400); }
+  if (el) {
+    el.classList.add('activa');
+    if (id !== 'login') { void el.offsetWidth; el.classList.add('entrando'); setTimeout(() => el.classList.remove('entrando'), 400); }
+  }
   guardarPantalla(id);
   if (!esAdmin && cuentaActual) {
     cuentaActualSpan();
@@ -2020,28 +1870,31 @@ function cambiarPantalla(id) {
     if (id === 'configuracion') restaurarConfiguracion();
   }
 }
-
 function cuentaActualSpan() {
-  document.querySelectorAll('#cuentaActual, #cuentaPerfil').forEach(e => e.textContent = cuentaActual);
+  document.querySelectorAll('#cuentaActual, #cuentaPerfil').forEach(e => { if (e) e.textContent = cuentaActual; });
 }
-
 async function cargarDatosInicio() {
   try {
     let res = await fetch(BACKEND + '/cuenta/' + cuentaActual);
     let data = await res.json();
     const sEl = document.getElementById('inicioSaldo');
-    sEl.classList.add('actualizando');
-    sEl.textContent = '$' + (data.saldo || 0).toLocaleString();
-    setTimeout(() => sEl.classList.remove('actualizando'), 600);
+    if (sEl) {
+      sEl.classList.add('actualizando');
+      sEl.textContent = '$' + (data.saldo || 0).toLocaleString();
+      setTimeout(() => sEl.classList.remove('actualizando'), 600);
+    }
     if (data.fechaRegistro && !perfilFechaRegistro) { perfilFechaRegistro = data.fechaRegistro; guardarSesion(); }
   } catch(e) {}
   let nombre = perfilNombre || cuentaActual;
-  document.getElementById('bienvenidaMsg').textContent = 'Hola, ' + nombre + ' 👋 Bienvenido a Banco Libre';
+  const bienvenidaEl = document.getElementById('bienvenidaMsg');
+  if (bienvenidaEl) bienvenidaEl.textContent = 'Hola, ' + nombre + ' 👋 Bienvenido a Banco Libre';
   let hAvatar = document.getElementById('headerAvatar');
-  if (perfilFotoUrl) {
-    hAvatar.innerHTML = `<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;">`;
-  } else {
-    hAvatar.innerHTML = `<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>`;
+  if (hAvatar) {
+    if (perfilFotoUrl) {
+      hAvatar.innerHTML = `<img src="${perfilFotoUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid white;">`;
+    } else {
+      hAvatar.innerHTML = `<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>`;
+    }
   }
   actualizarTicker();
   guardarSesion();
@@ -2053,12 +1906,13 @@ function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
   const tabs = ['usuarios', 'criptos', 'opiniones'];
   let idx = tabs.indexOf(tab);
-  document.querySelectorAll('.admin-tab')[idx].classList.add('active');
-  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  const adminTabs = document.querySelectorAll('.admin-tab');
+  if (adminTabs[idx]) adminTabs[idx].classList.add('active');
+  const tabContent = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+  if (tabContent) tabContent.classList.add('active');
   if (tab === 'criptos') renderizarAdminCriptos();
   if (tab === 'opiniones') cargarOpinionesAdmin();
 }
-
 async function cargarAdmin() {
   try {
     let res = await fetch(BACKEND + '/admin/cuentas', { headers: { 'x-admin-token': ADMIN_PASS } });
@@ -2070,14 +1924,17 @@ async function cargarAdmin() {
     if (data2.ok && data2.precios) preciosCriptos = data2.precios;
     let totalSaldo = todasLasCuentas.reduce((a, c) => a + (c.saldo || 0), 0);
     let totalMovs = todasLasCuentas.reduce((a, c) => a + ((c.movimientos || []).length), 0);
-    document.getElementById('statCuentas').textContent = todasLasCuentas.length;
-    document.getElementById('statSaldo').textContent = '$' + totalSaldo.toLocaleString();
-    document.getElementById('statMovs').textContent = totalMovs;
-  } catch(e) { document.getElementById('adminListWrap').innerHTML = '<p style="color:#ff3b30;text-align:center;">Error al conectar</p>'; }
+    const statCuentas = document.getElementById('statCuentas');
+    const statSaldo = document.getElementById('statSaldo');
+    const statMovs = document.getElementById('statMovs');
+    if (statCuentas) statCuentas.textContent = todasLasCuentas.length;
+    if (statSaldo) statSaldo.textContent = '$' + totalSaldo.toLocaleString();
+    if (statMovs) statMovs.textContent = totalMovs;
+  } catch(e) { const wrap = document.getElementById('adminListWrap'); if (wrap) wrap.innerHTML = '<p style="color:#ff3b30;text-align:center;">Error al conectar</p>'; }
 }
-
 function renderizarCuentasAdmin(lista) {
   let wrap = document.getElementById('adminListWrap');
+  if (!wrap) return;
   if (lista.length === 0) { wrap.innerHTML = '<p style="color:var(--texto-sub);text-align:center;">Sin resultados</p>'; return; }
   wrap.innerHTML = '';
   lista.forEach(c => {
@@ -2087,14 +1944,14 @@ function renderizarCuentasAdmin(lista) {
     wrap.appendChild(card);
   });
 }
-
 function filtrarCuentas() {
   let q = document.getElementById('adminBuscador').value.trim().toLowerCase();
   renderizarCuentasAdmin(todasLasCuentas.filter(c => c.cuenta.includes(q) || (c.correo && c.correo.toLowerCase().includes(q))));
 }
-
 function renderizarAdminCriptos() {
-  let lista = document.getElementById('adminCriptosList'); lista.innerHTML = '';
+  let lista = document.getElementById('adminCriptosList'); 
+  if (!lista) return;
+  lista.innerHTML = '';
   CRIPTOS.forEach(c => {
     let precio = preciosCriptos[c.simbolo] || c.precio;
     let row = document.createElement('div'); row.className = 'admin-cripto-row';
@@ -2102,17 +1959,18 @@ function renderizarAdminCriptos() {
     lista.appendChild(row);
   });
 }
-
 function abrirModalPrecioCripto(simbolo) {
   criptoParaEditar = simbolo;
   let c = CRIPTOS.find(x => x.simbolo === simbolo);
   let precio = preciosCriptos[simbolo] || c.precio;
-  document.getElementById('modalCriptoNombre').textContent = c.emoji + ' ' + c.nombre;
-  document.getElementById('modalCriptoPrecioActual').textContent = 'Precio actual: $' + precio.toLocaleString();
-  document.getElementById('nuevoPrecioInput').value = precio;
+  const nombreEl = document.getElementById('modalCriptoNombre');
+  const actualEl = document.getElementById('modalCriptoPrecioActual');
+  const inputEl = document.getElementById('nuevoPrecioInput');
+  if (nombreEl) nombreEl.textContent = c.emoji + ' ' + c.nombre;
+  if (actualEl) actualEl.textContent = 'Precio actual: $' + precio.toLocaleString();
+  if (inputEl) inputEl.value = precio;
   document.getElementById('modalPrecioCripto').classList.add('active');
 }
-
 async function guardarPrecioCripto() {
   let precio = parseFloat(document.getElementById('nuevoPrecioInput').value);
   if (isNaN(precio) || precio <= 0) { showToast('⚠️ Precio inválido'); return; }
@@ -2123,15 +1981,17 @@ async function guardarPrecioCripto() {
     if (data.ok) { preciosCriptos[criptoParaEditar] = precio; let el = document.getElementById('precio-' + criptoParaEditar); if (el) el.textContent = '$' + precio.toLocaleString(); cerrarModal('modalPrecioCripto'); }
   } catch(e) { showToast('❌ Error'); }
 }
-
 async function verCriptosUsuario(cuenta) {
-  document.getElementById('modalUserCriptoCuenta').textContent = 'Cuenta: ' + cuenta;
-  document.getElementById('userCriptosList').innerHTML = '<div class="loading-spinner"></div>';
+  const cuentaEl = document.getElementById('modalUserCriptoCuenta');
+  const listaEl = document.getElementById('userCriptosList');
+  if (cuentaEl) cuentaEl.textContent = 'Cuenta: ' + cuenta;
+  if (listaEl) listaEl.innerHTML = '<div class="loading-spinner"></div>';
   document.getElementById('modalUserCriptos').classList.add('active');
   try {
     let res = await fetch(BACKEND + '/cuenta/' + cuenta); let data = await res.json();
     let criptos = data.criptomonedas || {};
     let lista = document.getElementById('userCriptosList');
+    if (!lista) return;
     let keys = Object.keys(criptos).filter(k => criptos[k] > 0);
     if (keys.length === 0) { lista.innerHTML = '<p style="color:var(--texto-sub);">Sin criptomonedas</p>'; return; }
     lista.innerHTML = '';
@@ -2142,9 +2002,8 @@ async function verCriptosUsuario(cuenta) {
       div.innerHTML = `<div class="auc-left"><span style="font-size:20px;">${c.emoji}</span><div><div class="auc-nombre">${c.nombre}</div><div class="auc-cant">${cant} ${sim} · $${(precio * cant).toLocaleString()}</div></div></div><button class="btn-auc-quitar" onclick="quitarCriptoUsuario('${cuenta}','${sim}')">Quitar</button>`;
       lista.appendChild(div);
     });
-  } catch(e) { document.getElementById('userCriptosList').innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
+  } catch(e) { const lista = document.getElementById('userCriptosList'); if (lista) lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
 }
-
 async function quitarCriptoUsuario(cuenta, simbolo) {
   if (!confirm('¿Quitar todas las ' + simbolo + ' de ' + cuenta + '?')) return;
   try {
@@ -2153,9 +2012,10 @@ async function quitarCriptoUsuario(cuenta, simbolo) {
     if (data.ok) verCriptosUsuario(cuenta);
   } catch(e) { showToast('❌ Error'); }
 }
-
 async function cargarOpinionesAdmin() {
-  let lista = document.getElementById('adminOpinionesList'); lista.innerHTML = '<div class="loading-spinner"></div>';
+  let lista = document.getElementById('adminOpinionesList'); 
+  if (!lista) return;
+  lista.innerHTML = '<div class="loading-spinner"></div>';
   try {
     let res = await fetch(BACKEND + '/comentarios'); let data = await res.json();
     if (!data.ok || data.comentarios.length === 0) { lista.innerHTML = '<p style="color:var(--texto-sub);text-align:center;">Sin reseñas</p>'; return; }
@@ -2168,7 +2028,6 @@ async function cargarOpinionesAdmin() {
     });
   } catch(e) { lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
 }
-
 async function borrarOpinion(id) {
   if (!confirm('¿Eliminar esta reseña?')) return;
   try {
@@ -2176,14 +2035,16 @@ async function borrarOpinion(id) {
     let data = await res.json(); showToast(data.ok ? '✅ ' + data.mensaje : '❌ ' + data.mensaje); if (data.ok) cargarOpinionesAdmin();
   } catch(e) { showToast('❌ Error'); }
 }
-
 async function verOpinionesUsuario(cuenta) {
-  document.getElementById('modalOpinionCuenta').textContent = 'Cuenta: ' + cuenta;
-  document.getElementById('opinionesUsuarioLista').innerHTML = '<div class="loading-spinner"></div>';
+  const cuentaEl = document.getElementById('modalOpinionCuenta');
+  const listaEl = document.getElementById('opinionesUsuarioLista');
+  if (cuentaEl) cuentaEl.textContent = 'Cuenta: ' + cuenta;
+  if (listaEl) listaEl.innerHTML = '<div class="loading-spinner"></div>';
   document.getElementById('modalOpinionesUsuario').classList.add('active');
   try {
     let res = await fetch(BACKEND + '/comentarios/usuario/' + cuenta); let data = await res.json();
     let lista = document.getElementById('opinionesUsuarioLista');
+    if (!lista) return;
     if (!data.ok || data.comentarios.length === 0) { lista.innerHTML = '<p style="color:var(--texto-sub);">Sin reseñas</p>'; return; }
     lista.innerHTML = '';
     data.comentarios.forEach(c => {
@@ -2192,16 +2053,16 @@ async function verOpinionesUsuario(cuenta) {
       p.innerHTML = `<span style="color:#ff9500;">${estrellas}</span> — ${c.texto} <span style="color:var(--texto-sub);font-size:10px;">${c.fecha || ''}</span>`;
       lista.appendChild(p);
     });
-  } catch(e) { document.getElementById('opinionesUsuarioLista').innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
+  } catch(e) { const lista = document.getElementById('opinionesUsuarioLista'); if (lista) lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
 }
-
 function abrirModalSaldo(cuenta, saldo) {
   cuentaParaEditar = cuenta;
-  document.getElementById('modalCuentaLabel').textContent = 'Cuenta: ' + cuenta + ' | Saldo: $' + saldo;
-  document.getElementById('nuevoSaldoInput').value = saldo;
+  const labelEl = document.getElementById('modalCuentaLabel');
+  const inputEl = document.getElementById('nuevoSaldoInput');
+  if (labelEl) labelEl.textContent = 'Cuenta: ' + cuenta + ' | Saldo: $' + saldo;
+  if (inputEl) inputEl.value = saldo;
   document.getElementById('modalSaldo').classList.add('active');
 }
-
 async function guardarSaldo() {
   let nuevoSaldo = parseFloat(document.getElementById('nuevoSaldoInput').value);
   if (isNaN(nuevoSaldo) || nuevoSaldo < 0) { showToast('⚠️ Saldo inválido'); return; }
@@ -2209,31 +2070,32 @@ async function guardarSaldo() {
   let data = await res.json(); showToast(data.ok ? '✅ ' + data.mensaje : '❌ ' + data.mensaje);
   if (data.ok) { cerrarModal('modalSaldo'); cargarAdmin(); }
 }
-
 async function verHistorial(cuenta) {
-  document.getElementById('modalHistCuenta').textContent = 'Cuenta: ' + cuenta;
-  document.getElementById('historialLista').innerHTML = '<div class="loading-spinner"></div>';
+  const cuentaEl = document.getElementById('modalHistCuenta');
+  const listaEl = document.getElementById('historialLista');
+  if (cuentaEl) cuentaEl.textContent = 'Cuenta: ' + cuenta;
+  if (listaEl) listaEl.innerHTML = '<div class="loading-spinner"></div>';
   document.getElementById('modalHistorial').classList.add('active');
   let res = await fetch(BACKEND + '/cuenta/' + cuenta); let data = await res.json();
   let lista = document.getElementById('historialLista');
+  if (!lista) return;
   let movs = data.movimientos || [];
   if (movs.length === 0) { lista.innerHTML = '<p style="color:var(--texto-sub);">Sin movimientos</p>'; return; }
   lista.innerHTML = ''; movs.slice().reverse().forEach(m => { let p = document.createElement('p'); p.textContent = m; p.style.color = 'var(--texto)'; lista.appendChild(p); });
 }
-
 function abrirModalBorrar(cuenta, correo) {
   cuentaParaBorrar = cuenta;
-  document.getElementById('modalBorrarLabel').textContent = '¿Eliminar cuenta ' + cuenta + ' (' + correo + ')?';
+  const labelEl = document.getElementById('modalBorrarLabel');
+  if (labelEl) labelEl.textContent = '¿Eliminar cuenta ' + cuenta + ' (' + correo + ')?';
   document.getElementById('modalBorrar').classList.add('active');
 }
-
 async function confirmarBorrado() {
   let res = await fetch(BACKEND + '/admin/borrar-cuenta', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_PASS }, body: JSON.stringify({ cuenta: cuentaParaBorrar }) });
   let data = await res.json(); showToast(data.ok ? '✅ ' + data.mensaje : '❌ ' + data.mensaje);
   if (data.ok) { cerrarModal('modalBorrar'); cargarAdmin(); }
 }
 
-// ==================== INICIALIZACIÓN ====================
+// ==================== INICIALIZACIÓN Y EVENT LISTENERS ====================
 window.addEventListener('DOMContentLoaded', async () => {
   inicializarPrecios();
   restaurarConfiguracion();
@@ -2243,6 +2105,27 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.modal-overlay').forEach(ov => {
     ov.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
   });
+  
+  // Asegurar que los botones de cerrar gráficas funcionen correctamente
+  const closeIndividualBtn = document.querySelector('#graficaIndividual .grafica-back-btn');
+  if (closeIndividualBtn) {
+    closeIndividualBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarGraficaIndividual();
+      return false;
+    };
+  }
+  
+  const closeGeneralBtn = document.querySelector('#graficaGeneral .grafica-back-btn');
+  if (closeGeneralBtn) {
+    closeGeneralBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarGraficaGeneral();
+      return false;
+    };
+  }
 });
 </script>
 </div></body>
