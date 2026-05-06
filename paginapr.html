@@ -418,46 +418,27 @@ ul li {
 .tema-btn.activo { border-color: var(--texto); transform: scale(1.05); }
 .tema-dot { width: 20px; height: 20px; border-radius: 50%; }
 
-/* GRÁFICAS */
+/* GRÁFICAS - MANTENIENDO EL FORMATO ORIGINAL */
 .grafica-fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--blanco);
-  z-index: 2000;
-  padding: 16px;
-  box-sizing: border-box;
-  display: none;
-  overflow-y: auto;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--blanco); z-index: 2000; padding: 70px 16px 16px; box-sizing: border-box;
+  display: none; overflow-y: auto;
 }
 .grafica-fullscreen.activa { display: block; animation: fadeInUp 0.3s both; }
-
 .grafica-back-btn {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  background: var(--azul);
-  color: white;
-  border: none;
-  border-radius: 30px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 0;
-  z-index: 2001;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: absolute; top: 14px; left: 15px; background: var(--azul); color: white;
+  border: none; border-radius: 10px; padding: 8px 16px; font-size: 14px;
+  cursor: pointer; margin: 0; z-index: 2001;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-.grafica-back-btn:hover {
-  background: var(--azul-dark);
-  transform: scale(1.02);
+.grafica-back-btn:hover { background: var(--azul-dark); transform: scale(1.02); }
+.grafica-back-btn:active { transform: scale(0.96); }
+.grafica-header {
+  position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+  background: var(--azul); display: flex; align-items: center; padding: 0 15px;
+  box-sizing: border-box; z-index: 5;
 }
-.grafica-back-btn:active {
-  transform: scale(0.96);
-}
-
+.grafica-title { color: white; font-weight: bold; font-size: 16px; flex: 1; text-align: center; }
 .chart-container { position: relative; width: 100%; margin-bottom: 16px; }
 .chart-tabs {
   display: flex; gap: 6px; margin-bottom: 12px;
@@ -571,7 +552,7 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 /* MODALES */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5); z-index: 200; display: none;
+  background: rgba(0,0,0,0.5); z-index: 3000; display: none;
   align-items: center; justify-content: center;
 }
 .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
@@ -820,7 +801,10 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 <!-- GRÁFICA INDIVIDUAL -->
 <div class="grafica-fullscreen" id="graficaIndividual">
   <button class="grafica-back-btn" onclick="cerrarGraficaIndividual()">← Volver</button>
-  <div style="padding-top: 60px;">
+  <div class="grafica-header">
+    <div class="grafica-title" id="graficaIndividualTitle">—</div>
+  </div>
+  <div style="padding-top:10px;">
     <div class="chart-tabs" id="graficaTabs">
       <button class="chart-tab" onclick="cambiarPeriodoGrafica('1h', this)">1h</button>
       <button class="chart-tab active" onclick="cambiarPeriodoGrafica('24h', this)">24h</button>
@@ -844,7 +828,10 @@ textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,122,255
 <!-- GRÁFICA GENERAL -->
 <div class="grafica-fullscreen" id="graficaGeneral">
   <button class="grafica-back-btn" onclick="cerrarGraficaGeneral()">← Volver</button>
-  <div style="padding-top: 60px;">
+  <div class="grafica-header">
+    <div class="grafica-title">📊 Todas las criptos</div>
+  </div>
+  <div style="padding-top:10px;">
     <div class="chart-container" style="height:240px;"><canvas id="chartGeneral"></canvas></div>
     <p style="font-size:11px;color:var(--texto-sub);text-align:center;margin:4px 0 10px;">Precio actual de todas las criptomonedas</p>
     <div id="generalLeyenda" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
@@ -1198,7 +1185,7 @@ function irDesdeCarrusel(pantalla, simbolo) {
   }
 }
 
-// ==================== GRÁFICAS ====================
+// ==================== GRÁFICAS - CORREGIDAS ====================
 function getPuntosGrafica(simbolo, periodo) {
   const hist = historialPrecios[simbolo] || [];
   switch(periodo) {
@@ -1231,12 +1218,14 @@ function abrirGraficaIndividual(simbolo) {
   }
   graficaSimboloActual = simbolo;
   const c = CRIPTOS.find(x => x.simbolo === simbolo);
+  document.getElementById('graficaIndividualTitle').textContent = c.emoji + ' ' + c.nombre;
   document.getElementById('graficaIndividual').classList.add('activa');
   graficaPeriodoActual = '24h';
   renderizarGraficaIndividual(simbolo, '24h', true);
 }
 
-function cerrarGraficaIndividual() {
+function cerrarGraficaIndividual(e) {
+  if (e) e.stopPropagation();
   const graficaDiv = document.getElementById('graficaIndividual');
   if (graficaDiv) graficaDiv.classList.remove('activa');
   graficaSimboloActual = null;
@@ -1296,7 +1285,8 @@ function abrirGraficaGeneral() {
   renderizarGraficaGeneral();
 }
 
-function cerrarGraficaGeneral() {
+function cerrarGraficaGeneral(e) {
+  if (e) e.stopPropagation();
   const graficaDiv = document.getElementById('graficaGeneral');
   if (graficaDiv) graficaDiv.classList.remove('activa');
   if (chartGeneral) { chartGeneral.destroy(); chartGeneral = null; }
@@ -1710,9 +1700,9 @@ function cargarPerfil() {
     const criptos = Object.keys(data.criptomonedas || {}).filter(k => data.criptomonedas[k] > 0).length;
     const statsRow = document.getElementById('perfilStats');
     if (statsRow) statsRow.innerHTML = `
-      <div class="perfil-stat-card"><div class="perfil-stat-val">${movs}</div><div class="perfil-stat-label">Movimientos</div></div>
-      <div class="perfil-stat-card"><div class="perfil-stat-val">${criptos}</div><div class="perfil-stat-label">Tipos cripto</div></div>
-      <div class="perfil-stat-card"><div class="perfil-stat-val">$${(data.saldo || 0).toLocaleString()}</div><div class="perfil-stat-label">Saldo</div></div>
+      <div class=\"perfil-stat-card\"><div class=\"perfil-stat-val\">${movs}</div><div class=\"perfil-stat-label\">Movimientos</div></div>
+      <div class=\"perfil-stat-card\"><div class=\"perfil-stat-val\">${criptos}</div><div class=\"perfil-stat-label\">Tipos cripto</div></div>
+      <div class=\"perfil-stat-card\"><div class=\"perfil-stat-val\">$${(data.saldo || 0).toLocaleString()}</div><div class=\"perfil-stat-label\">Saldo</div></div>
     `;
   }).catch(() => {});
 }
@@ -1745,7 +1735,7 @@ async function cargarComentarios() {
       let estrellas = '★'.repeat(c.estrellas) + '☆'.repeat(5 - c.estrellas);
       let avatarHtml = c.foto ? `<img src="${c.foto}" class="comentario-avatar">` : `<div class="comentario-avatar-placeholder">👤</div>`;
       let div = document.createElement('div'); div.className = 'comentario-card'; div.style.animationDelay = (i * 0.05) + 's';
-      div.innerHTML = `<div class="comentario-card-header">${avatarHtml}<div><div class="comentario-user">${c.nombre || c.cuenta}</div><div class="comentario-estrellas" style="color:#ff9500;">${estrellas}</div></div></div><p class="comentario-texto">${c.texto}</p><div class="comentario-fecha">${c.fecha || ''}</div>`;
+      div.innerHTML = `<div class=\"comentario-card-header\">${avatarHtml}<div><div class=\"comentario-user\">${c.nombre || c.cuenta}</div><div class=\"comentario-estrellas\" style=\"color:#ff9500;\">${estrellas}</div></div></div><p class=\"comentario-texto\">${c.texto}</p><div class=\"comentario-fecha\">${c.fecha || ''}</div>`;
       lista.appendChild(div);
     });
   } catch(e) { lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
@@ -1956,7 +1946,7 @@ function renderizarCuentasAdmin(lista) {
   lista.forEach(c => {
     let avatarHtml = c.foto ? `<img src="${c.foto}" class="admin-user-avatar">` : `<div class="admin-user-avatar-placeholder">👤</div>`;
     let card = document.createElement('div'); card.className = 'admin-card';
-    card.innerHTML = `<div class="admin-card-top">${avatarHtml}<div class="admin-user-info"><div class="admin-cuenta-num">🏦 ${c.cuenta}</div>${c.nombre ? `<div class="admin-nombre-usuario">${c.nombre}</div>` : ''}</div></div><div class="admin-saldo">$${(c.saldo || 0).toLocaleString()}</div><div class="admin-correo">📧 ${c.correo}</div><div class="admin-btn-row"><button class="admin-btn btn-edit" onclick="abrirModalSaldo('${c.cuenta}',${c.saldo})">✏️ Saldo</button><button class="admin-btn btn-history" onclick="verHistorial('${c.cuenta}')">📋 Hist.</button><button class="admin-btn btn-cripto" onclick="verCriptosUsuario('${c.cuenta}')">🪙</button><button class="admin-btn btn-opinion" onclick="verOpinionesUsuario('${c.cuenta}')">⭐</button><button class="admin-btn btn-delete" onclick="abrirModalBorrar('${c.cuenta}','${c.correo}')">🗑️</button></div>`;
+    card.innerHTML = `<div class=\"admin-card-top\">${avatarHtml}<div class=\"admin-user-info\"><div class=\"admin-cuenta-num\">🏦 ${c.cuenta}</div>${c.nombre ? `<div class=\"admin-nombre-usuario\">${c.nombre}</div>` : ''}</div></div><div class=\"admin-saldo\">$${(c.saldo || 0).toLocaleString()}</div><div class=\"admin-correo\">📧 ${c.correo}</div><div class=\"admin-btn-row\"><button class=\"admin-btn btn-edit\" onclick=\"abrirModalSaldo('${c.cuenta}',${c.saldo})\">✏️ Saldo</button><button class=\"admin-btn btn-history\" onclick=\"verHistorial('${c.cuenta}')\">📋 Hist.</button><button class=\"admin-btn btn-cripto\" onclick=\"verCriptosUsuario('${c.cuenta}')\">🪙</button><button class=\"admin-btn btn-opinion\" onclick=\"verOpinionesUsuario('${c.cuenta}')\">⭐</button><button class=\"admin-btn btn-delete\" onclick=\"abrirModalBorrar('${c.cuenta}','${c.correo}')\">🗑️</button></div>`;
     wrap.appendChild(card);
   });
 }
@@ -1971,7 +1961,7 @@ function renderizarAdminCriptos() {
   CRIPTOS.forEach(c => {
     let precio = preciosCriptos[c.simbolo] || c.precio;
     let row = document.createElement('div'); row.className = 'admin-cripto-row';
-    row.innerHTML = `<div class="admin-cripto-left"><span style="font-size:24px;">${c.emoji}</span><div><div class="admin-cripto-nombre">${c.nombre}</div><div class="admin-cripto-simbolo">${c.simbolo}</div></div></div><div style="display:flex;align-items:center;gap:8px;"><span class="admin-cripto-precio" id="precio-${c.simbolo}">$${precio.toLocaleString()}</span><button class="btn-edit-precio" onclick="abrirModalPrecioCripto('${c.simbolo}')">✏️</button></div>`;
+    row.innerHTML = `<div class=\"admin-cripto-left\"><span style=\"font-size:24px;\">${c.emoji}</span><div><div class=\"admin-cripto-nombre\">${c.nombre}</div><div class=\"admin-cripto-simbolo\">${c.simbolo}</div></div></div><div style=\"display:flex;align-items:center;gap:8px;\"><span class=\"admin-cripto-precio\" id=\"precio-${c.simbolo}\">$${precio.toLocaleString()}</span><button class=\"btn-edit-precio\" onclick=\"abrirModalPrecioCripto('${c.simbolo}')\">✏️</button></div>`;
     lista.appendChild(row);
   });
 }
@@ -2015,7 +2005,7 @@ async function verCriptosUsuario(cuenta) {
       let c = CRIPTOS.find(x => x.simbolo === sim); if (!c) return;
       let precio = preciosCriptos[sim] || c.precio; let cant = criptos[sim];
       let div = document.createElement('div'); div.className = 'admin-user-cripto-item';
-      div.innerHTML = `<div class="auc-left"><span style="font-size:20px;">${c.emoji}</span><div><div class="auc-nombre">${c.nombre}</div><div class="auc-cant">${cant} ${sim} · $${(precio * cant).toLocaleString()}</div></div></div><button class="btn-auc-quitar" onclick="quitarCriptoUsuario('${cuenta}','${sim}')">Quitar</button>`;
+      div.innerHTML = `<div class=\"auc-left\"><span style=\"font-size:20px;\">${c.emoji}</span><div><div class=\"auc-nombre\">${c.nombre}</div><div class=\"auc-cant\">${cant} ${sim} · $${(precio * cant).toLocaleString()}</div></div></div><button class=\"btn-auc-quitar\" onclick=\"quitarCriptoUsuario('${cuenta}','${sim}')\">Quitar</button>`;
       lista.appendChild(div);
     });
   } catch(e) { const lista = document.getElementById('userCriptosList'); if (lista) lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
@@ -2039,7 +2029,7 @@ async function cargarOpinionesAdmin() {
     data.comentarios.slice().reverse().forEach(c => {
       let estrellas = '★'.repeat(c.estrellas) + '☆'.repeat(5 - c.estrellas);
       let div = document.createElement('div'); div.className = 'admin-opinion-card';
-      div.innerHTML = `<div class="admin-opinion-header"><div><b style="font-size:12px;">${c.nombre || c.cuenta}</b><div style="font-size:10px;color:var(--texto-sub);">${c.cuenta}</div></div><button class="btn-borrar-opinion" onclick="borrarOpinion('${c._id}')">🗑️</button></div><div style="color:#ff9500;font-size:14px;">${estrellas}</div><p class="admin-opinion-texto">${c.texto}</p><div class="admin-opinion-fecha">${c.fecha || ''}</div>`;
+      div.innerHTML = `<div class=\"admin-opinion-header\"><div><b style=\"font-size:12px;\">${c.nombre || c.cuenta}</b><div style=\"font-size:10px;color:var(--texto-sub);\">${c.cuenta}</div></div><button class=\"btn-borrar-opinion\" onclick=\"borrarOpinion('${c._id}')\">🗑️</button></div><div style=\"color:#ff9500;font-size:14px;\">${estrellas}</div><p class=\"admin-opinion-texto\">${c.texto}</p><div class=\"admin-opinion-fecha\">${c.fecha || ''}</div>`;
       lista.appendChild(div);
     });
   } catch(e) { lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
@@ -2066,7 +2056,7 @@ async function verOpinionesUsuario(cuenta) {
     data.comentarios.forEach(c => {
       let estrellas = '★'.repeat(c.estrellas) + '☆'.repeat(5 - c.estrellas);
       let p = document.createElement('p'); p.style.cssText = 'margin:0 0 8px;font-size:12px;border-bottom:1px solid var(--border);padding-bottom:8px;color:var(--texto);';
-      p.innerHTML = `<span style="color:#ff9500;">${estrellas}</span> — ${c.texto} <span style="color:var(--texto-sub);font-size:10px;">${c.fecha || ''}</span>`;
+      p.innerHTML = `<span style=\"color:#ff9500;\">${estrellas}</span> — ${c.texto} <span style=\"color:var(--texto-sub);font-size:10px;\">${c.fecha || ''}</span>`;
       lista.appendChild(p);
     });
   } catch(e) { const lista = document.getElementById('opinionesUsuarioLista'); if (lista) lista.innerHTML = '<p style="color:#ff3b30;">Error</p>'; }
