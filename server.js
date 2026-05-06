@@ -334,10 +334,16 @@ app.post("/comprar-criptos", async (req, res) => {
 });
 
 // ===============================
-//   VENDER CRIPTOS (NUEVO ENDPOINT)
+//   VENDER CRIPTOS (CORREGIDO)
 // ===============================
 app.post("/vender-criptos", async (req, res) => {
   const { cuenta, simbolo, cantidad, precio, total } = req.body;
+  
+  console.log("=== VENTA RECIBIDA ===");
+  console.log("Cuenta:", cuenta);
+  console.log("Símbolo:", simbolo);
+  console.log("Cantidad:", cantidad);
+  console.log("Total:", total);
   
   if (!cuenta || !simbolo || !cantidad || !precio || !total) {
     return res.json({ ok: false, mensaje: "Datos inválidos" });
@@ -348,15 +354,15 @@ app.post("/vender-criptos", async (req, res) => {
     return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
   }
   
-  // Verificar que tenga suficientes criptos
   const criptos = user.criptomonedas || new Map();
   const cantidadActual = criptos.get(simbolo) || 0;
+  
+  console.log("Cantidad actual de", simbolo, ":", cantidadActual);
   
   if (cantidadActual < cantidad) {
     return res.json({ ok: false, mensaje: "No tienes suficientes " + simbolo });
   }
   
-  // Actualizar criptomonedas
   const nuevaCantidad = cantidadActual - cantidad;
   if (nuevaCantidad === 0) {
     criptos.delete(simbolo);
@@ -364,61 +370,31 @@ app.post("/vender-criptos", async (req, res) => {
     criptos.set(simbolo, nuevaCantidad);
   }
   
-  // Actualizar saldo
+  const saldoAnterior = user.saldo;
   user.saldo = (user.saldo || 0) + total;
   user.criptomonedas = criptos;
   user.markModified("criptomonedas");
   
-  // Registrar movimiento
   const hora = new Date().toLocaleString();
   user.movimientos.push(`Venta de ${cantidad} ${simbolo} | +$${total.toLocaleString()} | ${hora}`);
   
   await user.save();
   
-  // Enviar correo de confirmación
+  console.log("Venta exitosa! Nuevo saldo:", user.saldo);
+  
   await enviarCorreo(user.correo, "Confirmación de venta de criptos - Banco Libre",
-    `<h2>Venta realizada</h2>
+    `<h2>✅ Venta realizada</h2>
      <p>Has vendido: <b>${cantidad} ${simbolo}</b></p>
      <p>Total recibido: <b>$${total.toLocaleString()}</b></p>
+     <p>Saldo anterior: <b>$${saldoAnterior.toLocaleString()}</b></p>
      <p>Saldo actual: <b>$${user.saldo.toLocaleString()}</b></p>
      <p>Fecha: ${hora}</p>`);
   
-  res.json({ ok: true, mensaje: `Venta de ${cantidad} ${simbolo} realizada. +$${total.toLocaleString()}` });
+  res.json({ ok: true, mensaje: `✅ Venta de ${cantidad} ${simbolo} realizada. +$${total.toLocaleString()}` });
 });
 
 // ===============================
-//   ACTUALIZAR CRIPTOS (FALLBACK)
-// ===============================
-app.post("/actualizar-criptos", async (req, res) => {
-  const { cuenta, simbolo, nuevaCantidad, nuevoSaldo, totalVenta } = req.body;
-  
-  const user = await Usuario.findOne({ cuenta });
-  if (!user) {
-    return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
-  }
-  
-  const criptos = user.criptomonedas || new Map();
-  
-  if (nuevaCantidad === 0) {
-    criptos.delete(simbolo);
-  } else {
-    criptos.set(simbolo, nuevaCantidad);
-  }
-  
-  user.saldo = nuevoSaldo;
-  user.criptomonedas = criptos;
-  user.markModified("criptomonedas");
-  
-  const hora = new Date().toLocaleString();
-  user.movimientos.push(`Venta de criptos ${simbolo} | +$${totalVenta?.toLocaleString() || 0} | ${hora}`);
-  
-  await user.save();
-  
-  res.json({ ok: true, mensaje: "Venta procesada correctamente" });
-});
-
-// ===============================
-//   COMENTARIOS — Nuevo
+//   COMENTARIOS
 // ===============================
 app.post("/comentarios/nuevo", async (req, res) => {
   const { cuenta, estrellas, texto, nombre, foto } = req.body;
@@ -434,9 +410,6 @@ app.post("/comentarios/nuevo", async (req, res) => {
   res.json({ ok: true, mensaje: "Reseña publicada" });
 });
 
-// ===============================
-//   COMENTARIOS — Listar todos
-// ===============================
 app.get("/comentarios", async (req, res) => {
   try {
     const comentarios = await Comentario.find({}).sort({ _id: 1 });
@@ -444,9 +417,6 @@ app.get("/comentarios", async (req, res) => {
   } catch (err) { res.json({ ok: false, mensaje: "Error" }); }
 });
 
-// ===============================
-//   COMENTARIOS — Por usuario
-// ===============================
 app.get("/comentarios/usuario/:cuenta", async (req, res) => {
   try {
     const comentarios = await Comentario.find({ cuenta: req.params.cuenta });
@@ -455,7 +425,7 @@ app.get("/comentarios/usuario/:cuenta", async (req, res) => {
 });
 
 // ===============================
-//   RUTAS ADMIN — Listar cuentas
+//   RUTAS ADMIN
 // ===============================
 app.get("/admin/cuentas", verificarAdmin, async (req, res) => {
   try {
@@ -464,9 +434,6 @@ app.get("/admin/cuentas", verificarAdmin, async (req, res) => {
   } catch (err) { res.json({ ok: false, mensaje: "Error del servidor" }); }
 });
 
-// ===============================
-//   RUTAS ADMIN — Editar saldo
-// ===============================
 app.post("/admin/editar-saldo", verificarAdmin, async (req, res) => {
   const { cuenta, nuevoSaldo } = req.body;
   if (typeof nuevoSaldo !== "number" || nuevoSaldo < 0)
@@ -489,9 +456,6 @@ app.post("/admin/editar-saldo", verificarAdmin, async (req, res) => {
   res.json({ ok: true, mensaje: `Saldo actualizado a $${nuevoSaldo}` });
 });
 
-// ===============================
-//   RUTAS ADMIN — Borrar cuenta
-// ===============================
 app.post("/admin/borrar-cuenta", verificarAdmin, async (req, res) => {
   const { cuenta } = req.body;
   if (!cuenta) return res.json({ ok: false, mensaje: "Cuenta requerida" });
@@ -502,9 +466,6 @@ app.post("/admin/borrar-cuenta", verificarAdmin, async (req, res) => {
   res.json({ ok: true, mensaje: `Cuenta ${cuenta} eliminada correctamente` });
 });
 
-// ===============================
-//   RUTAS ADMIN — Editar precio cripto
-// ===============================
 app.post("/admin/editar-precio-cripto", verificarAdmin, async (req, res) => {
   const { simbolo, precio } = req.body;
   if (!simbolo || typeof precio !== "number" || precio <= 0)
@@ -514,9 +475,6 @@ app.post("/admin/editar-precio-cripto", verificarAdmin, async (req, res) => {
   res.json({ ok: true, mensaje: `Precio de ${simbolo} actualizado a $${precio}` });
 });
 
-// ===============================
-//   RUTAS ADMIN — Quitar cripto a usuario
-// ===============================
 app.post("/admin/quitar-cripto", verificarAdmin, async (req, res) => {
   const { cuenta, simbolo } = req.body;
   if (!cuenta || !simbolo) return res.json({ ok: false, mensaje: "Datos incompletos" });
@@ -537,9 +495,6 @@ app.post("/admin/quitar-cripto", verificarAdmin, async (req, res) => {
   res.json({ ok: true, mensaje: `${simbolo} eliminado de la cuenta ${cuenta}` });
 });
 
-// ===============================
-//   RUTAS ADMIN — Borrar opinión
-// ===============================
 app.post("/admin/borrar-opinion", verificarAdmin, async (req, res) => {
   const { id } = req.body;
   if (!id) return res.json({ ok: false, mensaje: "ID requerido" });
