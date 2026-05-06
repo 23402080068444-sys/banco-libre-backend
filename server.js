@@ -1,5 +1,3 @@
-
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -333,6 +331,90 @@ app.post("/comprar-criptos", async (req, res) => {
      <p>Fecha: ${hora}</p>`);
 
   res.json({ ok: true, mensaje: `Compra realizada: ${resumen.join(", ")}` });
+});
+
+// ===============================
+//   VENDER CRIPTOS (NUEVO ENDPOINT)
+// ===============================
+app.post("/vender-criptos", async (req, res) => {
+  const { cuenta, simbolo, cantidad, precio, total } = req.body;
+  
+  if (!cuenta || !simbolo || !cantidad || !precio || !total) {
+    return res.json({ ok: false, mensaje: "Datos inválidos" });
+  }
+  
+  const user = await Usuario.findOne({ cuenta });
+  if (!user) {
+    return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
+  }
+  
+  // Verificar que tenga suficientes criptos
+  const criptos = user.criptomonedas || new Map();
+  const cantidadActual = criptos.get(simbolo) || 0;
+  
+  if (cantidadActual < cantidad) {
+    return res.json({ ok: false, mensaje: "No tienes suficientes " + simbolo });
+  }
+  
+  // Actualizar criptomonedas
+  const nuevaCantidad = cantidadActual - cantidad;
+  if (nuevaCantidad === 0) {
+    criptos.delete(simbolo);
+  } else {
+    criptos.set(simbolo, nuevaCantidad);
+  }
+  
+  // Actualizar saldo
+  user.saldo = (user.saldo || 0) + total;
+  user.criptomonedas = criptos;
+  user.markModified("criptomonedas");
+  
+  // Registrar movimiento
+  const hora = new Date().toLocaleString();
+  user.movimientos.push(`Venta de ${cantidad} ${simbolo} | +$${total.toLocaleString()} | ${hora}`);
+  
+  await user.save();
+  
+  // Enviar correo de confirmación
+  await enviarCorreo(user.correo, "Confirmación de venta de criptos - Banco Libre",
+    `<h2>Venta realizada</h2>
+     <p>Has vendido: <b>${cantidad} ${simbolo}</b></p>
+     <p>Total recibido: <b>$${total.toLocaleString()}</b></p>
+     <p>Saldo actual: <b>$${user.saldo.toLocaleString()}</b></p>
+     <p>Fecha: ${hora}</p>`);
+  
+  res.json({ ok: true, mensaje: `Venta de ${cantidad} ${simbolo} realizada. +$${total.toLocaleString()}` });
+});
+
+// ===============================
+//   ACTUALIZAR CRIPTOS (FALLBACK)
+// ===============================
+app.post("/actualizar-criptos", async (req, res) => {
+  const { cuenta, simbolo, nuevaCantidad, nuevoSaldo, totalVenta } = req.body;
+  
+  const user = await Usuario.findOne({ cuenta });
+  if (!user) {
+    return res.json({ ok: false, mensaje: "Cuenta no encontrada" });
+  }
+  
+  const criptos = user.criptomonedas || new Map();
+  
+  if (nuevaCantidad === 0) {
+    criptos.delete(simbolo);
+  } else {
+    criptos.set(simbolo, nuevaCantidad);
+  }
+  
+  user.saldo = nuevoSaldo;
+  user.criptomonedas = criptos;
+  user.markModified("criptomonedas");
+  
+  const hora = new Date().toLocaleString();
+  user.movimientos.push(`Venta de criptos ${simbolo} | +$${totalVenta?.toLocaleString() || 0} | ${hora}`);
+  
+  await user.save();
+  
+  res.json({ ok: true, mensaje: "Venta procesada correctamente" });
 });
 
 // ===============================
