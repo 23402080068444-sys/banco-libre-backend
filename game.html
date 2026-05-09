@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Claude Kart 🏎️</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+
+<!-- renderer.js debe estar en la misma carpeta (mismo repo) -->
+<script src="renderer.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --neon:#7b5cb8; --gold:#ffd166; --red:#e63946;
+  --teal:#06d6a0; --bg:#060412;
+}
+html,body{background:var(--bg);color:#fff;font-family:'Share Tech Mono',monospace;overflow:hidden;height:100vh;width:100vw}
+
+/* ══ TÍTULO ══════════════════════════════════════════════ */
+#titleScreen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 30%,#2d0f6b 0%,#060412 70%);
+}
+#titleScreen::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237b5cb8' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+h1.title{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(3rem,9vw,7.5rem);
+  color:var(--gold);
+  text-shadow:0 0 30px rgba(255,209,102,.45),0 5px 0 rgba(140,90,0,.4);
+  letter-spacing:3px;
+  animation:bounce 2.2s ease-in-out infinite;
+  line-height:1;
+}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+
+p.sub{font-size:.8rem;color:#6a4aaa;letter-spacing:8px;text-transform:uppercase;margin:10px 0 28px}
+
+/* kart animado */
+.kart-strip{width:260px;height:48px;overflow:hidden;position:relative;margin-bottom:22px}
+.kart-anim{position:absolute;font-size:2.8rem;animation:drive 1.8s linear infinite}
+@keyframes drive{from{left:-60px}to{left:280px}}
+
+/* panel */
+.panel{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(123,92,184,.35);
+  border-radius:18px;padding:26px 32px;
+  display:flex;flex-direction:column;gap:14px;
+  min-width:330px;max-width:420px;width:90vw;
+  backdrop-filter:blur(14px);
+  box-shadow:0 0 60px rgba(123,92,184,.12);
+}
+
+label{font-size:.7rem;color:var(--neon);letter-spacing:3px;text-transform:uppercase;margin-bottom:2px;display:block}
+
+input{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(123,92,184,.4);
+  border-radius:9px;color:#fff;
+  font-family:'Share Tech Mono',monospace;font-size:1rem;
+  padding:10px 14px;outline:none;width:100%;
+  transition:border-color .2s;
+}
+input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(123,92,184,.15)}
+
+.row{display:flex;gap:10px}
+.btn{
+  flex:1;font-family:'Fredoka One',cursive;font-size:1.05rem;letter-spacing:1px;
+  padding:13px 18px;border:none;border-radius:11px;cursor:pointer;
+  transition:transform .12s,box-shadow .2s;position:relative;overflow:hidden;
+}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .15s}
+.btn:hover::after{background:rgba(255,255,255,.08)}
+.btn:active{transform:scale(.95)}
+.btn-host{background:var(--neon);color:#fff;box-shadow:0 0 20px rgba(123,92,184,.45)}
+.btn-join{background:var(--teal);color:#0a0a1a;box-shadow:0 0 20px rgba(6,214,160,.35)}
+.btn-solo{background:linear-gradient(135deg,#ffd166,#f4a261);color:#0a0a1a;box-shadow:0 0 20px rgba(255,209,102,.35)}
+
+#roomInfo{font-size:.82rem;color:var(--teal);text-align:center;min-height:18px;letter-spacing:1px}
+#playerList{font-size:.75rem;color:#888;text-align:center;min-height:16px}
+
+#credits{font-size:.65rem;color:#333;position:absolute;bottom:14px;letter-spacing:2px}
+
+/* ══ JUEGO ═══════════════════════════════════════════════ */
+#gameWrap{display:none;position:fixed;inset:0}
+canvas#gc{display:block;width:100%;height:100%}
+
+#minimapCvs{
+  position:fixed;right:12px;top:12px;
+  width:88px;height:88px;border-radius:50%;
+  background:rgba(6,2,20,.9);
+  border:2px solid rgba(123,92,184,.6);
+}
+
+/* mensajes flotantes */
+#msgBox{
+  position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+  background:rgba(6,2,20,.78);border:1px solid rgba(123,92,184,.35);
+  border-radius:9px;padding:7px 18px;font-size:.78rem;color:var(--teal);
+  max-width:360px;text-align:center;pointer-events:none;
+  opacity:0;transition:opacity .35s;white-space:nowrap;
+}
+#msgBox.show{opacity:1}
+
+/* controles hint */
+#ctrlHint{
+  position:fixed;left:12px;bottom:14px;font-size:.62rem;
+  color:rgba(255,255,255,.25);line-height:2;pointer-events:none;
+}
+
+/* fin carrera */
+#endScreen{
+  display:none;position:fixed;inset:0;z-index:200;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(6,2,20,.94);
+  font-family:'Fredoka One',cursive;
+}
+#endScreen h2{font-size:3.8rem;color:var(--gold);text-shadow:0 0 40px rgba(255,209,102,.5);margin-bottom:22px}
+#podium{font-size:1rem;color:#ccc;line-height:2.4;text-align:center;letter-spacing:1px}
+#endScreen .btn-play{
+  margin-top:30px;background:var(--red);color:#fff;
+  font-family:'Fredoka One',cursive;font-size:1.1rem;
+  padding:14px 44px;border:none;border-radius:13px;cursor:pointer;
+  box-shadow:0 0 26px rgba(230,57,70,.45);transition:transform .1s;
+}
+#endScreen .btn-play:hover{transform:scale(1.04)}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ PANTALLA TÍTULO ══════════════ -->
+<div id="titleScreen">
+  <h1 class="title">🏎️ CLAUDE KART</h1>
+  <p class="sub">by Claude · Anthropic 2026</p>
+
+  <div class="kart-strip">
+    <div class="kart-anim">🏎️</div>
+  </div>
+
+  <div class="panel">
+    <div>
+      <label>Tu nombre de piloto</label>
+      <input id="pName" maxlength="14" placeholder="Ej: Max, Senna, Lewis…"/>
+    </div>
+
+    <div id="joinRow" style="display:none">
+      <label>IP del host (ej: 192.168.1.5)</label>
+      <input id="hostIP" placeholder="192.168.x.x"/>
+    </div>
+
+    <div id="roomInfo">Elige modo de juego</div>
+    <div id="playerList"></div>
+
+    <div class="row">
+      <button class="btn btn-host" id="btnHost">🖥️ Hostear</button>
+      <button class="btn btn-join" id="btnJoin">📡 Unirse</button>
+    </div>
+    <button class="btn btn-solo" id="btnSolo">🤖 Solo vs IA</button>
+  </div>
+
+  <p id="credits">CLAUDE KART v1.0 — claude.ai</p>
+</div>
+
+<!-- ══════════════ JUEGO ══════════════ -->
+<div id="gameWrap">
+  <canvas id="gc"></canvas>
+  <canvas id="minimapCvs" width="88" height="88"></canvas>
+</div>
+
+<div id="msgBox"></div>
+<div id="ctrlHint">
+  ↑ / W &nbsp;Acelerar<br>
+  ↓ / S &nbsp;Frenar<br>
+  ← / A &nbsp;Izquierda<br>
+  → / D &nbsp;Derecha<br>
+  SHIFT &nbsp;Nitro<br>
+  SPACE &nbsp;Item
+</div>
+
+<!-- ══════════════ FIN CARRERA ══════════════ -->
+<div id="endScreen">
+  <h2>🏆 FIN DE CARRERA</h2>
+  <div id="podium"></div>
+  <button class="btn-play" onclick="location.reload()">🔄 Jugar de nuevo</button>
+</div>
+
+<script>
+// ================================================================
+//  CLAUDE KART — game.js (embebido en game.html)
+//  Multijugador P2P via WebRTC (PeerJS CDN) + modo IA local
+//  ► renderer.js se carga como script externo (mismo repo/carpeta)
+// ================================================================
+
+// ── Cargar PeerJS dinámicamente ─────────────────────────────────
+(()=>{
+  const s=document.createElement('script');
+  s.src='https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js';
+  document.head.appendChild(s);
+})();
+
+// ════════ CONFIG ════════════════════════════════════════════════
+const MAX_LAPS = 3;
+const AI_COUNT = 3;
+const TICK      = 1/60;
+
+// ════════ ESTADO ════════════════════════════════════════════════
+let myName='Piloto', myId=0, myColor=0;
+let players=[];           // todos los karts
+let localP=null;          // referencia al jugador local
+let frame=0, raceStarted=false, countdown=4.5, cdTimer=0;
+let gameMode='solo';      // 'solo' | 'host' | 'join'
+let peer=null, conns=[];
+let msgTimeout=null;
+
+// ════════ PISTA (oval con curvas) ════════════════════════════════
+const TRACK_PTS = (()=>{
+  const pts=[];
+  const N=140;
+  for(let i=0;i<N;i++){
+    const t=i/N*Math.PI*2;
+    const x=Math.cos(t)*90+Math.sin(t*2)*14+Math.sin(t*3)*5;
+    const z=Math.sin(t)*130+Math.cos(t*2)*18+Math.cos(t*4)*4;
+    pts.push({x,z});
+  }
+  return pts;
+})();
+
+function trackAt(prog){
+  const t=((prog%1)+1)%1;
+  const i=t*TRACK_PTS.length|0;
+  const j=(i+1)%TRACK_PTS.length;
+  const f=t*TRACK_PTS.length-i;
+  return {x:TRACK_PTS[i].x+(TRACK_PTS[j].x-TRACK_PTS[i].x)*f,
+          z:TRACK_PTS[i].z+(TRACK_PTS[j].z-TRACK_PTS[i].z)*f};
+}
+function trackAngle(prog){
+  const a=trackAt(prog), b=trackAt((prog+.006)%1);
+  return Math.atan2(b.x-a.x,b.z-a.z);
+}
+function nearestProgress(x,z){
+  let best=0,bestD=Infinity;
+  for(let i=0;i<TRACK_PTS.length;i++){
+    const d=Math.hypot(TRACK_PTS[i].x-x,TRACK_PTS[i].z-z);
+    if(d<bestD){bestD=d;best=i;}
+  }
+  return best/TRACK_PTS.length;
+}
+
+// ════════ CANVAS ════════════════════════════════════════════════
+const canvas=document.getElementById('gc');
+const ctx=canvas.getContext('2d');
+const mmCvs=document.getElementById('minimapCvs');
+const mmCtx=mmCvs.getContext('2d');
+
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+window.addEventListener('resize',resize); resize();
+
+// ════════ INPUT ══════════════════════════════════════════════════
+const keys={};
+window.addEventListener('keydown',e=>{keys[e.code]=true;e.preventDefault&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&e.preventDefault();});
+window.addEventListener('keyup',  e=>{keys[e.code]=false;});
+
+// Móvil: botones táctiles (opcional, se puede expandir)
+let touchAccel=false, touchBrake=false, touchLeft=false, touchRight=false;
+
+// ════════ ITEMS ══════════════════════════════════════════════════
+const ITEMS=['🍄','⭐','🐢','💥','🔵','🌶️'];
+
+function giveItem(p){
+  if(!p.item) p.item=ITEMS[Math.random()*ITEMS.length|0];
+}
+
+function fireItem(p){
+  if(!p.item)return;
+  const it=p.item; p.item=null;
+  showMsg(`${p.name} usó ${it}!`);
+  if(it==='🍄'){ p.speed+=4; }
+  if(it==='⭐'){ p.star=240; }
+  if(it==='🌶️'){ p.nitro=Math.min((p.nitro||0)+.5,1); }
+  if(['🐢','💥','🔵'].includes(it)){
+    // golpear al más cercano
+    const target=players.filter(q=>q.id!==p.id&&!q.finished)
+      .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0];
+    if(target){
+      target.stunned=90; target.speed*=.15;
+      showMsg(`💫 ${target.name} fue golpeado!`);
+    }
+  }
+  broadcast();
+}
+
+// ════════ PLAYERS ════════════════════════════════════════════════
+function makePlayer(id,name,colorIdx,isAI=false){
+  const prog=.025*id;
+  const pos=trackAt(prog);
+  return {
+    id,name,colorIdx,isAI,
+    x:pos.x,z:pos.z,
+    angle:trackAngle(prog),
+    speed:0,
+    nitro:.7,
+    lap:1,
+    prog:prog,
+    prevProg:prog,
+    item:null,star:0,stunned:0,
+    finished:false,finishRank:0,finishFrame:0,
+  };
+}
+
+function calcPositions(){
+  const running=players.filter(p=>!p.finished);
+  running.sort((a,b)=>{
+    const la=a.lap+(a.prog>.5?a.prog-.5:a.prog+.5);
+    const lb=b.lap+(b.prog>.5?b.prog-.5:b.prog+.5);
+    return lb-la;
+  });
+  running.forEach((p,i)=>p.pos=i+1);
+  let rank=running.length;
+  players.filter(p=>p.finished).forEach(p=>p.pos=p.finishRank);
+}
+
+// ════════ IA ════════════════════════════════════════════════════
+function updateAI(p,dt){
+  if(p.stunned>0){p.stunned--;return;}
+
+  const ahead=trackAt((p.prog+.02)%1);
+  const desired=Math.atan2(ahead.x-p.x, ahead.z-p.z);
+  let da=desired-p.angle;
+  while(da>Math.PI)da-=Math.PI*2;
+  while(da<-Math.PI)da+=Math.PI*2;
+  p.angle+=Math.sign(da)*Math.min(Math.abs(da),.072);
+
+  const maxSpd=3.6+Math.random()*.5;
+  p.speed+=(maxSpd-p.speed)*.042;
+  if(Math.random()<.004) giveItem(p);
+  if(p.item&&Math.random()<.018) fireItem(p);
+  movePlayer(p,dt);
+}
+
+// ════════ MOVER ══════════════════════════════════════════════════
+function movePlayer(p,dt){
+  if(p.finished)return;
+  const boost=(p.star>0)?1.45:1;
+  p.x+=Math.sin(p.angle)*p.speed*dt*boost;
+  p.z+=Math.cos(p.angle)*p.speed*dt*boost;
+  p.speed*=.965;
+  if(p.star>0)p.star--;
+
+  const np=nearestProgress(p.x,p.z);
+  // detectar vuelta completa
+  if(p.prevProg>.88&&np<.12){ p.lap++; checkFinish(p); }
+  if(p.prevProg<.12&&np>.88&&p.lap>1){ p.lap--; } // marcha atrás penalty
+  p.prevProg=p.prog; p.prog=np;
+
+  // partículas al girar fuerte
+  if(p.id===myId&&p.speed>2)
+    Renderer.spawnDust(canvas.width/2+20*(Math.random()-.5), canvas.height*.78+10*(Math.random()-.5), p.speed*.3);
+}
+
+function checkFinish(p){
+  if(p.lap>MAX_LAPS&&!p.finished){
+    p.finished=true;
+    p.finishRank=players.filter(q=>q.finished).length;
+    p.finishFrame=frame;
+    showMsg(`🏁 ${p.name} terminó en posición ${p.finishRank}!`);
+    const allDone=players.filter(q=>!q.isAI||!q.finished);
+    if(p.id===myId) setTimeout(showEnd,2200);
+  }
+}
+
+// ════════ LOCAL UPDATE ═══════════════════════════════════════════
+function updateLocal(p,dt){
+  if(!raceStarted||p.stunned>0){ if(p.stunned>0)p.stunned--; return; }
+  if(p.finished)return;
+
+  const accel=keys['ArrowUp']||keys['KeyW']||touchAccel;
+  const brake=keys['ArrowDown']||keys['KeyS']||touchBrake;
+  const left =keys['ArrowLeft']||keys['KeyA']||touchLeft;
+  const right=keys['ArrowRight']||keys['KeyD']||touchRight;
+  const nitro=keys['ShiftLeft']||keys['ShiftRight'];
+
+  if(left)  p.angle-=(.04+p.speed*.006);
+  if(right) p.angle+=(.04+p.speed*.006);
+  if(accel) p.speed=Math.min(p.speed+.18, nitro&&p.nitro>.05?6:4.8);
+  if(brake) p.speed=Math.max(p.speed-.14,-1.5);
+  if(nitro&&p.nitro>0&&accel){ p.nitro=Math.max(0,p.nitro-.008); }
+
+  if(!accel&&!brake) p.speed*=.97;
+  p.speed=Math.max(p.speed,-1.5);
+
+  if(keys['Space']){ keys['Space']=false; fireItem(p); }
+
+  movePlayer(p,dt);
+  broadcast();
+}
+
+// ════════ RENDER ═════════════════════════════════════════════════
+let lastTime=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  const dt=Math.min((ts-lastTime)/1000,.05); lastTime=ts;
+
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  if(!localP){return;}
+
+  frame++;
+
+  // countdown
+  if(!raceStarted){
+    cdTimer+=dt;
+    countdown=Math.max(0,4.5-cdTimer);
+    if(cdTimer>4.5) raceStarted=true;
+  }
+
+  // update AI
+  if(raceStarted) players.filter(p=>p.isAI).forEach(p=>updateAI(p,dt));
+  // update local
+  updateLocal(localP,dt);
+  calcPositions();
+
+  // ── Render escena ──
+  const camAngle=localP.angle+Math.PI; // miramos hacia donde va
+  Renderer.drawSky(ctx,W,H,frame);
+  Renderer.drawGround(ctx,W,H,localP.x,localP.z,camAngle);
+  Renderer.updateParticles(ctx);
+
+  // otros jugadores (sprites simples proyectados)
+  const others=players.filter(p=>p.id!==myId);
+  others.forEach(p=>{
+    const dx=p.x-localP.x, dz=p.z-localP.z;
+    const dist=Math.hypot(dx,dz);
+    if(dist>80)return;
+
+    // proyección manual al plano de pantalla
+    const sinC=Math.sin(-camAngle), cosC=Math.cos(-camAngle);
+    const rx=dx*cosC-dz*sinC;
+    const rz=dx*sinC+dz*cosC;
+    if(rz<.5)return; // detrás de la cámara
+
+    const hY=H*Renderer.HORIZON;
+    const scale=Math.max(.2,Math.min(2, Renderer.CAMERA_H*H/(rz*18)));
+    const sx=W/2+(rx/rz)*W*.55;
+    const sy=hY+(Renderer.CAMERA_H/(rz))*H*.62;
+
+    if(sx<-80||sx>W+80||sy>H+60)return;
+    Renderer.drawKartSprite(ctx,sx,sy,scale,p.colorIdx,p.name,false,frame,p.star>0);
+  });
+
+  // HUD
+  Renderer.drawHUD(ctx,W,H,{
+    speed:localP.speed,
+    lap:Math.min(localP.lap,MAX_LAPS),
+    maxLaps:MAX_LAPS,
+    pos:localP.pos||1,
+    total:players.length,
+    item:localP.item,
+    name:myName,
+    countdown:raceStarted?0:countdown,
+    nitro:localP.nitro,
+  });
+
+  // Minimap
+  Renderer.drawMinimap(mmCtx,88,88,TRACK_PTS,players,myId);
+}
+
+// ════════ NETWORK (PeerJS WebRTC) ════════════════════════════════
+function broadcast(){
+  if(!localP||conns.length===0)return;
+  const state={id:localP.id,x:localP.x,z:localP.z,angle:localP.angle,
+    speed:localP.speed,lap:localP.lap,prog:localP.prog,
+    item:localP.item,star:localP.star,finished:localP.finished,finishRank:localP.finishRank};
+  conns.forEach(c=>{try{c.send(JSON.stringify(state));}catch(_){}});
+}
+
+function onRemoteData(data){
+  try{
+    const s=typeof data==='string'?JSON.parse(data):data;
+    const p=players.find(q=>q.id===s.id);
+    if(p){Object.assign(p,s);}
+  }catch(_){}
+}
+
+function setupHost(name){
+  peer=new Peer(undefined,{debug:0});
+  peer.on('open',id=>{
+    setInfo(`🟢 Tu ID: ${id}`);
+    setPlayers(`Esperando jugadores… (comparte tu ID)`);
+  });
+  peer.on('connection',conn=>{
+    conns.push(conn);
+    conn.on('data',onRemoteData);
+    conn.on('open',()=>{
+      // asignar ID remoto
+      const newId=players.length;
+      const rp=makePlayer(newId,`P${newId+1}`,newId,false);
+      players.push(rp);
+      setPlayers(`${players.length} jugador(es) conectado(s)`);
+      // enviar estado inicial
+      conn.send(JSON.stringify({type:'init',playerId:newId,players:players.map(p=>({
+        id:p.id,name:p.name,colorIdx:p.colorIdx,x:p.x,z:p.z,angle:p.angle,isAI:p.isAI
+      }))}));
+    });
+  });
+}
+
+function setupJoin(hostId, name){
+  peer=new Peer(undefined,{debug:0});
+  peer.on('open',()=>{
+    setInfo('Conectando…');
+    const conn=peer.connect(hostId,{reliable:true});
+    conns.push(conn);
+    conn.on('open',()=>setInfo('✅ Conectado!'));
+    conn.on('data',data=>{
+      try{
+        const msg=typeof data==='string'?JSON.parse(data):data;
+        if(msg.type==='init'){
+          myId=msg.playerId;
+          players=msg.players.map(p=>makePlayer(p.id,p.name,p.colorIdx,p.isAI));
+          localP=players.find(p=>p.id===myId);
+          if(localP)localP.name=name;
+          startGame();
+        } else { onRemoteData(data); }
+      }catch(_){}
+    });
+  });
+}
+
+// ════════ START GAME ═════════════════════════════════════════════
+function startGame(){
+  document.getElementById('titleScreen').style.display='none';
+  document.getElementById('gameWrap').style.display='block';
+  if(!localP&&players.length>0) localP=players.find(p=>p.id===myId);
+  if(!localP){ localP=players[0]; myId=0; }
+  raceStarted=false; countdown=4.5; cdTimer=0;
+  lastTime=performance.now();
+  requestAnimationFrame(loop);
+}
+
+function startSolo(name){
+  myId=0; myName=name; myColor=0;
+  players=[];
+  players.push(makePlayer(0,name,0,false));
+  for(let i=1;i<=AI_COUNT;i++){
+    const aiNames=['Luigi','Toad','Yoshi','Waluigi','Peach'];
+    players.push(makePlayer(i,aiNames[i-1]||`Bot${i}`,i,true));
+  }
+  localP=players[0];
+  startGame();
+}
+
+// ════════ FINAL ══════════════════════════════════════════════════
+function showEnd(){
+  const end=document.getElementById('endScreen');
+  end.style.display='flex';
+  const sorted=[...players].sort((a,b)=>(a.finishRank||99)-(b.finishRank||99));
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('podium').innerHTML=sorted.map((p,i)=>
+    `${medals[i]||`${i+1}.`} &nbsp;<span style="color:${Renderer.KART_COLORS[p.colorIdx%6]}">${p.name}</span>`
+  ).join('<br>');
+}
+
+// ════════ MENSAJES ════════════════════════════════════════════════
+function showMsg(txt){
+  const el=document.getElementById('msgBox');
+  el.textContent=txt; el.classList.add('show');
+  clearTimeout(msgTimeout);
+  msgTimeout=setTimeout(()=>el.classList.remove('show'),2800);
+}
+function setInfo(t){document.getElementById('roomInfo').textContent=t;}
+function setPlayers(t){document.getElementById('playerList').textContent=t;}
+
+// ════════ UI EVENTOS ═════════════════════════════════════════════
+document.getElementById('btnSolo').addEventListener('click',()=>{
+  const name=document.getElementById('pName').value.trim()||'Piloto';
+  myName=name;
+  startSolo(name);
+});
+
+document.getElementById('btnHost').addEventListener('click',()=>{
+  const name=document.getElementById('pName').value.trim()||'Host';
+  myName=name; myId=0; myColor=0; gameMode='host';
+  players=[];
+  players.push(makePlayer(0,name,0,false));
+  localP=players[0];
+  document.getElementById('joinRow').style.display='none';
+  setInfo('Iniciando servidor…');
+  // Esperar PeerJS
+  const waitPeer=setInterval(()=>{
+    if(typeof Peer!=='undefined'){
+      clearInterval(waitPeer);
+      setupHost(name);
+      // botón para iniciar cuando quiera
+      const br=document.createElement('button');
+      br.className='btn btn-solo'; br.style.marginTop='8px';
+      br.textContent='▶ Iniciar carrera';
+      br.onclick=()=>{ if(players.length===1)players.push(...[...Array(AI_COUNT)].map((_,i)=>makePlayer(i+1,['Luigi','Toad','Yoshi'][i],i+1,true))); startGame(); };
+      document.querySelector('.panel').appendChild(br);
+    }
+  },200);
+});
+
+document.getElementById('btnJoin').addEventListener('click',()=>{
+  const jRow=document.getElementById('joinRow');
+  if(jRow.style.display==='none'){
+    jRow.style.display='block';
+    setInfo('Ingresa el ID del host y presiona Unirse');
+    document.getElementById('btnJoin').textContent='✅ Conectar';
+  } else {
+    const hostId=document.getElementById('hostIP').value.trim();
+    if(!hostId){setInfo('⚠ Ingresa el ID del host');return;}
+    const name=document.getElementById('pName').value.trim()||'Piloto';
+    myName=name; gameMode='join';
+    const waitPeer=setInterval(()=>{
+      if(typeof Peer!=='undefined'){clearInterval(waitPeer); setupJoin(hostId,name);}
+    },200);
+  }
+});
+
+// input enter
+document.getElementById('pName').addEventListener('keydown',e=>{
+  if(e.key==='Enter') document.getElementById('btnSolo').click();
+});
+</script>
+</body>
+</html>
