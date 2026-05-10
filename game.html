@@ -1,626 +1,607 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Claude Kart 🏎️</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>✨ CLAUDE KART ✨ - Racing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-<!-- ✅ CORREGIDO: nombre exacto del archivo renderer.js -->
-<script src="renderer.js"></script>
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Fredoka One', cursive, sans-serif;
+            overflow: hidden;
+        }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --neon:#7b5cb8; --gold:#ffd166; --red:#e63946;
-  --teal:#06d6a0; --bg:#060412;
-}
-html,body{background:var(--bg);color:#fff;font-family:'Share Tech Mono',monospace;overflow:hidden;height:100vh;width:100vw}
+        .game-container {
+            position: relative;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 3px rgba(124,77,204,0.4);
+            overflow: hidden;
+        }
 
-#titleScreen{
-  position:fixed;inset:0;z-index:100;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
-  background:radial-gradient(ellipse 80% 60% at 50% 30%,#2d0f6b 0%,#060412 70%);
-}
-#titleScreen::before{
-  content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237b5cb8' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  pointer-events:none;
-}
+        canvas {
+            display: block;
+            cursor: none;
+        }
 
-h1.title{
-  font-family:'Fredoka One',cursive;
-  font-size:clamp(3rem,9vw,7.5rem);
-  color:var(--gold);
-  text-shadow:0 0 30px rgba(255,209,102,.45),0 5px 0 rgba(140,90,0,.4);
-  letter-spacing:3px;
-  animation:bounce 2.2s ease-in-out infinite;
-  line-height:1;
-}
-@keyframes bounce{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(6,2,20,0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-size: 13px;
+            font-family: monospace;
+            border-left: 4px solid #ffd166;
+            pointer-events: none;
+            z-index: 100;
+            letter-spacing: 0.5px;
+        }
 
-p.sub{font-size:.8rem;color:#6a4aaa;letter-spacing:8px;text-transform:uppercase;margin:10px 0 28px}
+        .controls-hint span {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 10px;
+            margin: 0 5px;
+            font-weight: bold;
+            color: #ffd166;
+            font-family: monospace;
+            font-size: 14px;
+        }
 
-.kart-strip{width:260px;height:48px;overflow:hidden;position:relative;margin-bottom:22px}
-.kart-anim{position:absolute;font-size:2.8rem;animation:drive 1.8s linear infinite}
-@keyframes drive{from{left:-60px}to{left:280px}}
-
-.panel{
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(123,92,184,.35);
-  border-radius:18px;padding:26px 32px;
-  display:flex;flex-direction:column;gap:14px;
-  min-width:330px;max-width:420px;width:90vw;
-  backdrop-filter:blur(14px);
-  box-shadow:0 0 60px rgba(123,92,184,.12);
-}
-
-label{font-size:.7rem;color:var(--neon);letter-spacing:3px;text-transform:uppercase;margin-bottom:2px;display:block}
-
-input{
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(123,92,184,.4);
-  border-radius:9px;color:#fff;
-  font-family:'Share Tech Mono',monospace;font-size:1rem;
-  padding:10px 14px;outline:none;width:100%;
-  transition:border-color .2s;
-}
-input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(123,92,184,.15)}
-
-.row{display:flex;gap:10px}
-.btn{
-  flex:1;font-family:'Fredoka One',cursive;font-size:1.05rem;letter-spacing:1px;
-  padding:13px 18px;border:none;border-radius:11px;cursor:pointer;
-  transition:transform .12s,box-shadow .2s;position:relative;overflow:hidden;
-}
-.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .15s}
-.btn:hover::after{background:rgba(255,255,255,.08)}
-.btn:active{transform:scale(.95)}
-.btn-host{background:var(--neon);color:#fff;box-shadow:0 0 20px rgba(123,92,184,.45)}
-.btn-join{background:var(--teal);color:#0a0a1a;box-shadow:0 0 20px rgba(6,214,160,.35)}
-.btn-solo{background:linear-gradient(135deg,#ffd166,#f4a261);color:#0a0a1a;box-shadow:0 0 20px rgba(255,209,102,.35)}
-
-#roomInfo{font-size:.82rem;color:var(--teal);text-align:center;min-height:18px;letter-spacing:1px}
-#playerList{font-size:.75rem;color:#888;text-align:center;min-height:16px}
-#credits{font-size:.65rem;color:#333;position:absolute;bottom:14px;letter-spacing:2px}
-
-/* error banner si renderer.js falla */
-#rendererError{
-  display:none;background:#e63946;color:#fff;
-  font-size:.82rem;padding:8px 16px;border-radius:8px;
-  text-align:center;margin-top:6px;
-}
-
-#gameWrap{display:none;position:fixed;inset:0}
-canvas#gc{display:block;width:100%;height:100%}
-
-#minimapCvs{
-  position:fixed;right:12px;top:12px;
-  width:88px;height:88px;border-radius:50%;
-  background:rgba(6,2,20,.9);
-  border:2px solid rgba(123,92,184,.6);
-}
-
-#msgBox{
-  position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
-  background:rgba(6,2,20,.78);border:1px solid rgba(123,92,184,.35);
-  border-radius:9px;padding:7px 18px;font-size:.78rem;color:var(--teal);
-  max-width:360px;text-align:center;pointer-events:none;
-  opacity:0;transition:opacity .35s;white-space:nowrap;
-}
-#msgBox.show{opacity:1}
-
-#ctrlHint{
-  position:fixed;left:12px;bottom:14px;font-size:.62rem;
-  color:rgba(255,255,255,.25);line-height:2;pointer-events:none;
-}
-
-#endScreen{
-  display:none;position:fixed;inset:0;z-index:200;
-  flex-direction:column;align-items:center;justify-content:center;
-  background:rgba(6,2,20,.94);
-  font-family:'Fredoka One',cursive;
-}
-#endScreen h2{font-size:3.8rem;color:var(--gold);text-shadow:0 0 40px rgba(255,209,102,.5);margin-bottom:22px}
-#podium{font-size:1rem;color:#ccc;line-height:2.4;text-align:center;letter-spacing:1px}
-#endScreen .btn-play{
-  margin-top:30px;background:var(--red);color:#fff;
-  font-family:'Fredoka One',cursive;font-size:1.1rem;
-  padding:14px 44px;border:none;border-radius:13px;cursor:pointer;
-  box-shadow:0 0 26px rgba(230,57,70,.45);transition:transform .1s;
-}
-#endScreen .btn-play:hover{transform:scale(1.04)}
-</style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
 </head>
 <body>
-
-<div id="titleScreen">
-  <h1 class="title">🏎️ CLAUDE KART</h1>
-  <p class="sub">by Claude · Anthropic 2026</p>
-
-  <div class="kart-strip">
-    <div class="kart-anim">🏎️</div>
-  </div>
-
-  <div class="panel">
-    <div>
-      <label>Tu nombre de piloto</label>
-      <input id="pName" maxlength="14" placeholder="Ej: Max, Senna, Lewis…"/>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
     </div>
-
-    <div id="joinRow" style="display:none">
-      <label>ID del host (PeerJS ID)</label>
-      <input id="hostIP" placeholder="Pega el ID del host aquí"/>
+    <div class="controls-hint">
+        🎮 <span>← →</span> DIRECCIÓN &nbsp;&nbsp;|&nbsp;&nbsp; 
+        <span>↑</span> ACELERAR &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span>↓</span> FRENAR &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span>␣</span> USAR ITEM
     </div>
+    <script src="renderer.js"></script>
+    <script>
+        // ================================================================
+        //  CLAUDE KART — Lógica principal del juego
+        //  Controles arreglados, cámara desde arriba, animaciones mejoradas
+        // ================================================================
 
-    <div id="rendererError">
-      ⚠️ renderer.js no encontrado. Asegúrate de que ambos archivos estén en la misma carpeta del repo.
-    </div>
-
-    <div id="roomInfo">Elige modo de juego</div>
-    <div id="playerList"></div>
-
-    <div class="row">
-      <button class="btn btn-host" id="btnHost">🖥️ Hostear</button>
-      <button class="btn btn-join" id="btnJoin">📡 Unirse</button>
-    </div>
-    <button class="btn btn-solo" id="btnSolo">🤖 Solo vs IA</button>
-  </div>
-
-  <p id="credits">CLAUDE KART v1.0 — claude.ai</p>
-</div>
-
-<div id="gameWrap">
-  <canvas id="gc"></canvas>
-  <canvas id="minimapCvs" width="88" height="88"></canvas>
-</div>
-
-<div id="msgBox"></div>
-<div id="ctrlHint">
-  ↑ / W &nbsp;Acelerar<br>
-  ↓ / S &nbsp;Frenar<br>
-  ← / A &nbsp;Izquierda<br>
-  → / D &nbsp;Derecha<br>
-  SHIFT &nbsp;Nitro<br>
-  SPACE &nbsp;Item
-</div>
-
-<div id="endScreen">
-  <h2>🏆 FIN DE CARRERA</h2>
-  <div id="podium"></div>
-  <button class="btn-play" onclick="location.reload()">🔄 Jugar de nuevo</button>
-</div>
-
-<script>
-// ── Verificar que renderer.js cargó correctamente ─────────────
-window.addEventListener('load', () => {
-  if (typeof Renderer === 'undefined') {
-    document.getElementById('rendererError').style.display = 'block';
-    console.error('ERROR: renderer.js no se cargó. Verifica que el archivo existe en la misma carpeta que game.html y se llama exactamente "renderer.js"');
-  }
-});
-
-// ── Cargar PeerJS dinámicamente ─────────────────────────────────
-(()=>{
-  const s=document.createElement('script');
-  s.src='https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js';
-  document.head.appendChild(s);
-})();
-
-// ════════ CONFIG ════════════════════════════════════════════════
-const MAX_LAPS = 3;
-const AI_COUNT = 3;
-const TICK      = 1/60;
-
-// ════════ ESTADO ════════════════════════════════════════════════
-let myName='Piloto', myId=0, myColor=0;
-let players=[];
-let localP=null;
-let frame=0, raceStarted=false, countdown=4.5, cdTimer=0;
-let gameMode='solo';
-let peer=null, conns=[];
-let msgTimeout=null;
-
-// ════════ PISTA ════════════════════════════════════════════════
-const TRACK_PTS = (()=>{
-  const pts=[];
-  const N=140;
-  for(let i=0;i<N;i++){
-    const t=i/N*Math.PI*2;
-    const x=Math.cos(t)*90+Math.sin(t*2)*14+Math.sin(t*3)*5;
-    const z=Math.sin(t)*130+Math.cos(t*2)*18+Math.cos(t*4)*4;
-    pts.push({x,z});
-  }
-  return pts;
-})();
-
-function trackAt(prog){
-  const t=((prog%1)+1)%1;
-  const i=t*TRACK_PTS.length|0;
-  const j=(i+1)%TRACK_PTS.length;
-  const f=t*TRACK_PTS.length-i;
-  return {x:TRACK_PTS[i].x+(TRACK_PTS[j].x-TRACK_PTS[i].x)*f,
-          z:TRACK_PTS[i].z+(TRACK_PTS[j].z-TRACK_PTS[i].z)*f};
-}
-function trackAngle(prog){
-  const a=trackAt(prog), b=trackAt((prog+.006)%1);
-  return Math.atan2(b.x-a.x,b.z-a.z);
-}
-function nearestProgress(x,z){
-  let best=0,bestD=Infinity;
-  for(let i=0;i<TRACK_PTS.length;i++){
-    const d=Math.hypot(TRACK_PTS[i].x-x,TRACK_PTS[i].z-z);
-    if(d<bestD){bestD=d;best=i;}
-  }
-  return best/TRACK_PTS.length;
-}
-
-// ════════ CANVAS ════════════════════════════════════════════════
-const canvas=document.getElementById('gc');
-const ctx=canvas.getContext('2d');
-const mmCvs=document.getElementById('minimapCvs');
-const mmCtx=mmCvs.getContext('2d');
-
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-window.addEventListener('resize',resize); resize();
-
-// ════════ INPUT ═════════════════════════════════════════════════
-const keys={};
-window.addEventListener('keydown',e=>{
-  keys[e.code]=true;
-  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
-});
-window.addEventListener('keyup',e=>{keys[e.code]=false;});
-
-// ════════ ITEMS ═════════════════════════════════════════════════
-const ITEMS=['🍄','⭐','🐢','💥','🔵','🌶️'];
-
-function giveItem(p){
-  if(!p.item) p.item=ITEMS[Math.random()*ITEMS.length|0];
-}
-
-function fireItem(p){
-  if(!p.item)return;
-  const it=p.item; p.item=null;
-  showMsg(`${p.name} usó ${it}!`);
-  if(it==='🍄'){ p.speed+=4; }
-  if(it==='⭐'){ p.star=240; }
-  if(it==='🌶️'){ p.nitro=Math.min((p.nitro||0)+.5,1); }
-  if(['🐢','💥','🔵'].includes(it)){
-    const target=players.filter(q=>q.id!==p.id&&!q.finished)
-      .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0];
-    if(target){
-      target.stunned=90; target.speed*=.15;
-      showMsg(`💫 ${target.name} fue golpeado!`);
-    }
-  }
-  broadcast();
-}
-
-// ════════ PLAYERS ════════════════════════════════════════════════
-function makePlayer(id,name,colorIdx,isAI=false){
-  const prog=.025*id;
-  const pos=trackAt(prog);
-  return {
-    id,name,colorIdx,isAI,
-    x:pos.x,z:pos.z,
-    angle:trackAngle(prog),
-    speed:0,
-    nitro:.7,
-    lap:1,
-    prog:prog,
-    prevProg:prog,
-    item:null,star:0,stunned:0,
-    finished:false,finishRank:0,finishFrame:0,
-    pos:1,
-  };
-}
-
-function calcPositions(){
-  const running=players.filter(p=>!p.finished);
-  running.sort((a,b)=>{
-    const la=a.lap+(a.prog>.5?a.prog-.5:a.prog+.5);
-    const lb=b.lap+(b.prog>.5?b.prog-.5:b.prog+.5);
-    return lb-la;
-  });
-  running.forEach((p,i)=>p.pos=i+1);
-  players.filter(p=>p.finished).forEach(p=>p.pos=p.finishRank);
-}
-
-// ════════ IA ════════════════════════════════════════════════════
-function updateAI(p,dt){
-  if(p.stunned>0){p.stunned--;return;}
-  const ahead=trackAt((p.prog+.02)%1);
-  const desired=Math.atan2(ahead.x-p.x, ahead.z-p.z);
-  let da=desired-p.angle;
-  while(da>Math.PI)da-=Math.PI*2;
-  while(da<-Math.PI)da+=Math.PI*2;
-  p.angle+=Math.sign(da)*Math.min(Math.abs(da),.072);
-  const maxSpd=3.6+Math.random()*.5;
-  p.speed+=(maxSpd-p.speed)*.042;
-  if(Math.random()<.004) giveItem(p);
-  if(p.item&&Math.random()<.018) fireItem(p);
-  movePlayer(p,dt);
-}
-
-// ════════ MOVER ═════════════════════════════════════════════════
-function movePlayer(p,dt){
-  if(p.finished)return;
-  const boost=(p.star>0)?1.45:1;
-  p.x+=Math.sin(p.angle)*p.speed*dt*boost;
-  p.z+=Math.cos(p.angle)*p.speed*dt*boost;
-  p.speed*=.965;
-  if(p.star>0)p.star--;
-
-  const np=nearestProgress(p.x,p.z);
-  if(p.prevProg>.88&&np<.12){ p.lap++; checkFinish(p); }
-  if(p.prevProg<.12&&np>.88&&p.lap>1){ p.lap--; }
-  p.prevProg=p.prog; p.prog=np;
-
-  if(p.id===myId&&p.speed>2)
-    Renderer.spawnDust(canvas.width/2+20*(Math.random()-.5), canvas.height*.78+10*(Math.random()-.5), p.speed*.3);
-}
-
-function checkFinish(p){
-  if(p.lap>MAX_LAPS&&!p.finished){
-    p.finished=true;
-    p.finishRank=players.filter(q=>q.finished).length;
-    p.finishFrame=frame;
-    showMsg(`🏁 ${p.name} terminó en posición ${p.finishRank}!`);
-    if(p.id===myId) setTimeout(showEnd,2200);
-  }
-}
-
-// ════════ LOCAL UPDATE ══════════════════════════════════════════
-function updateLocal(p,dt){
-  if(!raceStarted||p.stunned>0){ if(p.stunned>0)p.stunned--; return; }
-  if(p.finished)return;
-
-  const accel=keys['ArrowUp']||keys['KeyW'];
-  const brake=keys['ArrowDown']||keys['KeyS'];
-  const left =keys['ArrowLeft']||keys['KeyA'];
-  const right=keys['ArrowRight']||keys['KeyD'];
-  const nitro=keys['ShiftLeft']||keys['ShiftRight'];
-
-  if(left)  p.angle-=(.04+p.speed*.006);
-  if(right) p.angle+=(.04+p.speed*.006);
-  if(accel) p.speed=Math.min(p.speed+.18, nitro&&p.nitro>.05?6:4.8);
-  if(brake) p.speed=Math.max(p.speed-.14,-1.5);
-  if(nitro&&p.nitro>0&&accel){ p.nitro=Math.max(0,p.nitro-.008); }
-  if(!accel&&!brake) p.speed*=.97;
-  p.speed=Math.max(p.speed,-1.5);
-
-  if(keys['Space']){ keys['Space']=false; fireItem(p); }
-
-  movePlayer(p,dt);
-  broadcast();
-}
-
-// ════════ RENDER ════════════════════════════════════════════════
-let lastTime=0;
-function loop(ts){
-  requestAnimationFrame(loop);
-  const dt=Math.min((ts-lastTime)/1000,.05); lastTime=ts;
-  const W=canvas.width, H=canvas.height;
-  ctx.clearRect(0,0,W,H);
-  if(!localP)return;
-
-  frame++;
-
-  if(!raceStarted){
-    cdTimer+=dt;
-    countdown=Math.max(0,4.5-cdTimer);
-    if(cdTimer>4.5) raceStarted=true;
-  }
-
-  if(raceStarted) players.filter(p=>p.isAI).forEach(p=>updateAI(p,dt));
-  updateLocal(localP,dt);
-  calcPositions();
-
-  const camAngle=localP.angle+Math.PI;
-  Renderer.drawSky(ctx,W,H,frame);
-  Renderer.drawGround(ctx,W,H,localP.x,localP.z,camAngle);
-  Renderer.updateParticles(ctx);
-
-  // sprites de otros jugadores
-  players.filter(p=>p.id!==myId).forEach(p=>{
-    const dx=p.x-localP.x, dz=p.z-localP.z;
-    const dist=Math.hypot(dx,dz);
-    if(dist>80)return;
-
-    const sinC=Math.sin(-camAngle), cosC=Math.cos(-camAngle);
-    const rx=dx*cosC-dz*sinC;
-    const rz=dx*sinC+dz*cosC;
-    if(rz<.5)return;
-
-    const hY=H*Renderer.HORIZON;
-    const scale=Math.max(.2,Math.min(2, Renderer.CAMERA_H*H/(rz*18)));
-    const sx=W/2+(rx/rz)*W*.55;
-    const sy=hY+(Renderer.CAMERA_H/(rz))*H*.62;
-    if(sx<-80||sx>W+80||sy>H+60)return;
-    Renderer.drawKartSprite(ctx,sx,sy,scale,p.colorIdx,p.name,false,frame,p.star>0);
-  });
-
-  Renderer.drawHUD(ctx,W,H,{
-    speed:localP.speed,
-    lap:Math.min(localP.lap,MAX_LAPS),
-    maxLaps:MAX_LAPS,
-    pos:localP.pos||1,
-    total:players.length,
-    item:localP.item,
-    name:myName,
-    countdown:raceStarted?0:countdown,
-    nitro:localP.nitro,
-  });
-
-  Renderer.drawMinimap(mmCtx,88,88,TRACK_PTS,players,myId);
-}
-
-// ════════ NETWORK ════════════════════════════════════════════════
-function broadcast(){
-  if(!localP||conns.length===0)return;
-  const state={
-    id:localP.id,x:localP.x,z:localP.z,angle:localP.angle,
-    speed:localP.speed,lap:localP.lap,prog:localP.prog,
-    item:localP.item,star:localP.star,finished:localP.finished,finishRank:localP.finishRank
-  };
-  conns.forEach(c=>{try{c.send(JSON.stringify(state));}catch(_){}});
-}
-
-function onRemoteData(data){
-  try{
-    const s=typeof data==='string'?JSON.parse(data):data;
-    const p=players.find(q=>q.id===s.id);
-    if(p) Object.assign(p,s);
-  }catch(_){}
-}
-
-function setupHost(name){
-  peer=new Peer(undefined,{debug:0});
-  peer.on('open',id=>{
-    setInfo(`🟢 Tu ID: ${id}`);
-    setPlayers(`Esperando jugadores… (comparte tu ID)`);
-  });
-  peer.on('connection',conn=>{
-    conns.push(conn);
-    conn.on('data',onRemoteData);
-    conn.on('open',()=>{
-      const newId=players.length;
-      const rp=makePlayer(newId,`P${newId+1}`,newId,false);
-      players.push(rp);
-      setPlayers(`${players.length} jugador(es) conectado(s)`);
-      conn.send(JSON.stringify({type:'init',playerId:newId,players:players.map(p=>({
-        id:p.id,name:p.name,colorIdx:p.colorIdx,x:p.x,z:p.z,angle:p.angle,isAI:p.isAI
-      }))}));
-    });
-  });
-}
-
-function setupJoin(hostId,name){
-  peer=new Peer(undefined,{debug:0});
-  peer.on('open',()=>{
-    setInfo('Conectando…');
-    const conn=peer.connect(hostId,{reliable:true});
-    conns.push(conn);
-    conn.on('open',()=>setInfo('✅ Conectado!'));
-    conn.on('data',data=>{
-      try{
-        const msg=typeof data==='string'?JSON.parse(data):data;
-        if(msg.type==='init'){
-          myId=msg.playerId;
-          players=msg.players.map(p=>makePlayer(p.id,p.name,p.colorIdx,p.isAI));
-          localP=players.find(p=>p.id===myId);
-          if(localP) localP.name=name;
-          startGame();
-        } else { onRemoteData(data); }
-      }catch(_){}
-    });
-  });
-}
-
-// ════════ START GAME ════════════════════════════════════════════
-function startGame(){
-  document.getElementById('titleScreen').style.display='none';
-  document.getElementById('gameWrap').style.display='block';
-  if(!localP&&players.length>0) localP=players.find(p=>p.id===myId);
-  if(!localP){ localP=players[0]; myId=0; }
-  raceStarted=false; countdown=4.5; cdTimer=0;
-  lastTime=performance.now();
-  requestAnimationFrame(loop);
-}
-
-function startSolo(name){
-  myId=0; myName=name; myColor=0;
-  players=[];
-  players.push(makePlayer(0,name,0,false));
-  const aiNames=['Luigi','Toad','Yoshi','Waluigi','Peach'];
-  for(let i=1;i<=AI_COUNT;i++){
-    players.push(makePlayer(i,aiNames[i-1]||`Bot${i}`,i,true));
-  }
-  localP=players[0];
-  startGame();
-}
-
-// ════════ FINAL ═════════════════════════════════════════════════
-function showEnd(){
-  const end=document.getElementById('endScreen');
-  end.style.display='flex';
-  const sorted=[...players].sort((a,b)=>(a.finishRank||99)-(b.finishRank||99));
-  const medals=['🥇','🥈','🥉'];
-  document.getElementById('podium').innerHTML=sorted.map((p,i)=>
-    `${medals[i]||`${i+1}.`} &nbsp;<span style="color:${Renderer.KART_COLORS[p.colorIdx%6]}">${p.name}</span>`
-  ).join('<br>');
-}
-
-// ════════ MENSAJES ══════════════════════════════════════════════
-function showMsg(txt){
-  const el=document.getElementById('msgBox');
-  el.textContent=txt; el.classList.add('show');
-  clearTimeout(msgTimeout);
-  msgTimeout=setTimeout(()=>el.classList.remove('show'),2800);
-}
-function setInfo(t){document.getElementById('roomInfo').textContent=t;}
-function setPlayers(t){document.getElementById('playerList').textContent=t;}
-
-// ════════ UI EVENTOS ════════════════════════════════════════════
-document.getElementById('btnSolo').addEventListener('click',()=>{
-  if(typeof Renderer==='undefined'){
-    setInfo('⚠️ Error: renderer.js no cargó. Verifica el repo.');
-    return;
-  }
-  const name=document.getElementById('pName').value.trim()||'Piloto';
-  myName=name;
-  startSolo(name);
-});
-
-document.getElementById('btnHost').addEventListener('click',()=>{
-  if(typeof Renderer==='undefined'){ setInfo('⚠️ Error: renderer.js no cargó.'); return; }
-  const name=document.getElementById('pName').value.trim()||'Host';
-  myName=name; myId=0; myColor=0; gameMode='host';
-  players=[];
-  players.push(makePlayer(0,name,0,false));
-  localP=players[0];
-  document.getElementById('joinRow').style.display='none';
-  setInfo('Iniciando servidor…');
-  const waitPeer=setInterval(()=>{
-    if(typeof Peer!=='undefined'){
-      clearInterval(waitPeer);
-      setupHost(name);
-      const br=document.createElement('button');
-      br.className='btn btn-solo'; br.style.marginTop='8px';
-      br.textContent='▶ Iniciar carrera';
-      br.onclick=()=>{
-        if(players.length===1){
-          const aiNames=['Luigi','Toad','Yoshi'];
-          for(let i=0;i<AI_COUNT;i++) players.push(makePlayer(i+1,aiNames[i],i+1,true));
+        class ClaudeKart {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // Cámara (vista desde arriba siguiendo al jugador)
+                this.camX = 0;
+                this.camZ = 0;
+                this.camAngle = 0;
+                
+                // Estado del juego
+                this.gameState = 'countdown'; // countdown, racing, finished
+                this.countdown = 4;
+                this.frame = 0;
+                this.lastTime = 0;
+                
+                // Pista
+                this.trackPoints = this.generateTrack();
+                
+                // Jugadores
+                this.players = [];
+                this.localPlayerId = 'local';
+                this.maxLaps = 3;
+                
+                // Items disponibles
+                this.availableItems = ['🍄', '⚡', '⭐', '🛡️'];
+                
+                // Controles (ARREGLADOS)
+                this.keys = {
+                    ArrowUp: false,
+                    ArrowDown: false,
+                    ArrowLeft: false,
+                    ArrowRight: false,
+                    Space: false
+                };
+                
+                // Efectos visuales
+                this.screenShake = 0;
+                this.flashAlpha = 0;
+                this.floatingTexts = [];
+                
+                this.init();
+            }
+            
+            generateTrack() {
+                // Circuito ovalado más suave
+                const points = [];
+                const segments = 100;
+                
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
+                    const angle = t * Math.PI * 2;
+                    
+                    // Óvalo con ligeras variaciones
+                    let x = Math.cos(angle) * 42;
+                    let z = Math.sin(angle) * 32;
+                    
+                    // Añadir algunas curvas para hacerlo interesante
+                    x += Math.sin(angle * 2) * 3;
+                    z += Math.cos(angle * 1.5) * 2;
+                    
+                    points.push({ x, z });
+                }
+                
+                return points;
+            }
+            
+            init() {
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                window.addEventListener('keyup', (e) => this.handleKeyUp(e));
+                
+                // Crear jugadores
+                this.players = [
+                    { id: 'local', name: 'YOU', x: 0, z: 0, angle: 0, speed: 0, lap: 1, checkpointIdx: 0, item: null, nitro: 0, color: 0, ai: false, totalTime: 0 },
+                    { id: 'ai1', name: 'BLAZE', x: 0, z: 0, angle: 0.5, speed: 0, lap: 1, checkpointIdx: 0, item: null, nitro: 0, color: 1, ai: true, aiTarget: 0 },
+                    { id: 'ai2', name: 'SHADOW', x: 0, z: 0, angle: 1, speed: 0, lap: 1, checkpointIdx: 0, item: null, nitro: 0, color: 2, ai: true, aiTarget: 0 },
+                    { id: 'ai3', name: 'NOVA', x: 0, z: 0, angle: 1.5, speed: 0, lap: 1, checkpointIdx: 0, item: null, nitro: 0, color: 4, ai: true, aiTarget: 0 },
+                    { id: 'ai4', name: 'RAPID', x: 0, z: 0, angle: 2, speed: 0, lap: 1, checkpointIdx: 0, item: null, nitro: 0, color: 5, ai: true, aiTarget: 0 }
+                ];
+                
+                // Posicionar en la pista
+                this.players.forEach((p, idx) => {
+                    const offset = idx * 0.25;
+                    const pos = this.getTrackPoint(offset);
+                    p.x = pos.x;
+                    p.z = pos.z;
+                    p.angle = pos.angle;
+                });
+                
+                this.animate();
+            }
+            
+            getTrackPoint(distance) {
+                const total = this.trackPoints.length;
+                let idx = Math.floor(distance * total) % total;
+                let nextIdx = (idx + 1) % total;
+                
+                const p1 = this.trackPoints[idx];
+                const p2 = this.trackPoints[nextIdx];
+                const t = (distance * total) % 1;
+                
+                const x = p1.x + (p2.x - p1.x) * t;
+                const z = p1.z + (p2.z - p1.z) * t;
+                const angle = Math.atan2(p2.z - p1.z, p2.x - p1.x);
+                
+                return { x, z, angle };
+            }
+            
+            updateTrackPosition(player) {
+                let bestDist = Infinity;
+                let bestAngle = player.angle;
+                let bestIdx = 0;
+                
+                // Encontrar el punto más cercano en la pista
+                for (let i = 0; i < this.trackPoints.length; i++) {
+                    const p = this.trackPoints[i];
+                    const dx = p.x - player.x;
+                    const dz = p.z - player.z;
+                    const dist = dx * dx + dz * dz;
+                    
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestIdx = i;
+                    }
+                }
+                
+                // Calcular progreso en la vuelta
+                const nextIdx = (bestIdx + 1) % this.trackPoints.length;
+                const p1 = this.trackPoints[bestIdx];
+                const p2 = this.trackPoints[nextIdx];
+                
+                const dx = p2.x - p1.x;
+                const dz = p2.z - p1.z;
+                const len = Math.hypot(dx, dz);
+                
+                if (len > 0.01) {
+                    const px = player.x - p1.x;
+                    const pz = player.z - p1.z;
+                    const t = (px * dx + pz * dz) / (len * len);
+                    const clampedT = Math.max(0, Math.min(1, t));
+                    
+                    // Ángulo de la pista
+                    const trackAngle = Math.atan2(dz, dx);
+                    bestAngle = trackAngle;
+                    
+                    // Progreso total
+                    player.progress = bestIdx / this.trackPoints.length + clampedT / this.trackPoints.length;
+                    
+                    // Control de vueltas
+                    if (player.lastProgress !== undefined && player.progress < player.lastProgress - 0.5) {
+                        player.lap++;
+                        if (player.id === 'local') {
+                            Renderer.spawnDust(player.x, player.z, 3, '#ffd166');
+                            this.addFloatingText(player.x, player.z, `LAP ${player.lap}/${this.maxLaps}`, '#ffd166');
+                        }
+                        if (player.lap > this.maxLaps) {
+                            this.gameState = 'finished';
+                        }
+                    }
+                    player.lastProgress = player.progress;
+                }
+                
+                return bestAngle;
+            }
+            
+            addFloatingText(x, z, text, color) {
+                this.floatingTexts.push({
+                    x, z, text, color,
+                    life: 1,
+                    offsetY: 0
+                });
+            }
+            
+            handleKeyDown(e) {
+                if (e.key === ' ' || e.key === 'Space') {
+                    e.preventDefault();
+                    if (!this.keys.Space) {
+                        this.keys.Space = true;
+                        this.useItem();
+                    }
+                    return;
+                }
+                
+                const keyMap = {
+                    'ArrowUp': 'ArrowUp',
+                    'ArrowDown': 'ArrowDown', 
+                    'ArrowLeft': 'ArrowLeft',
+                    'ArrowRight': 'ArrowRight'
+                };
+                
+                if (keyMap[e.key]) {
+                    this.keys[e.key] = true;
+                    e.preventDefault();
+                }
+            }
+            
+            handleKeyUp(e) {
+                if (e.key === ' ' || e.key === 'Space') {
+                    this.keys.Space = false;
+                    return;
+                }
+                
+                const keyMap = {
+                    'ArrowUp': 'ArrowUp',
+                    'ArrowDown': 'ArrowDown',
+                    'ArrowLeft': 'ArrowLeft', 
+                    'ArrowRight': 'ArrowRight'
+                };
+                
+                if (keyMap[e.key]) {
+                    this.keys[e.key] = false;
+                    e.preventDefault();
+                }
+            }
+            
+            useItem() {
+                const player = this.players.find(p => p.id === 'local');
+                if (!player || !player.item || this.gameState !== 'racing') return;
+                
+                // Efecto visual de lanzamiento
+                this.screenShake = 10;
+                this.flashAlpha = 0.7;
+                
+                // Animación de partículas
+                Renderer.spawnItemEffect(player.x, player.z, player.item);
+                
+                // Efecto según item
+                if (player.item === '🍄') {
+                    player.speed = Math.min(player.speed + 7, 28);
+                    player.nitro = Math.min(1, player.nitro + 0.25);
+                    this.addFloatingText(player.x, player.z, '🍄 BOOST!', '#06d6a0');
+                } else if (player.item === '⚡') {
+                    // Golpear a oponentes cercanos
+                    this.players.forEach(p => {
+                        if (p.id !== 'local') {
+                            const dx = p.x - player.x;
+                            const dz = p.z - player.z;
+                            const dist = Math.hypot(dx, dz);
+                            if (dist < 10) {
+                                p.speed = Math.max(p.speed - 6, 0);
+                                Renderer.spawnItemEffect(p.x, p.z, '⚡');
+                                this.addFloatingText(p.x, p.z, '⚡ ZAP!', '#ff6b6b');
+                            }
+                        }
+                    });
+                } else if (player.item === '⭐') {
+                    player.speed = Math.min(player.speed + 4, 26);
+                    this.addFloatingText(player.x, player.z, '⭐ STAR POWER!', '#ffd166');
+                }
+                
+                player.item = null;
+                this.addFloatingText(player.x, player.z, '✨ ITEM USED!', '#ffd166');
+            }
+            
+            updatePlayerMovement(player, dt, isLocal) {
+                const turnSpeed = 3.5 * dt;
+                const acceleration = 18 * dt;
+                const brakeForce = 22 * dt;
+                const friction = 5 * dt;
+                
+                let steer = 0;
+                let accel = 0;
+                
+                if (isLocal) {
+                    // CONTROLES ARREGLADOS
+                    if (this.keys.ArrowLeft) steer = -1;
+                    if (this.keys.ArrowRight) steer = 1;
+                    if (this.keys.ArrowUp) accel = 1;
+                    if (this.keys.ArrowDown) accel = -0.7;
+                } else {
+                    // IA básica
+                    const targetAngle = this.updateTrackPosition(player);
+                    let angleDiff = targetAngle - player.angle;
+                    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                    steer = Math.max(-1, Math.min(1, angleDiff * 1.5));
+                    accel = 0.8 + Math.random() * 0.3;
+                }
+                
+                // Aplicar dirección
+                if (player.speed > 0.5) {
+                    player.angle += steer * turnSpeed * (player.speed / 15);
+                } else if (player.speed < -0.5) {
+                    player.angle -= steer * turnSpeed * 0.5;
+                }
+                
+                // Aplicar aceleración/freno
+                if (accel > 0) {
+                    player.speed += acceleration * accel;
+                    if (player.speed > 26) player.speed = 26;
+                    
+                    // Partículas al acelerar
+                    if (isLocal && Math.random() < 0.3) {
+                        Renderer.spawnDust(player.x, player.z, player.speed / 8, '#ffd166');
+                    }
+                } else if (accel < 0) {
+                    player.speed += brakeForce * accel;
+                    if (player.speed < -8) player.speed = -8;
+                } else {
+                    player.speed -= friction * Math.sign(player.speed);
+                    if (Math.abs(player.speed) < 0.2) player.speed = 0;
+                }
+                
+                // Mover
+                const moveX = Math.cos(player.angle) * player.speed * dt;
+                const moveZ = Math.sin(player.angle) * player.speed * dt;
+                
+                let newX = player.x + moveX;
+                let newZ = player.z + moveZ;
+                
+                // Verificar límites de pista
+                let onTrack = false;
+                for (const p of this.trackPoints) {
+                    const dx = p.x - newX;
+                    const dz = p.z - newZ;
+                    if (Math.hypot(dx, dz) < 8) {
+                        onTrack = true;
+                        break;
+                    }
+                }
+                
+                if (onTrack || Math.abs(player.speed) < 2) {
+                    player.x = newX;
+                    player.z = newZ;
+                } else {
+                    player.speed *= 0.5;
+                }
+                
+                // Recoger items aleatorios
+                if (isLocal && Math.random() < 0.005 && !player.item && this.gameState === 'racing') {
+                    player.item = this.availableItems[Math.floor(Math.random() * this.availableItems.length)];
+                    this.addFloatingText(player.x, player.z, `📦 ${player.item}`, '#06d6a0');
+                }
+                
+                // Regenerar nitro
+                if (player.nitro < 1) {
+                    player.nitro = Math.min(1, player.nitro + dt * 0.15);
+                }
+            }
+            
+            updateRankings() {
+                // Ordenar por vuelta y progreso
+                this.players.sort((a, b) => {
+                    if (a.lap !== b.lap) return b.lap - a.lap;
+                    return (b.progress || 0) - (a.progress || 0);
+                });
+                
+                this.players.forEach((p, idx) => {
+                    p.position = idx + 1;
+                });
+            }
+            
+            resize() {
+                const size = Math.min(window.innerWidth - 40, window.innerHeight - 40, 1300);
+                this.canvas.width = size;
+                this.canvas.height = size * 0.7;
+                this.canvas.style.width = `${size}px`;
+                this.canvas.style.height = `${size * 0.7}px`;
+            }
+            
+            update(dt) {
+                dt = Math.min(dt, 0.033);
+                this.frame++;
+                
+                // Countdown
+                if (this.gameState === 'countdown') {
+                    this.countdown -= dt;
+                    if (this.countdown <= 0) {
+                        this.gameState = 'racing';
+                        this.countdown = 0;
+                    }
+                }
+                
+                // Actualizar jugadores
+                this.players.forEach(player => {
+                    this.updatePlayerMovement(player, dt, player.id === 'local');
+                    this.updateTrackPosition(player);
+                });
+                
+                this.updateRankings();
+                
+                // Efectos visuales
+                if (this.screenShake > 0) this.screenShake -= dt * 30;
+                if (this.flashAlpha > 0) this.flashAlpha -= dt * 2;
+                
+                // Textos flotantes
+                for (let i = this.floatingTexts.length-1; i >= 0; i--) {
+                    this.floatingTexts[i].life -= dt * 1.5;
+                    this.floatingTexts[i].offsetY -= dt * 30;
+                    if (this.floatingTexts[i].life <= 0) {
+                        this.floatingTexts.splice(i, 1);
+                    }
+                }
+                
+                // Actualizar cámara (sigue al jugador local)
+                const localPlayer = this.players.find(p => p.id === 'local');
+                if (localPlayer) {
+                    this.camX = localPlayer.x;
+                    this.camZ = localPlayer.z;
+                    this.camAngle = localPlayer.angle;
+                }
+                
+                // Actualizar partículas del renderer
+                Renderer.updateParticles(this.ctx, this.camX, this.camZ);
+            }
+            
+            render() {
+                const W = this.canvas.width;
+                const H = this.canvas.height;
+                
+                // Aplicar screen shake
+                let shakeX = 0, shakeY = 0;
+                if (this.screenShake > 0) {
+                    shakeX = (Math.random() - 0.5) * this.screenShake;
+                    shakeY = (Math.random() - 0.5) * this.screenShake;
+                }
+                
+                this.ctx.save();
+                this.ctx.translate(shakeX, shakeY);
+                
+                // Renderizar mundo 3D
+                Renderer.drawSky(this.ctx, W, H, this.frame);
+                Renderer.drawGround(this.ctx, W, H, this.camX, this.camZ, this.camAngle);
+                
+                // Renderizar karts
+                const scale = 35;
+                for (const player of this.players) {
+                    const isLocal = player.id === 'local';
+                    const screenX = W/2 + (player.x - this.camX) * scale;
+                    const screenY = H/2 + (player.z - this.camZ) * scale;
+                    
+                    if (screenX > -100 && screenX < W+100 && screenY > -100 && screenY < H+100) {
+                        const kartScale = 0.45;
+                        Renderer.drawKartSprite(
+                            this.ctx, screenX, screenY, kartScale,
+                            player.color, player.name, isLocal,
+                            this.frame * 0.02, player.position === 1
+                        );
+                    }
+                }
+                
+                // Renderizar partículas
+                Renderer.drawParticles(this.ctx, this.camX, this.camZ, W, H, scale);
+                
+                // Renderizar textos flotantes
+                for (const txt of this.floatingTexts) {
+                    const screenX = W/2 + (txt.x - this.camX) * scale;
+                    const screenY = H/2 + (txt.z - this.camZ) * scale + txt.offsetY;
+                    if (screenX > 0 && screenX < W && screenY > 0 && screenY < H) {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = txt.life;
+                        this.ctx.font = `bold ${20 * txt.life}px 'Fredoka One', cursive`;
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillStyle = txt.color;
+                        this.ctx.shadowBlur = 8;
+                        this.ctx.shadowColor = '#000';
+                        this.ctx.fillText(txt.text, screenX, screenY);
+                        this.ctx.restore();
+                    }
+                }
+                
+                // Flash effect
+                if (this.flashAlpha > 0) {
+                    this.ctx.fillStyle = `rgba(255,255,200,${this.flashAlpha * 0.5})`;
+                    this.ctx.fillRect(0, 0, W, H);
+                }
+                
+                // HUD
+                const localPlayer = this.players.find(p => p.id === 'local');
+                if (localPlayer) {
+                    Renderer.drawHUD(this.ctx, W, H, {
+                        speed: Math.abs(localPlayer.speed),
+                        lap: localPlayer.lap,
+                        maxLaps: this.maxLaps,
+                        pos: localPlayer.position,
+                        total: this.players.length,
+                        item: localPlayer.item,
+                        name: localPlayer.name,
+                        countdown: this.gameState === 'countdown' ? this.countdown : 0,
+                        nitro: localPlayer.nitro
+                    });
+                }
+                
+                // Minimapa
+                const mmSize = 140;
+                const mmCanvas = document.createElement('canvas');
+                mmCanvas.width = mmSize;
+                mmCanvas.height = mmSize;
+                const mmCtx = mmCanvas.getContext('2d');
+                Renderer.drawMinimap(mmCtx, mmSize, mmSize, this.trackPoints, this.players, this.localPlayerId, this.frame);
+                this.ctx.drawImage(mmCanvas, W - mmSize - 15, 15, mmSize, mmSize);
+                
+                this.ctx.restore();
+            }
+            
+            animate() {
+                const now = performance.now();
+                let dt = 0.016;
+                if (this.lastTime) {
+                    dt = Math.min(0.033, (now - this.lastTime) / 1000);
+                }
+                this.lastTime = now;
+                
+                this.update(dt);
+                this.render();
+                
+                requestAnimationFrame(() => this.animate());
+            }
         }
-        startGame();
-      };
-      document.querySelector('.panel').appendChild(br);
-    }
-  },200);
-});
-
-document.getElementById('btnJoin').addEventListener('click',()=>{
-  const jRow=document.getElementById('joinRow');
-  if(jRow.style.display==='none'){
-    jRow.style.display='block';
-    setInfo('Ingresa el ID del host y presiona Conectar');
-    document.getElementById('btnJoin').textContent='✅ Conectar';
-  } else {
-    const hostId=document.getElementById('hostIP').value.trim();
-    if(!hostId){ setInfo('⚠ Ingresa el ID del host'); return; }
-    const name=document.getElementById('pName').value.trim()||'Piloto';
-    myName=name; gameMode='join';
-    const waitPeer=setInterval(()=>{
-      if(typeof Peer!=='undefined'){ clearInterval(waitPeer); setupJoin(hostId,name); }
-    },200);
-  }
-});
-
-document.getElementById('pName').addEventListener('keydown',e=>{
-  if(e.key==='Enter') document.getElementById('btnSolo').click();
-});
-</script>
+        
+        // Iniciar juego
+        window.addEventListener('load', () => {
+            new ClaudeKart();
+        });
+    </script>
 </body>
 </html>
