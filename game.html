@@ -6,7 +6,7 @@
 <title>Claude Kart 🏎️</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 
-<!-- renderer.js debe estar en la misma carpeta (mismo repo) -->
+<!-- ✅ CORREGIDO: nombre exacto del archivo renderer.js -->
 <script src="renderer.js"></script>
 
 <style>
@@ -17,7 +17,6 @@
 }
 html,body{background:var(--bg);color:#fff;font-family:'Share Tech Mono',monospace;overflow:hidden;height:100vh;width:100vw}
 
-/* ══ TÍTULO ══════════════════════════════════════════════ */
 #titleScreen{
   position:fixed;inset:0;z-index:100;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
@@ -42,12 +41,10 @@ h1.title{
 
 p.sub{font-size:.8rem;color:#6a4aaa;letter-spacing:8px;text-transform:uppercase;margin:10px 0 28px}
 
-/* kart animado */
 .kart-strip{width:260px;height:48px;overflow:hidden;position:relative;margin-bottom:22px}
 .kart-anim{position:absolute;font-size:2.8rem;animation:drive 1.8s linear infinite}
 @keyframes drive{from{left:-60px}to{left:280px}}
 
-/* panel */
 .panel{
   background:rgba(255,255,255,.04);
   border:1px solid rgba(123,92,184,.35);
@@ -85,10 +82,15 @@ input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(123,92,184,.15)}
 
 #roomInfo{font-size:.82rem;color:var(--teal);text-align:center;min-height:18px;letter-spacing:1px}
 #playerList{font-size:.75rem;color:#888;text-align:center;min-height:16px}
-
 #credits{font-size:.65rem;color:#333;position:absolute;bottom:14px;letter-spacing:2px}
 
-/* ══ JUEGO ═══════════════════════════════════════════════ */
+/* error banner si renderer.js falla */
+#rendererError{
+  display:none;background:#e63946;color:#fff;
+  font-size:.82rem;padding:8px 16px;border-radius:8px;
+  text-align:center;margin-top:6px;
+}
+
 #gameWrap{display:none;position:fixed;inset:0}
 canvas#gc{display:block;width:100%;height:100%}
 
@@ -99,7 +101,6 @@ canvas#gc{display:block;width:100%;height:100%}
   border:2px solid rgba(123,92,184,.6);
 }
 
-/* mensajes flotantes */
 #msgBox{
   position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
   background:rgba(6,2,20,.78);border:1px solid rgba(123,92,184,.35);
@@ -109,13 +110,11 @@ canvas#gc{display:block;width:100%;height:100%}
 }
 #msgBox.show{opacity:1}
 
-/* controles hint */
 #ctrlHint{
   position:fixed;left:12px;bottom:14px;font-size:.62rem;
   color:rgba(255,255,255,.25);line-height:2;pointer-events:none;
 }
 
-/* fin carrera */
 #endScreen{
   display:none;position:fixed;inset:0;z-index:200;
   flex-direction:column;align-items:center;justify-content:center;
@@ -135,7 +134,6 @@ canvas#gc{display:block;width:100%;height:100%}
 </head>
 <body>
 
-<!-- ══════════════ PANTALLA TÍTULO ══════════════ -->
 <div id="titleScreen">
   <h1 class="title">🏎️ CLAUDE KART</h1>
   <p class="sub">by Claude · Anthropic 2026</p>
@@ -151,8 +149,12 @@ canvas#gc{display:block;width:100%;height:100%}
     </div>
 
     <div id="joinRow" style="display:none">
-      <label>IP del host (ej: 192.168.1.5)</label>
-      <input id="hostIP" placeholder="192.168.x.x"/>
+      <label>ID del host (PeerJS ID)</label>
+      <input id="hostIP" placeholder="Pega el ID del host aquí"/>
+    </div>
+
+    <div id="rendererError">
+      ⚠️ renderer.js no encontrado. Asegúrate de que ambos archivos estén en la misma carpeta del repo.
     </div>
 
     <div id="roomInfo">Elige modo de juego</div>
@@ -168,7 +170,6 @@ canvas#gc{display:block;width:100%;height:100%}
   <p id="credits">CLAUDE KART v1.0 — claude.ai</p>
 </div>
 
-<!-- ══════════════ JUEGO ══════════════ -->
 <div id="gameWrap">
   <canvas id="gc"></canvas>
   <canvas id="minimapCvs" width="88" height="88"></canvas>
@@ -184,7 +185,6 @@ canvas#gc{display:block;width:100%;height:100%}
   SPACE &nbsp;Item
 </div>
 
-<!-- ══════════════ FIN CARRERA ══════════════ -->
 <div id="endScreen">
   <h2>🏆 FIN DE CARRERA</h2>
   <div id="podium"></div>
@@ -192,11 +192,13 @@ canvas#gc{display:block;width:100%;height:100%}
 </div>
 
 <script>
-// ================================================================
-//  CLAUDE KART — game.js (embebido en game.html)
-//  Multijugador P2P via WebRTC (PeerJS CDN) + modo IA local
-//  ► renderer.js se carga como script externo (mismo repo/carpeta)
-// ================================================================
+// ── Verificar que renderer.js cargó correctamente ─────────────
+window.addEventListener('load', () => {
+  if (typeof Renderer === 'undefined') {
+    document.getElementById('rendererError').style.display = 'block';
+    console.error('ERROR: renderer.js no se cargó. Verifica que el archivo existe en la misma carpeta que game.html y se llama exactamente "renderer.js"');
+  }
+});
 
 // ── Cargar PeerJS dinámicamente ─────────────────────────────────
 (()=>{
@@ -212,14 +214,14 @@ const TICK      = 1/60;
 
 // ════════ ESTADO ════════════════════════════════════════════════
 let myName='Piloto', myId=0, myColor=0;
-let players=[];           // todos los karts
-let localP=null;          // referencia al jugador local
+let players=[];
+let localP=null;
 let frame=0, raceStarted=false, countdown=4.5, cdTimer=0;
-let gameMode='solo';      // 'solo' | 'host' | 'join'
+let gameMode='solo';
 let peer=null, conns=[];
 let msgTimeout=null;
 
-// ════════ PISTA (oval con curvas) ════════════════════════════════
+// ════════ PISTA ════════════════════════════════════════════════
 const TRACK_PTS = (()=>{
   const pts=[];
   const N=140;
@@ -262,15 +264,15 @@ const mmCtx=mmCvs.getContext('2d');
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
 window.addEventListener('resize',resize); resize();
 
-// ════════ INPUT ══════════════════════════════════════════════════
+// ════════ INPUT ═════════════════════════════════════════════════
 const keys={};
-window.addEventListener('keydown',e=>{keys[e.code]=true;e.preventDefault&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&e.preventDefault();});
-window.addEventListener('keyup',  e=>{keys[e.code]=false;});
+window.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+});
+window.addEventListener('keyup',e=>{keys[e.code]=false;});
 
-// Móvil: botones táctiles (opcional, se puede expandir)
-let touchAccel=false, touchBrake=false, touchLeft=false, touchRight=false;
-
-// ════════ ITEMS ══════════════════════════════════════════════════
+// ════════ ITEMS ═════════════════════════════════════════════════
 const ITEMS=['🍄','⭐','🐢','💥','🔵','🌶️'];
 
 function giveItem(p){
@@ -285,7 +287,6 @@ function fireItem(p){
   if(it==='⭐'){ p.star=240; }
   if(it==='🌶️'){ p.nitro=Math.min((p.nitro||0)+.5,1); }
   if(['🐢','💥','🔵'].includes(it)){
-    // golpear al más cercano
     const target=players.filter(q=>q.id!==p.id&&!q.finished)
       .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0];
     if(target){
@@ -311,6 +312,7 @@ function makePlayer(id,name,colorIdx,isAI=false){
     prevProg:prog,
     item:null,star:0,stunned:0,
     finished:false,finishRank:0,finishFrame:0,
+    pos:1,
   };
 }
 
@@ -322,21 +324,18 @@ function calcPositions(){
     return lb-la;
   });
   running.forEach((p,i)=>p.pos=i+1);
-  let rank=running.length;
   players.filter(p=>p.finished).forEach(p=>p.pos=p.finishRank);
 }
 
 // ════════ IA ════════════════════════════════════════════════════
 function updateAI(p,dt){
   if(p.stunned>0){p.stunned--;return;}
-
   const ahead=trackAt((p.prog+.02)%1);
   const desired=Math.atan2(ahead.x-p.x, ahead.z-p.z);
   let da=desired-p.angle;
   while(da>Math.PI)da-=Math.PI*2;
   while(da<-Math.PI)da+=Math.PI*2;
   p.angle+=Math.sign(da)*Math.min(Math.abs(da),.072);
-
   const maxSpd=3.6+Math.random()*.5;
   p.speed+=(maxSpd-p.speed)*.042;
   if(Math.random()<.004) giveItem(p);
@@ -344,7 +343,7 @@ function updateAI(p,dt){
   movePlayer(p,dt);
 }
 
-// ════════ MOVER ══════════════════════════════════════════════════
+// ════════ MOVER ═════════════════════════════════════════════════
 function movePlayer(p,dt){
   if(p.finished)return;
   const boost=(p.star>0)?1.45:1;
@@ -354,12 +353,10 @@ function movePlayer(p,dt){
   if(p.star>0)p.star--;
 
   const np=nearestProgress(p.x,p.z);
-  // detectar vuelta completa
   if(p.prevProg>.88&&np<.12){ p.lap++; checkFinish(p); }
-  if(p.prevProg<.12&&np>.88&&p.lap>1){ p.lap--; } // marcha atrás penalty
+  if(p.prevProg<.12&&np>.88&&p.lap>1){ p.lap--; }
   p.prevProg=p.prog; p.prog=np;
 
-  // partículas al girar fuerte
   if(p.id===myId&&p.speed>2)
     Renderer.spawnDust(canvas.width/2+20*(Math.random()-.5), canvas.height*.78+10*(Math.random()-.5), p.speed*.3);
 }
@@ -370,20 +367,19 @@ function checkFinish(p){
     p.finishRank=players.filter(q=>q.finished).length;
     p.finishFrame=frame;
     showMsg(`🏁 ${p.name} terminó en posición ${p.finishRank}!`);
-    const allDone=players.filter(q=>!q.isAI||!q.finished);
     if(p.id===myId) setTimeout(showEnd,2200);
   }
 }
 
-// ════════ LOCAL UPDATE ═══════════════════════════════════════════
+// ════════ LOCAL UPDATE ══════════════════════════════════════════
 function updateLocal(p,dt){
   if(!raceStarted||p.stunned>0){ if(p.stunned>0)p.stunned--; return; }
   if(p.finished)return;
 
-  const accel=keys['ArrowUp']||keys['KeyW']||touchAccel;
-  const brake=keys['ArrowDown']||keys['KeyS']||touchBrake;
-  const left =keys['ArrowLeft']||keys['KeyA']||touchLeft;
-  const right=keys['ArrowRight']||keys['KeyD']||touchRight;
+  const accel=keys['ArrowUp']||keys['KeyW'];
+  const brake=keys['ArrowDown']||keys['KeyS'];
+  const left =keys['ArrowLeft']||keys['KeyA'];
+  const right=keys['ArrowRight']||keys['KeyD'];
   const nitro=keys['ShiftLeft']||keys['ShiftRight'];
 
   if(left)  p.angle-=(.04+p.speed*.006);
@@ -391,7 +387,6 @@ function updateLocal(p,dt){
   if(accel) p.speed=Math.min(p.speed+.18, nitro&&p.nitro>.05?6:4.8);
   if(brake) p.speed=Math.max(p.speed-.14,-1.5);
   if(nitro&&p.nitro>0&&accel){ p.nitro=Math.max(0,p.nitro-.008); }
-
   if(!accel&&!brake) p.speed*=.97;
   p.speed=Math.max(p.speed,-1.5);
 
@@ -401,61 +396,51 @@ function updateLocal(p,dt){
   broadcast();
 }
 
-// ════════ RENDER ═════════════════════════════════════════════════
+// ════════ RENDER ════════════════════════════════════════════════
 let lastTime=0;
 function loop(ts){
   requestAnimationFrame(loop);
   const dt=Math.min((ts-lastTime)/1000,.05); lastTime=ts;
-
   const W=canvas.width, H=canvas.height;
   ctx.clearRect(0,0,W,H);
-
-  if(!localP){return;}
+  if(!localP)return;
 
   frame++;
 
-  // countdown
   if(!raceStarted){
     cdTimer+=dt;
     countdown=Math.max(0,4.5-cdTimer);
     if(cdTimer>4.5) raceStarted=true;
   }
 
-  // update AI
   if(raceStarted) players.filter(p=>p.isAI).forEach(p=>updateAI(p,dt));
-  // update local
   updateLocal(localP,dt);
   calcPositions();
 
-  // ── Render escena ──
-  const camAngle=localP.angle+Math.PI; // miramos hacia donde va
+  const camAngle=localP.angle+Math.PI;
   Renderer.drawSky(ctx,W,H,frame);
   Renderer.drawGround(ctx,W,H,localP.x,localP.z,camAngle);
   Renderer.updateParticles(ctx);
 
-  // otros jugadores (sprites simples proyectados)
-  const others=players.filter(p=>p.id!==myId);
-  others.forEach(p=>{
+  // sprites de otros jugadores
+  players.filter(p=>p.id!==myId).forEach(p=>{
     const dx=p.x-localP.x, dz=p.z-localP.z;
     const dist=Math.hypot(dx,dz);
     if(dist>80)return;
 
-    // proyección manual al plano de pantalla
     const sinC=Math.sin(-camAngle), cosC=Math.cos(-camAngle);
     const rx=dx*cosC-dz*sinC;
     const rz=dx*sinC+dz*cosC;
-    if(rz<.5)return; // detrás de la cámara
+    if(rz<.5)return;
 
     const hY=H*Renderer.HORIZON;
     const scale=Math.max(.2,Math.min(2, Renderer.CAMERA_H*H/(rz*18)));
     const sx=W/2+(rx/rz)*W*.55;
     const sy=hY+(Renderer.CAMERA_H/(rz))*H*.62;
-
     if(sx<-80||sx>W+80||sy>H+60)return;
     Renderer.drawKartSprite(ctx,sx,sy,scale,p.colorIdx,p.name,false,frame,p.star>0);
   });
 
-  // HUD
   Renderer.drawHUD(ctx,W,H,{
     speed:localP.speed,
     lap:Math.min(localP.lap,MAX_LAPS),
@@ -468,16 +453,17 @@ function loop(ts){
     nitro:localP.nitro,
   });
 
-  // Minimap
   Renderer.drawMinimap(mmCtx,88,88,TRACK_PTS,players,myId);
 }
 
-// ════════ NETWORK (PeerJS WebRTC) ════════════════════════════════
+// ════════ NETWORK ════════════════════════════════════════════════
 function broadcast(){
   if(!localP||conns.length===0)return;
-  const state={id:localP.id,x:localP.x,z:localP.z,angle:localP.angle,
+  const state={
+    id:localP.id,x:localP.x,z:localP.z,angle:localP.angle,
     speed:localP.speed,lap:localP.lap,prog:localP.prog,
-    item:localP.item,star:localP.star,finished:localP.finished,finishRank:localP.finishRank};
+    item:localP.item,star:localP.star,finished:localP.finished,finishRank:localP.finishRank
+  };
   conns.forEach(c=>{try{c.send(JSON.stringify(state));}catch(_){}});
 }
 
@@ -485,7 +471,7 @@ function onRemoteData(data){
   try{
     const s=typeof data==='string'?JSON.parse(data):data;
     const p=players.find(q=>q.id===s.id);
-    if(p){Object.assign(p,s);}
+    if(p) Object.assign(p,s);
   }catch(_){}
 }
 
@@ -499,12 +485,10 @@ function setupHost(name){
     conns.push(conn);
     conn.on('data',onRemoteData);
     conn.on('open',()=>{
-      // asignar ID remoto
       const newId=players.length;
       const rp=makePlayer(newId,`P${newId+1}`,newId,false);
       players.push(rp);
       setPlayers(`${players.length} jugador(es) conectado(s)`);
-      // enviar estado inicial
       conn.send(JSON.stringify({type:'init',playerId:newId,players:players.map(p=>({
         id:p.id,name:p.name,colorIdx:p.colorIdx,x:p.x,z:p.z,angle:p.angle,isAI:p.isAI
       }))}));
@@ -512,7 +496,7 @@ function setupHost(name){
   });
 }
 
-function setupJoin(hostId, name){
+function setupJoin(hostId,name){
   peer=new Peer(undefined,{debug:0});
   peer.on('open',()=>{
     setInfo('Conectando…');
@@ -526,7 +510,7 @@ function setupJoin(hostId, name){
           myId=msg.playerId;
           players=msg.players.map(p=>makePlayer(p.id,p.name,p.colorIdx,p.isAI));
           localP=players.find(p=>p.id===myId);
-          if(localP)localP.name=name;
+          if(localP) localP.name=name;
           startGame();
         } else { onRemoteData(data); }
       }catch(_){}
@@ -534,7 +518,7 @@ function setupJoin(hostId, name){
   });
 }
 
-// ════════ START GAME ═════════════════════════════════════════════
+// ════════ START GAME ════════════════════════════════════════════
 function startGame(){
   document.getElementById('titleScreen').style.display='none';
   document.getElementById('gameWrap').style.display='block';
@@ -549,15 +533,15 @@ function startSolo(name){
   myId=0; myName=name; myColor=0;
   players=[];
   players.push(makePlayer(0,name,0,false));
+  const aiNames=['Luigi','Toad','Yoshi','Waluigi','Peach'];
   for(let i=1;i<=AI_COUNT;i++){
-    const aiNames=['Luigi','Toad','Yoshi','Waluigi','Peach'];
     players.push(makePlayer(i,aiNames[i-1]||`Bot${i}`,i,true));
   }
   localP=players[0];
   startGame();
 }
 
-// ════════ FINAL ══════════════════════════════════════════════════
+// ════════ FINAL ═════════════════════════════════════════════════
 function showEnd(){
   const end=document.getElementById('endScreen');
   end.style.display='flex';
@@ -568,7 +552,7 @@ function showEnd(){
   ).join('<br>');
 }
 
-// ════════ MENSAJES ════════════════════════════════════════════════
+// ════════ MENSAJES ══════════════════════════════════════════════
 function showMsg(txt){
   const el=document.getElementById('msgBox');
   el.textContent=txt; el.classList.add('show');
@@ -578,14 +562,19 @@ function showMsg(txt){
 function setInfo(t){document.getElementById('roomInfo').textContent=t;}
 function setPlayers(t){document.getElementById('playerList').textContent=t;}
 
-// ════════ UI EVENTOS ═════════════════════════════════════════════
+// ════════ UI EVENTOS ════════════════════════════════════════════
 document.getElementById('btnSolo').addEventListener('click',()=>{
+  if(typeof Renderer==='undefined'){
+    setInfo('⚠️ Error: renderer.js no cargó. Verifica el repo.');
+    return;
+  }
   const name=document.getElementById('pName').value.trim()||'Piloto';
   myName=name;
   startSolo(name);
 });
 
 document.getElementById('btnHost').addEventListener('click',()=>{
+  if(typeof Renderer==='undefined'){ setInfo('⚠️ Error: renderer.js no cargó.'); return; }
   const name=document.getElementById('pName').value.trim()||'Host';
   myName=name; myId=0; myColor=0; gameMode='host';
   players=[];
@@ -593,16 +582,20 @@ document.getElementById('btnHost').addEventListener('click',()=>{
   localP=players[0];
   document.getElementById('joinRow').style.display='none';
   setInfo('Iniciando servidor…');
-  // Esperar PeerJS
   const waitPeer=setInterval(()=>{
     if(typeof Peer!=='undefined'){
       clearInterval(waitPeer);
       setupHost(name);
-      // botón para iniciar cuando quiera
       const br=document.createElement('button');
       br.className='btn btn-solo'; br.style.marginTop='8px';
       br.textContent='▶ Iniciar carrera';
-      br.onclick=()=>{ if(players.length===1)players.push(...[...Array(AI_COUNT)].map((_,i)=>makePlayer(i+1,['Luigi','Toad','Yoshi'][i],i+1,true))); startGame(); };
+      br.onclick=()=>{
+        if(players.length===1){
+          const aiNames=['Luigi','Toad','Yoshi'];
+          for(let i=0;i<AI_COUNT;i++) players.push(makePlayer(i+1,aiNames[i],i+1,true));
+        }
+        startGame();
+      };
       document.querySelector('.panel').appendChild(br);
     }
   },200);
@@ -612,20 +605,19 @@ document.getElementById('btnJoin').addEventListener('click',()=>{
   const jRow=document.getElementById('joinRow');
   if(jRow.style.display==='none'){
     jRow.style.display='block';
-    setInfo('Ingresa el ID del host y presiona Unirse');
+    setInfo('Ingresa el ID del host y presiona Conectar');
     document.getElementById('btnJoin').textContent='✅ Conectar';
   } else {
     const hostId=document.getElementById('hostIP').value.trim();
-    if(!hostId){setInfo('⚠ Ingresa el ID del host');return;}
+    if(!hostId){ setInfo('⚠ Ingresa el ID del host'); return; }
     const name=document.getElementById('pName').value.trim()||'Piloto';
     myName=name; gameMode='join';
     const waitPeer=setInterval(()=>{
-      if(typeof Peer!=='undefined'){clearInterval(waitPeer); setupJoin(hostId,name);}
+      if(typeof Peer!=='undefined'){ clearInterval(waitPeer); setupJoin(hostId,name); }
     },200);
   }
 });
 
-// input enter
 document.getElementById('pName').addEventListener('keydown',e=>{
   if(e.key==='Enter') document.getElementById('btnSolo').click();
 });
