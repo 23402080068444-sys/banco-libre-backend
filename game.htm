@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>✨ CLAUDE KART ✨</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    body {
+      background: #0a0a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #gameCanvas {
+      display: block;
+      border-radius: 14px;
+      box-shadow: 0 0 40px rgba(100,60,200,0.4), 0 0 0 2px rgba(124,77,204,0.3);
+    }
+    #controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pill {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 4px 14px;
+      color: #aaa;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    .pill b { color: #ffd166; }
+  </style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="controls">
+  <div class="pill">← → <b>GIRAR</b></div>
+  <div class="pill">↑ <b>ACELERAR</b></div>
+  <div class="pill">↓ <b>FRENAR</b></div>
+  <div class="pill">ESPACIO <b>USAR ITEM</b></div>
+</div>
+
+<script src="renderer.js"></script>
+<script>
+// ================================================================
+//  CLAUDE KART — game.htm  (requiere renderer.js en la misma carpeta)
+// ================================================================
+
+class ClaudeKart {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+
+    // Tamaño responsivo
+    const maxW = Math.min(window.innerWidth - 20, 760);
+    this.W = maxW;
+    this.H = Math.round(maxW * 0.68);
+    this.canvas.width = this.W;
+    this.canvas.height = this.H;
+
+    this.frame = 0;
+    this.lastTime = 0;
+    this.gameState = 'countdown'; // countdown | racing | finished
+    this.countdown = 3;
+    this.countTimer = 1;
+    this.finishOrder = [];
+    this.MAX_LAPS = 3;
+
+    this.keys = {};
+    this.ITEMS = ['🍄','⚡','⭐','🛡️'];
+
+    this.track = this.buildTrack();
+    this.trackCanvas = Renderer.buildTrackCanvas(this.W, this.H, this.track);
+    this.itemBoxes = this.placeItemBoxes();
+    this.karts = this.createKarts();
+    this.player = this.karts[0];
+
+    window.addEventListener('keydown', e => {
+      this.keys[e.code] = true;
+      if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))
+        e.preventDefault();
+    });
+    window.addEventListener('keyup', e => { this.keys[e.code] = false; });
+
+    requestAnimationFrame(ts => this.loop(ts));
+  }
+
+  // ── TRACK ──────────────────────────────────────────────────────
+  buildTrack() {
+    const pts = [];
+    const cx = this.W / 2, cy = this.H / 2;
+    const rx = this.W * 0.37, ry = this.H * 0.36;
+    const segs = 180;
+    for(let i = 0; i <= segs; i++) {
+      const a = (i / segs) * Math.PI * 2;
+      const x = cx + Math.cos(a) * rx + Math.sin(a * 2) * 18;
+      const y = cy + Math.sin(a) * ry + Math.cos(a * 3) * 10;
+      pts.push({ x, y });
+    }
+    return pts;
+  }
+
+  tangentAt(i) {
+    const n = this.track.length - 1;
+    const a = this.track[Math.max(0, i - 1)];
+    const b = this.track[Math.min(n, i + 1)];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    return { tx: dx/len, ty: dy/len, nx: -dy/len, ny: dx/len };
+  }
+
+  nearestTrackIdx(x, y) {
+    let best = 0, bd = 1e9;
+    for(let i = 0; i < this.track.length; i++) {
+      const dx = this.track[i].x - x, dy = this.track[i].y - y;
+      const d = dx*dx + dy*dy;
+      if(d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+
+  onTrack(x, y) {
+    const i = this.nearestTrackIdx(x, y);
+    const p = this.track[i];
+    return Math.hypot(p.x - x, p.y - y) < Renderer.TRACK_W / 2 + 2;
+  }
+
+  trackProgress(x, y) {
+    return this.nearestTrackIdx(x, y) / this.track.length;
+  }
+
+  // ── ITEM BOXES ─────────────────────────────────────────────────
+  placeItemBoxes() {
+    const boxes = [];
+    for(let i = 0; i < 8; i++) {
+      const idx = Math.floor(i / 8 * this.track.length);
+      const p = this.track[idx];
+      boxes.push({ x: p.x, y: p.y, active: true, cooldown: 0 });
+    }
+    return boxes;
+  }
+
+  // ── KARTS ──────────────────────────────────────────────────────
+  createKarts() {
+    const names = ['TÚ','BLAZE','SHADOW','NOVA','RAPID'];
+    return names.map((name, i) => {
+      const sIdx = Math.floor(i / names.length * this.track.length);
+      const p = this.track[sIdx];
+      const t = this.tangentAt(sIdx);
+      const off = (i % 2 === 0 ? 1 : -1) * (i === 0 ? 0 : 14);
+      return {
+        x: p.x + t.nx * off,
+        y: p.y + t.ny * off,
+        angle: Math.atan2(t.ty, t.tx),
+        speed: 0,
+        steer: 0,
+        lap: 1,
+        lapsDone: 0,
+        progress: sIdx / this.track.length,
+        lastProgress: sIdx / this.track.length,
+        totalProgress: sIdx / this.track.length,
+        item: null,
+        itemTimer: 0,
+        stunned: 0,
+        color: Renderer.KART_COLORS[i],
+        name,
+        isPlayer: i === 0,
+        pos: i + 1,
+        aiTargetIdx: sIdx
+      };
+    });
+  }
+
+  // ── PHYSICS ────────────────────────────────────────────────────
+  updateKart(k, dt) {
+    const MAX_SPEED = 4.2;
+    const ACCEL = 0.12;
+    const BRAKE = 0.18;
+    const FRICTION = 0.035;
+    const TURN = 0.048;
+    const OFF_FRIC = 0.08;
+
+    if(k.stunned > 0) {
+      k.stunned -= dt;
+      k.speed *= 0.95;
+      k.x += Math.cos(k.angle) * k.speed;
+      k.y += Math.sin(k.angle) * k.speed;
+      this.updateLapCount(k);
+      return;
+    }
+
+    if(k.isPlayer) {
+      let steer = 0;
+      if(this.keys['ArrowLeft']) steer = -1;
+      if(this.keys['ArrowRight']) steer = 1;
+      k.steer += (steer - k.steer) * 0.25;
+
+      if(this.keys['ArrowUp'])
+        k.speed = Math.min(k.speed + ACCEL, MAX_SPEED);
+      else if(this.keys['ArrowDown'])
+        k.speed = Math.max(k.speed - BRAKE, -MAX_SPEED * 0.4);
+      else {
+        k.speed *= (1 - FRICTION);
+        if(Math.abs(k.speed) < 0.05) k.speed = 0;
+      }
+
+      if(this.keys['Space'] && k.item && k.itemTimer <= 0) {
+        this.useItem(k);
+        this.keys['Space'] = false;
+      }
+    } else {
+      // AI steering
+      const lookahead = Math.min(this.track.length - 1, Math.floor(12 + k.speed * 3));
+      const tidx = (k.aiTargetIdx + lookahead) % this.track.length;
+      const tp = this.track[tidx];
+      const desired = Math.atan2(tp.y - k.y, tp.x - k.x);
+      let diff = desired - k.angle;
+      while(diff > Math.PI) diff -= Math.PI * 2;
+      while(diff < -Math.PI) diff += Math.PI * 2;
+      k.steer = Math.max(-1, Math.min(1, diff * 2));
+
+      const targetSpeed = MAX_SPEED * (0.82 + (5 - k.pos) * 0.02);
+      if(k.speed < targetSpeed) k.speed = Math.min(k.speed + ACCEL * 0.9, targetSpeed);
+      else k.speed *= (1 - FRICTION);
+
+      if(k.item && Math.random() < 0.003) this.useItem(k);
+    }
+
+    // Turn
+    if(Math.abs(k.speed) > 0.1) {
+      const eff = Math.min(1, Math.abs(k.speed) / 2);
+      k.angle += k.steer * TURN * eff * Math.sign(k.speed);
+    }
+
+    // Move
+    const nx = k.x + Math.cos(k.angle) * k.speed;
+    const ny = k.y + Math.sin(k.angle) * k.speed;
+    const road = this.onTrack(nx, ny);
+
+    if(road || Math.abs(k.speed) < 0.5) {
+      k.x = nx; k.y = ny;
+    }
+    if(!road) {
+      k.speed *= (1 - OFF_FRIC);
+      Renderer.addDust(k.x, k.y, '#8B7355');
+    } else if(Math.abs(k.speed) > 2 && Math.random() < 0.12) {
+      Renderer.addDust(k.x, k.y, k.color + '88');
+    }
+
+    // Clamp
+    k.x = Math.max(10, Math.min(this.W - 10, k.x));
+    k.y = Math.max(10, Math.min(this.H - 10, k.y));
+
+    // Update AI nearest
+    if(!k.isPlayer) k.aiTargetIdx = this.nearestTrackIdx(k.x, k.y);
+
+    // Item pickup
+    if(!k.item && k.itemTimer <= 0) {
+      for(const box of this.itemBoxes) {
+        if(box.active && Math.hypot(box.x - k.x, box.y - k.y) < 18) {
+          k.item = this.ITEMS[Math.floor(Math.random() * this.ITEMS.length)];
+          box.active = false;
+          box.cooldown = 8;
+          break;
+        }
+      }
+    }
+    if(k.itemTimer > 0) k.itemTimer -= dt;
+
+    this.updateLapCount(k);
+  }
+
+  updateLapCount(k) {
+    const prog = this.trackProgress(k.x, k.y);
+    if(k.lastProgress > 0.85 && prog < 0.15 && k.speed > 0.1) {
+      k.lapsDone++;
+      k.lap = Math.min(k.lapsDone + 1, this.MAX_LAPS + 1);
+      if(k.lapsDone >= this.MAX_LAPS && !this.finishOrder.includes(k)) {
+        this.finishOrder.push(k);
+        if(k.isPlayer) this.gameState = 'finished';
+      }
+      if(k.isPlayer) Renderer.addBoom(k.x, k.y);
+    }
+    k.lastProgress = prog;
+    k.totalProgress = k.lapsDone + prog;
+  }
+
+  useItem(k) {
+    const item = k.item;
+    k.item = null;
+    k.itemTimer = 0.5;
+
+    if(item === '🍄') {
+      k.speed = Math.min(4.2 * 1.5, k.speed + 2.5);
+      Renderer.addBoom(k.x, k.y);
+    } else if(item === '⚡') {
+      for(const o of this.karts) {
+        if(o !== k && Math.hypot(o.x - k.x, o.y - k.y) < 130) {
+          o.stunned = 1.5;
+          Renderer.addBoom(o.x, o.y);
+        }
+      }
+    } else if(item === '⭐') {
+      k.speed = Math.min(4.2 * 1.3, k.speed + 1.5);
+      Renderer.addBoom(k.x, k.y);
+    }
+  }
+
+  updateRankings() {
+    [...this.karts]
+      .sort((a, b) => b.totalProgress - a.totalProgress)
+      .forEach((k, i) => k.pos = i + 1);
+  }
+
+  // ── LOOP ───────────────────────────────────────────────────────
+  loop(ts) {
+    const dt = Math.min((ts - this.lastTime) / 1000, 0.033);
+    this.lastTime = ts;
+    this.frame++;
+
+    // Countdown
+    if(this.gameState === 'countdown') {
+      this.countTimer -= dt;
+      if(this.countTimer <= 0) {
+        this.countdown--;
+        this.countTimer = 1;
+        if(this.countdown < 0) this.gameState = 'racing';
+      }
+    }
+
+    // Update
+    if(this.gameState === 'racing') {
+      this.karts.forEach(k => this.updateKart(k, dt));
+      this.updateRankings();
+      for(const b of this.itemBoxes) {
+        if(!b.active) { b.cooldown -= dt; if(b.cooldown <= 0) b.active = true; }
+      }
+    }
+
+    Renderer.updateParticles();
+
+    // Render
+    const ctx = this.ctx;
+    ctx.drawImage(this.trackCanvas, 0, 0);
+
+    Renderer.drawItemBoxes(ctx, this.itemBoxes, this.frame);
+    Renderer.drawParticles(ctx);
+
+    // Karts sorted by Y
+    [...this.karts].sort((a, b) => a.y - b.y).forEach(k => Renderer.drawKart(ctx, k, this.frame));
+
+    Renderer.drawHUD(ctx, this.W, this.H, this.player, this.MAX_LAPS);
+
+    // Lap / position HUD (top bar)
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.beginPath();
+    ctx.roundRect(this.W/2 - 90, 8, 180, 30, 8);
+    ctx.fill();
+    ctx.fillStyle = '#ffd166';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Vuelta ${Math.min(this.player.lap, this.MAX_LAPS)}/${this.MAX_LAPS}   Pos ${this.player.pos}/${this.karts.length}`, this.W/2, 28);
+
+    if(this.gameState === 'countdown') Renderer.drawCountdown(ctx, this.W, this.H, this.countdown);
+    if(this.gameState === 'finished')  Renderer.drawFinish(ctx, this.W, this.H, this.finishOrder, this.karts);
+
+    requestAnimationFrame(ts => this.loop(ts));
+  }
+}
+
+window.addEventListener('load', () => new ClaudeKart());
+</script>
+</body>
+</html>
