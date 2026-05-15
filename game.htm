@@ -209,13 +209,13 @@ import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect }
 //  4. Copia tu config aquí:
 // ══════════════════════════════════════════════════════════════════
 const firebaseConfig = {
-  apiKey:            "AIzaSyB3zQzQzQzQzQzQzQzQzQzQzQzQzQzQzQ",  // ⚠️ Necesitas obtener esto de Firebase Console
-  authDomain:        "hjkkhjkj-39efb.firebaseapp.com",
-  databaseURL:       "https://hjkkhjkj-39efb-default-rtdb.firebaseio.com",  // ← CORREGIDO
-  projectId:         "hjkkhjkj-39efb",
-  storageBucket:     "hjkkhjkj-39efb.appspot.com",
-  messagingSenderId: "114356997777",  // ← Este es tu client_id sin el sufijo
-  appId:             "1:114356997777:web:xxxxxxxxxxxxxxxx"  // ⚠️ También necesitas esto de Firebase Console
+  apiKey: "TU_API_KEY",  // ← Necesitas el real de Firebase Console
+  authDomain: "hjkkhjkj-39efb.firebaseapp.com",  // ← Sin la 'w' extra
+  databaseURL: "https://hjkkhjkj-39efb-default-rtdb.firebaseio.com",
+  projectId: "hjkkhjkj-39efb",
+  storageBucket: "hjkkhjkj-39efb.appspot.com",
+  messagingSenderId: "114356997777",
+  appId: "TU_APP_ID"  // ← También necesitas el real
 };
 let db = null;
 let fbReady = false;
