@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>✨ CLAUDE KART ✨</title>
+  <title>✨ CLAUDE KART ONLINE ✨</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
     body {
@@ -15,7 +15,6 @@
       touch-action:none;
     }
 
-    /* ═══ MENU ═══ */
     #menu {
       display:flex; flex-direction:column; align-items:center; gap:16px;
       position:absolute; z-index:20;
@@ -53,7 +52,6 @@
     .menu-btn.purple { border-color:#c77dff; color:#c77dff; }
     .menu-btn.purple:hover { background:rgba(199,125,255,0.13); }
 
-    /* ═══ LOBBY ═══ */
     #lobby {
       display:none; flex-direction:column; align-items:center; gap:14px;
       position:absolute; z-index:20; width:min(340px,94vw);
@@ -87,14 +85,12 @@
       font-size:11px; line-height:1.5; text-align:center; display:none;
     }
 
-    /* ═══ CANVAS ═══ */
     #gameCanvas {
       display:none; border-radius:10px;
       box-shadow:0 0 30px rgba(100,60,200,0.4), 0 0 0 2px rgba(124,77,204,0.3);
       touch-action:none;
     }
 
-    /* ═══ TOUCH D-PAD ═══ */
     #touch-ui {
       display:none; position:fixed;
       bottom:0; left:0; right:0; height:158px;
@@ -120,7 +116,6 @@
       background:rgba(230,57,70,0.16); border-color:#e63946;
     }
 
-    /* ═══ KB HINT ═══ */
     #kb-hint { display:none; gap:10px; margin-top:8px; flex-wrap:wrap; justify-content:center; }
     @media (hover:none) and (pointer:coarse) { #kb-hint { display:none !important; } }
     .pill {
@@ -132,7 +127,6 @@
 </head>
 <body>
 
-<!-- ═══ MAIN MENU ═══ -->
 <div id="menu">
   <h1>✨ CLAUDE <span>KART</span> ✨</h1>
   <div class="nick-row">
@@ -144,41 +138,28 @@
   <button class="menu-btn"        onclick="App.showLobby('join')">🔗  UNIRSE A SALA</button>
 </div>
 
-<!-- ═══ LOBBY ═══ -->
 <div id="lobby">
   <h2 id="lobbyTitle">SALA</h2>
-
-  <div id="fbwarn" class="fbwarn">
-    ⚠️ Firebase no configurado.<br>
-    Edita <b>firebaseConfig</b> en game.htm con tus credenciales.<br>
-    <a href="https://console.firebase.google.com" target="_blank" style="color:#ffd166;">console.firebase.google.com →</a>
-  </div>
-
-  <!-- CREATE view -->
+  <div id="fbwarn" class="fbwarn"></div>
   <div id="lobbyCreate" class="lbox" style="display:none;">
     <label>CÓDIGO DE SALA — COMPARTE ESTE CÓDIGO</label>
     <div id="roomCode">----</div>
     <div id="lobbyStatus">Generando sala...</div>
     <div id="playerList"></div>
   </div>
-
-  <!-- JOIN view -->
   <div id="lobbyJoin" class="lbox" style="display:none;">
     <label>INGRESA EL CÓDIGO DE 4 LETRAS</label>
     <input id="codeInput" maxlength="4" placeholder="XXXX"
            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
     <div id="joinStatus">—</div>
   </div>
-
   <button class="menu-btn green"  id="lobbyStartBtn" style="display:none;" onclick="App.startMultiplayer()">🚦 ¡INICIAR CARRERA!</button>
   <button class="menu-btn purple" id="lobbyJoinBtn"  style="display:none;" onclick="App.joinRoom()">🔗 CONECTAR</button>
   <button class="menu-btn red"    onclick="App.leaveLobby()">✖ VOLVER</button>
 </div>
 
-<!-- ═══ GAME ═══ -->
 <canvas id="gameCanvas"></canvas>
 
-<!-- Touch D-pad -->
 <div id="touch-ui">
   <div class="tbtn" id="tb-up">▲</div>
   <div class="tbtn" id="tb-left">◀</div>
@@ -194,41 +175,35 @@
   <div class="pill">ESPACIO <b>ITEM</b></div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+// ==================== CONFIGURACIÓN FIREBASE (TUS CREDENCIALES REALES) ====================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ══════════════════════════════════════════════════════════════════
-//  🔧 CONFIGURACIÓN FIREBASE
-//  1. Ve a https://console.firebase.google.com
-//  2. Crea un proyecto → Realtime Database → Crear base de datos
-//  3. Reglas: { "rules": { ".read": true, ".write": true } }
-//  4. Copia tu config aquí:
-// ══════════════════════════════════════════════════════════════════
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",  // ← Necesitas el real de Firebase Console
-  authDomain: "hjkkhjkj-39efb.firebaseapp.com",  // ← Sin la 'w' extra
-  databaseURL: "https://hjkkhjkj-39efb-default-rtdb.firebaseio.com",
+  apiKey: "AIzaSyBDd8ctaUtqpaWKjQ96-5_bAVpjXfcE0B4",
+  authDomain: "hjkkhjkj-39efb.firebaseapp.com",
   projectId: "hjkkhjkj-39efb",
-  storageBucket: "hjkkhjkj-39efb.appspot.com",
-  messagingSenderId: "114356997777",
-  appId: "TU_APP_ID"  // ← También necesitas el real
+  storageBucket: "hjkkhjkj-39efb.firebasestorage.app",
+  messagingSenderId: "957774931502",
+  appId: "1:957774931502:web:ea8806c244de97eb9be1bf",
+  measurementId: "G-GE5HBHWN1S"
 };
+
 let db = null;
 let fbReady = false;
 
 try {
-  if(!firebaseConfig.apiKey.startsWith('TU_')) {
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    fbReady = true;
-  }
-} catch(e) { console.warn('Firebase error:', e); }
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  fbReady = true;
+  console.log("✅ Firebase conectado correctamente");
+} catch(e) { 
+  console.error('Firebase error:', e); 
+  document.getElementById('fbwarn').innerHTML = '❌ Error de conexión a Firebase';
+  document.getElementById('fbwarn').style.display = 'block';
+}
 
-// ── State ──
 const myId = 'p_' + Math.random().toString(36).slice(2,8);
 let currentRoom = null;
 let isHost = false;
@@ -238,18 +213,13 @@ let stateUnsub = null;
 function getNick() {
   return (document.getElementById('nickInput').value.trim().toUpperCase() || 'ANON').slice(0,10);
 }
+
 function genCode() {
   const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   return Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
 }
 
-function showFbWarn() {
-  document.getElementById('fbwarn').style.display = 'block';
-}
-
-// ── App object exposed globally ──
 window.App = {
-
   startSolo() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('gameCanvas').style.display = 'block';
@@ -261,21 +231,24 @@ window.App = {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('lobby').style.display = 'flex';
     document.getElementById('lobbyCreate').style.display = 'none';
-    document.getElementById('lobbyJoin').style.display   = 'none';
+    document.getElementById('lobbyJoin').style.display = 'none';
     document.getElementById('lobbyStartBtn').style.display = 'none';
-    document.getElementById('lobbyJoinBtn').style.display  = 'none';
+    document.getElementById('lobbyJoinBtn').style.display = 'none';
     document.getElementById('fbwarn').style.display = 'none';
 
-    if(!fbReady) { showFbWarn(); }
+    if (!fbReady) {
+      document.getElementById('fbwarn').innerHTML = '⚠️ Firebase no conectado. Recarga la página.';
+      document.getElementById('fbwarn').style.display = 'block';
+      return;
+    }
 
-    if(mode === 'create') {
+    if (mode === 'create') {
       document.getElementById('lobbyTitle').textContent = 'CREAR SALA';
       document.getElementById('lobbyCreate').style.display = 'block';
-      if(fbReady) this._createRoom();
-      else { document.getElementById('roomCode').textContent = 'SIN FB'; document.getElementById('lobbyStatus').textContent = 'Configura Firebase primero.'; }
+      this._createRoom();
     } else {
       document.getElementById('lobbyTitle').textContent = 'UNIRSE A SALA';
-      document.getElementById('lobbyJoin').style.display  = 'block';
+      document.getElementById('lobbyJoin').style.display = 'block';
       document.getElementById('lobbyJoinBtn').style.display = 'inline-block';
     }
   },
@@ -288,157 +261,490 @@ window.App = {
     document.getElementById('lobbyStatus').textContent = 'Esperando jugadores...';
 
     await set(ref(db, `rooms/${code}`), {
-      host: myId, state:'waiting',
-      players:{ [myId]:{ nick:getNick(), color:0, ready:true } }
+      host: myId, state: 'waiting',
+      players: { [myId]: { nick: getNick(), color: 0, ready: true } }
     });
-    onDisconnect(ref(db,`rooms/${code}/players/${myId}`)).remove();
+    onDisconnect(ref(db, `rooms/${code}/players/${myId}`)).remove();
 
-    // Watch players list
-    roomUnsub = onValue(ref(db,`rooms/${code}/players`), snap => {
+    roomUnsub = onValue(ref(db, `rooms/${code}/players`), snap => {
       const pl = snap.val() || {};
-      const names = Object.entries(pl)
-        .map(([id,p]) => (id===myId?'★ ':'')+p.nick).join('  |  ');
-      document.getElementById('playerList').textContent = names;
-      document.getElementById('lobbyStatus').textContent =
-        `${Object.keys(pl).length} jugador(es) conectado(s)`;
+      const names = Object.entries(pl).map(([id,p]) => (id === myId ? '★ ' : '') + p.nick).join('  |  ');
+      document.getElementById('playerList').textContent = names || 'Esperando jugadores...';
+      document.getElementById('lobbyStatus').textContent = `${Object.keys(pl).length} jugador(es) conectado(s)`;
       document.getElementById('lobbyStartBtn').style.display = 'inline-block';
     });
 
-    // Watch race start signal
-    stateUnsub = onValue(ref(db,`rooms/${code}/state`), snap => {
-      if(snap.val()==='racing') this._launchMulti(code);
+    stateUnsub = onValue(ref(db, `rooms/${code}/state`), snap => {
+      if (snap.val() === 'racing') this._launchMulti(code);
     });
   },
 
   async joinRoom() {
-    if(!fbReady) { document.getElementById('joinStatus').textContent='⚠️ Configura Firebase'; return; }
+    if (!fbReady) { 
+      document.getElementById('joinStatus').textContent = '⚠️ Firebase no conectado'; 
+      return; 
+    }
+    
     const code = document.getElementById('codeInput').value.trim().toUpperCase();
-    if(code.length!==4) { document.getElementById('joinStatus').textContent='Código debe tener 4 letras'; return; }
+    if (code.length !== 4) { 
+      document.getElementById('joinStatus').textContent = '❌ Código debe tener 4 letras'; 
+      return; 
+    }
+    
     document.getElementById('joinStatus').textContent = '🔍 Buscando sala...';
 
-    const snap = await get(ref(db,`rooms/${code}`));
-    if(!snap.exists()) {
-      document.getElementById('joinStatus').textContent = '❌ Sala no encontrada'; return;
+    try {
+      const snap = await get(ref(db, `rooms/${code}`));
+      if (!snap.exists()) {
+        document.getElementById('joinStatus').textContent = '❌ Sala no encontrada';
+        return;
+      }
+      
+      currentRoom = code;
+      isHost = false;
+      const pl = snap.val().players || {};
+      const colorIdx = Object.keys(pl).length % 5;
+      
+      await update(ref(db, `rooms/${code}/players/${myId}`), {
+        nick: getNick(), 
+        color: colorIdx, 
+        ready: true 
+      });
+      onDisconnect(ref(db, `rooms/${code}/players/${myId}`)).remove();
+
+      document.getElementById('joinStatus').textContent = '✅ Conectado — esperando al host...';
+
+      stateUnsub = onValue(ref(db, `rooms/${code}/state`), snap => {
+        if (snap.val() === 'racing') this._launchMulti(code);
+      });
+    } catch(e) {
+      console.error(e);
+      document.getElementById('joinStatus').textContent = '❌ Error al conectar';
     }
-    currentRoom = code; isHost = false;
-
-    const pl = snap.val().players || {};
-    const colorIdx = Object.keys(pl).length % 5;
-    await update(ref(db,`rooms/${code}/players/${myId}`),
-      { nick:getNick(), color:colorIdx, ready:true });
-    onDisconnect(ref(db,`rooms/${code}/players/${myId}`)).remove();
-
-    document.getElementById('joinStatus').textContent = '✅ Conectado — esperando al host...';
-
-    stateUnsub = onValue(ref(db,`rooms/${code}/state`), snap => {
-      if(snap.val()==='racing') this._launchMulti(code);
-    });
   },
 
   async startMultiplayer() {
-    if(!currentRoom) return;
-    await update(ref(db,`rooms/${currentRoom}`), { state:'racing' });
+    if (!currentRoom) return;
+    await update(ref(db, `rooms/${currentRoom}`), { state: 'racing' });
   },
 
   _launchMulti(code) {
-    if(document.getElementById('gameCanvas').style.display==='block') return;
-    if(roomUnsub)  { roomUnsub();  roomUnsub  = null; }
-    // keep stateUnsub alive so host signal fires
+    if (document.getElementById('gameCanvas').style.display === 'block') return;
+    if (roomUnsub) { roomUnsub(); roomUnsub = null; }
+    
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('gameCanvas').style.display = 'block';
     document.getElementById('kb-hint').style.display = 'flex';
+    
     new ClaudeKart({
-      mode:'multi', nick:getNick(),
-      playerId:myId, isHost,
-      roomCode:code, db,
-      fbRef:ref, fbUpdate:update, fbOnValue:onValue
+      mode: 'multi', 
+      nick: getNick(),
+      playerId: myId, 
+      isHost: isHost,
+      roomCode: code, 
+      db: db,
+      fbRef: ref, 
+      fbUpdate: update, 
+      fbOnValue: onValue
     });
   },
 
   leaveLobby() {
-    if(currentRoom && fbReady) remove(ref(db,`rooms/${currentRoom}/players/${myId}`)).catch(()=>{});
-    if(roomUnsub)  { roomUnsub();  roomUnsub  = null; }
-    if(stateUnsub) { stateUnsub(); stateUnsub = null; }
-    currentRoom = null; isHost = false;
+    if (currentRoom && fbReady) {
+      remove(ref(db, `rooms/${currentRoom}/players/${myId}`)).catch(() => {});
+      if (!isHost && currentRoom) {
+        // Si no es host, verificar si la sala queda vacía
+      }
+    }
+    if (roomUnsub) { roomUnsub(); roomUnsub = null; }
+    if (stateUnsub) { stateUnsub(); stateUnsub = null; }
+    currentRoom = null;
+    isHost = false;
     document.getElementById('lobby').style.display = 'none';
-    document.getElementById('menu').style.display  = 'flex';
-    document.getElementById('lobbyCreate').style.display = 'none';
-    document.getElementById('lobbyJoin').style.display   = 'none';
+    document.getElementById('menu').style.display = 'flex';
     document.getElementById('roomCode').textContent = '----';
   }
 };
 </script>
 
-<script src="renderer.js"></script>
 <script>
 // ================================================================
-//  CLAUDE KART — ClaudeKart class
-//  No toques esta parte a menos que sepas lo que haces 😄
+//  RENDERER.JS - Motor de renderizado
 // ================================================================
+const Renderer = (() => {
+  const TRACK_W = 44;
+  const KART_COLORS = ['#e63946','#06d6a0','#ffd166','#118ab2','#c77dff'];
+  const MAX_PARTICLES = 300;
+  const particles = [];
 
+  function addDust(x, y, color='#aaaaaa') {
+    if(particles.length >= MAX_PARTICLES) return;
+    for(let i = 0; i < 3; i++) {
+      particles.push({ x, y, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, life: 1, color, size: 2 });
+    }
+  }
+
+  function addBoom(x, y) {
+    if(particles.length >= MAX_PARTICLES) return;
+    for(let i = 0; i < 14; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = Math.random() * 3 + 1;
+      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, color: Math.random() < 0.5 ? '#ffd166' : '#e63946', size: Math.random() * 4 + 2 });
+    }
+  }
+
+  function updateParticles() {
+    for(let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.95;
+      p.vy *= 0.95;
+      p.life -= 0.04;
+      if(p.life <= 0) particles.splice(i, 1);
+    }
+  }
+
+  function drawParticles(ctx) {
+    for(const p of particles) {
+      if(p.life <= 0) continue;
+      ctx.globalAlpha = p.life * 0.8;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function buildTrackCanvas(W, H, trackPts) {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = W;
+    offscreen.height = H;
+    const otx = offscreen.getContext('2d');
+
+    otx.fillStyle = '#1a3a1a';
+    otx.fillRect(0, 0, W, H);
+
+    otx.strokeStyle = 'rgba(0,0,0,0.5)';
+    otx.lineWidth = TRACK_W + 8;
+    otx.lineCap = 'round';
+    otx.lineJoin = 'round';
+    otx.beginPath();
+    trackPts.forEach((p, i) => i === 0 ? otx.moveTo(p.x, p.y) : otx.lineTo(p.x, p.y));
+    otx.closePath();
+    otx.stroke();
+
+    otx.strokeStyle = '#2a2a3e';
+    otx.lineWidth = TRACK_W;
+    otx.beginPath();
+    trackPts.forEach((p, i) => i === 0 ? otx.moveTo(p.x, p.y) : otx.lineTo(p.x, p.y));
+    otx.closePath();
+    otx.stroke();
+
+    const tangentAt = (i) => {
+      const n = trackPts.length - 1;
+      const a = trackPts[Math.max(0, i - 1)];
+      const b = trackPts[Math.min(n, i + 1)];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      return { tx: dx/len, ty: dy/len, nx: -dy/len, ny: dx/len };
+    };
+
+    for(let edge = 0; edge < 2; edge++) {
+      const sign = edge === 0 ? 1 : -1;
+      const hw = TRACK_W / 2 * sign;
+      for(let i = 0; i < trackPts.length - 1; i++) {
+        const { nx, ny } = tangentAt(i);
+        const p = trackPts[i];
+        const q = trackPts[i + 1];
+        const stripe = Math.floor(i / 4) % 2;
+        otx.strokeStyle = stripe ? '#e63946' : '#f1faee';
+        otx.lineWidth = 5;
+        otx.beginPath();
+        otx.moveTo(p.x + nx * (hw - sign * 2), p.y + ny * (hw - sign * 2));
+        otx.lineTo(q.x + nx * (hw - sign * 2), q.y + ny * (hw - sign * 2));
+        otx.stroke();
+      }
+    }
+
+    otx.setLineDash([12, 10]);
+    otx.strokeStyle = 'rgba(255,210,80,0.5)';
+    otx.lineWidth = 2;
+    otx.beginPath();
+    trackPts.forEach((p, i) => i === 0 ? otx.moveTo(p.x, p.y) : otx.lineTo(p.x, p.y));
+    otx.closePath();
+    otx.stroke();
+    otx.setLineDash([]);
+
+    const sp = trackPts[0];
+    const { nx, ny } = tangentAt(0);
+    otx.strokeStyle = '#ffffff';
+    otx.lineWidth = 4;
+    otx.beginPath();
+    otx.moveTo(sp.x + nx * TRACK_W / 2, sp.y + ny * TRACK_W / 2);
+    otx.lineTo(sp.x - nx * TRACK_W / 2, sp.y - ny * TRACK_W / 2);
+    otx.stroke();
+
+    for(let k = -2; k <= 2; k++) {
+      const even = (k + 10) % 2 === 0;
+      otx.fillStyle = even ? '#000' : '#fff';
+      otx.fillRect(sp.x + nx * (k * 6) - 3, sp.y + ny * (k * 6) - 3, 6, 6);
+    }
+
+    return offscreen;
+  }
+
+  function drawItemBoxes(ctx, itemBoxes, frame) {
+    for(const b of itemBoxes) {
+      if(!b.active) continue;
+      const pulse = 0.8 + Math.sin(frame * 0.08) * 0.2;
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(frame * 0.03);
+      ctx.strokeStyle = `rgba(255,210,80,${pulse})`;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-9, -9, 18, 18);
+      ctx.fillStyle = `rgba(255,210,80,${pulse * 0.3})`;
+      ctx.fillRect(-8, -8, 16, 16);
+      ctx.font = '12px serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(255,255,255,${pulse})`;
+      ctx.fillText('?', 0, 4);
+      ctx.restore();
+    }
+  }
+
+  function drawKart(ctx, k, frame) {
+    ctx.save();
+    ctx.translate(k.x, k.y);
+    ctx.rotate(k.angle);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(2, 3, 14, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = k.stunned > 0 ? '#ff6b6b' : k.color;
+    ctx.beginPath();
+    ctx.roundRect(-14, -8, 28, 16, 4);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath();
+    ctx.ellipse(2, -1, 7, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if(k.isPlayer) {
+      ctx.fillStyle = '#ffd166';
+      ctx.beginPath();
+      ctx.arc(2, -1, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = '#222';
+    [[-10,-9],[8,-9],[-10,7],[8,7]].forEach(([wx, wy]) => {
+      ctx.beginPath();
+      ctx.roundRect(wx - 4, wy - 3, 8, 6, 2);
+      ctx.fill();
+    });
+
+    ctx.fillStyle = k.color;
+    ctx.fillRect(-14, -11, 4, 6);
+    ctx.fillRect(-14, 5, 4, 6);
+
+    ctx.restore();
+
+    ctx.save();
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 4;
+    ctx.fillText(k.name, k.x, k.y - 18);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    if(k.item) {
+      ctx.font = '14px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(k.item, k.x, k.y - 30);
+    }
+  }
+
+  function drawHUD(ctx, W, H, player, maxLaps) {
+    const spd = Math.abs(player.speed) / 4.2;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.beginPath();
+    ctx.roundRect(W - 120, H - 50, 110, 36, 8);
+    ctx.fill();
+
+    const grad = ctx.createLinearGradient(W - 115, 0, W - 15, 0);
+    grad.addColorStop(0, '#06d6a0');
+    grad.addColorStop(0.6, '#ffd166');
+    grad.addColorStop(1, '#e63946');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(W - 115, H - 44, 100 * spd, 24, 4);
+    ctx.fill();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${Math.floor(Math.abs(player.speed) * 60)} km/h`, W - 113, H - 25);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.beginPath();
+    ctx.roundRect(10, H - 60, 52, 52, 8);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,200,80,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    if(player.item) {
+      ctx.font = '28px serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(player.item, 36, H - 26);
+    } else {
+      ctx.font = '24px serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.textAlign = 'center';
+      ctx.fillText('❓', 36, H - 26);
+    }
+
+    if(player.item) {
+      ctx.font = '9px monospace';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.textAlign = 'center';
+      ctx.fillText('ESPACIO', 36, H - 10);
+    }
+  }
+
+  function drawCountdown(ctx, W, H, countdown) {
+    const txt = countdown > 0 ? Math.ceil(countdown).toString() : '¡GO!';
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 80px monospace';
+    ctx.fillStyle = '#ffd166';
+    ctx.shadowColor = '#e63946';
+    ctx.shadowBlur = 20;
+    ctx.fillText(txt, W / 2, H / 2 + 30);
+    ctx.restore();
+  }
+
+  function drawFinish(ctx, W, H, finishOrder, allKarts) {
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.beginPath();
+    ctx.roundRect(W/2 - 170, H/2 - 90, 340, 200, 14);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd166';
+    ctx.font = 'bold 24px monospace';
+    ctx.fillText('¡CARRERA TERMINADA!', W/2, H/2 - 58);
+
+    const medals = ['🥇','🥈','🥉','4to','5to'];
+    const ordered = [...finishOrder, ...allKarts.filter(k => !finishOrder.includes(k)).sort((a,b) => b.progress - a.progress)];
+    ordered.forEach((k, i) => {
+      ctx.fillStyle = k.isPlayer ? '#ffd166' : '#aaa';
+      ctx.font = `${k.isPlayer ? 'bold ' : ''}16px monospace`;
+      ctx.fillText(`${medals[i] || (i+1)+'°'}  ${k.name}`, W/2, H/2 - 22 + i * 28);
+    });
+
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '12px monospace';
+    ctx.fillText('Presiona F5 para reiniciar', W/2, H/2 + 118);
+  }
+
+  return {
+    TRACK_W,
+    KART_COLORS,
+    addDust,
+    addBoom,
+    updateParticles,
+    drawParticles,
+    buildTrackCanvas,
+    drawItemBoxes,
+    drawKart,
+    drawHUD,
+    drawCountdown,
+    drawFinish
+  };
+})();
+
+// ================================================================
+//  CLAUDE KART - CLASE PRINCIPAL
+// ================================================================
 class ClaudeKart {
   constructor(opts={}) {
-    this.opts      = opts;
-    this.isMulti   = opts.mode === 'multi';
-    this.myId      = opts.playerId || 'local';
-    this.nick      = (opts.nick || 'TÚ').slice(0,10);
-    this.db        = opts.db        || null;
-    this.fbRef     = opts.fbRef     || null;
-    this.fbUpdate  = opts.fbUpdate  || null;
+    this.opts = opts;
+    this.isMulti = opts.mode === 'multi';
+    this.myId = opts.playerId || 'local';
+    this.nick = (opts.nick || 'TÚ').slice(0,10);
+    this.db = opts.db || null;
+    this.fbRef = opts.fbRef || null;
+    this.fbUpdate = opts.fbUpdate || null;
     this.fbOnValue = opts.fbOnValue || null;
-    this.roomCode  = opts.roomCode  || null;
+    this.roomCode = opts.roomCode || null;
 
     this.canvas = document.getElementById('gameCanvas');
-    this.ctx    = this.canvas.getContext('2d');
+    this.ctx = this.canvas.getContext('2d');
     this.resize();
     window.addEventListener('resize', () => this.resize());
 
-    this.frame = 0; this.lastTime = 0;
+    this.frame = 0;
+    this.lastTime = 0;
     this.gameState = 'countdown';
-    this.countdown = 3; this.countTimer = 1;
-    this.finishOrder = []; this.MAX_LAPS = 3;
+    this.countdown = 3;
+    this.countTimer = 1;
+    this.finishOrder = [];
+    this.MAX_LAPS = 3;
     this.ITEMS = ['🍄','⚡','⭐','🛡️'];
-    this.keys = {}; this.netSyncTimer = 0;
+    this.keys = {};
+    this.netSyncTimer = 0;
 
     this.setupKeyboard();
     this.setupTouch();
 
-    this.track       = this.buildTrack();
+    this.track = this.buildTrack();
     this.trackCanvas = Renderer.buildTrackCanvas(this.W, this.H, this.track);
-    this.itemBoxes   = this.placeItemBoxes();
-    this.karts       = this.createKarts();
-    this.player      = this.karts[0];
+    this.itemBoxes = this.placeItemBoxes();
+    this.karts = this.createKarts();
+    this.player = this.karts[0];
 
     if(this.isMulti && this.db) this.setupNetListener();
 
     requestAnimationFrame(ts => this.loop(ts));
   }
 
-  // ── SIZE ────────────────────────────────────────────────────
   resize() {
     const isMobile = window.innerWidth < 600;
-    const touchH   = isMobile ? 158 : 0;
-    const hintH    = isMobile ? 0   : 38;
-    const vw=window.innerWidth, vh=window.innerHeight;
+    const touchH = isMobile ? 158 : 0;
+    const hintH = isMobile ? 0 : 38;
+    const vw = window.innerWidth, vh = window.innerHeight;
     const avH = vh - touchH - hintH - 12;
     const W = Math.min(vw - 8, Math.round(avH / 0.68), 800);
     const H = Math.round(W * 0.68);
-    this.W=W; this.H=H;
-    this.canvas.width=W; this.canvas.height=H;
+    this.W = W;
+    this.H = H;
+    this.canvas.width = W;
+    this.canvas.height = H;
     if(this.track) this.trackCanvas = Renderer.buildTrackCanvas(W, H, this.track);
   }
 
-  // ── KEYBOARD ────────────────────────────────────────────────
   setupKeyboard() {
     window.addEventListener('keydown', e => {
-      this.keys[e.code]=true;
+      this.keys[e.code] = true;
       if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))
         e.preventDefault();
     });
-    window.addEventListener('keyup', e => { this.keys[e.code]=false; });
+    window.addEventListener('keyup', e => { this.keys[e.code] = false; });
   }
 
-  // ── TOUCH ───────────────────────────────────────────────────
   setupTouch() {
     const map = {
       'tb-up':'ArrowUp','tb-down':'ArrowDown',
@@ -447,296 +753,324 @@ class ClaudeKart {
     Object.entries(map).forEach(([id,code]) => {
       const el = document.getElementById(id);
       if(!el) return;
-      const on  = e => { e.preventDefault(); this.keys[code]=true;
-        if(code==='Space') this.tryUseItem(this.player); };
-      const off = e => { e.preventDefault(); this.keys[code]=false; };
-      el.addEventListener('touchstart', on,  {passive:false});
-      el.addEventListener('touchend',   off, {passive:false});
-      el.addEventListener('touchcancel',off, {passive:false});
-      el.addEventListener('mousedown',on); el.addEventListener('mouseup',off);
-      el.addEventListener('mouseleave',off);
+      const on = e => { 
+        e.preventDefault(); 
+        this.keys[code] = true;
+        if(code === 'Space') this.tryUseItem(this.player);
+      };
+      const off = e => { e.preventDefault(); this.keys[code] = false; };
+      el.addEventListener('touchstart', on, {passive:false});
+      el.addEventListener('touchend', off, {passive:false});
+      el.addEventListener('touchcancel', off, {passive:false});
+      el.addEventListener('mousedown', on);
+      el.addEventListener('mouseup', off);
+      el.addEventListener('mouseleave', off);
     });
   }
 
-  // ── TRACK ───────────────────────────────────────────────────
   buildTrack() {
-    const pts=[], cx=this.W/2, cy=this.H/2;
-    const rx=this.W*0.37, ry=this.H*0.36;
-    for(let i=0;i<=180;i++) {
-      const a=(i/180)*Math.PI*2;
-      pts.push({ x:cx+Math.cos(a)*rx+Math.sin(a*2)*18, y:cy+Math.sin(a)*ry+Math.cos(a*3)*10 });
+    const pts = [], cx = this.W/2, cy = this.H/2;
+    const rx = this.W*0.37, ry = this.H*0.36;
+    for(let i=0; i<=180; i++) {
+      const a = (i/180)*Math.PI*2;
+      pts.push({ x: cx+Math.cos(a)*rx+Math.sin(a*2)*18, y: cy+Math.sin(a)*ry+Math.cos(a*3)*10 });
     }
     return pts;
   }
+
   tangentAt(i) {
-    const n=this.track.length-1;
-    const a=this.track[Math.max(0,i-1)], b=this.track[Math.min(n,i+1)];
-    const dx=b.x-a.x, dy=b.y-a.y, len=Math.hypot(dx,dy)||1;
-    return {tx:dx/len,ty:dy/len,nx:-dy/len,ny:dx/len};
+    const n = this.track.length-1;
+    const a = this.track[Math.max(0,i-1)], b = this.track[Math.min(n,i+1)];
+    const dx = b.x-a.x, dy = b.y-a.y, len = Math.hypot(dx,dy)||1;
+    return { tx: dx/len, ty: dy/len, nx: -dy/len, ny: dx/len };
   }
+
   nearestTrackIdx(x,y) {
-    let best=0,bd=1e9;
-    for(let i=0;i<this.track.length;i++){
-      const dx=this.track[i].x-x,dy=this.track[i].y-y,d=dx*dx+dy*dy;
-      if(d<bd){bd=d;best=i;}
+    let best=0, bd=1e9;
+    for(let i=0; i<this.track.length; i++) {
+      const dx = this.track[i].x-x, dy = this.track[i].y-y, d = dx*dx+dy*dy;
+      if(d<bd) { bd=d; best=i; }
     }
     return best;
   }
-  trackDist(x,y) {
-    const i=this.nearestTrackIdx(x,y),p=this.track[i];
-    const d=Math.hypot(p.x-x,p.y-y),half=Renderer.TRACK_W/2;
-    return {onTrack:d<half+2,excess:Math.max(0,d-half)};
-  }
-  trackProgress(x,y){return this.nearestTrackIdx(x,y)/this.track.length;}
 
-  // ── ITEM BOXES ──────────────────────────────────────────────
+  trackDist(x,y) {
+    const i = this.nearestTrackIdx(x,y), p = this.track[i];
+    const d = Math.hypot(p.x-x, p.y-y), half = Renderer.TRACK_W/2;
+    return { onTrack: d<half+2, excess: Math.max(0, d-half) };
+  }
+
+  trackProgress(x,y) { return this.nearestTrackIdx(x,y)/this.track.length; }
+
   placeItemBoxes() {
-    const boxes=[];
-    for(let i=0;i<8;i++){
-      const idx=Math.floor(i/8*this.track.length),p=this.track[idx];
-      boxes.push({x:p.x,y:p.y,active:true,cooldown:0});
+    const boxes = [];
+    for(let i=0; i<8; i++) {
+      const idx = Math.floor(i/8*this.track.length), p = this.track[idx];
+      boxes.push({ x:p.x, y:p.y, active:true, cooldown:0 });
     }
     return boxes;
   }
 
-  // ── KARTS ───────────────────────────────────────────────────
   createKarts() {
-    const names=[this.nick,'BLAZE','SHADOW','NOVA','RAPID'];
-    return names.map((name,i)=>{
-      const sIdx=Math.floor(i/names.length*this.track.length);
-      const p=this.track[sIdx],t=this.tangentAt(sIdx);
-      const off=(i%2===0?1:-1)*(i===0?0:14);
+    const names = [this.nick, 'BLAZE', 'SHADOW', 'NOVA', 'RAPID'];
+    return names.map((name,i) => {
+      const sIdx = Math.floor(i/names.length*this.track.length);
+      const p = this.track[sIdx], t = this.tangentAt(sIdx);
+      const off = (i%2===0?1:-1)*(i===0?0:14);
       return {
-        x:p.x+t.nx*off, y:p.y+t.ny*off,
-        angle:Math.atan2(t.ty,t.tx),
-        speed:0,steer:0,lap:1,lapsDone:0,
-        progress:sIdx/this.track.length,
-        lastProgress:sIdx/this.track.length,
-        totalProgress:sIdx/this.track.length,
-        lastSectorIdx:sIdx, sectorForward:true,
-        item:null,itemTimer:0,stunned:0,
-        color:Renderer.KART_COLORS[i],
-        name,isPlayer:i===0,isRemote:false,
-        netId:i===0?this.myId:`ai${i}`,
-        pos:i+1,aiTargetIdx:sIdx
+        x: p.x+t.nx*off, y: p.y+t.ny*off,
+        angle: Math.atan2(t.ty,t.tx),
+        speed: 0, steer: 0, lap: 1, lapsDone: 0,
+        progress: sIdx/this.track.length,
+        lastProgress: sIdx/this.track.length,
+        totalProgress: sIdx/this.track.length,
+        lastSectorIdx: sIdx, sectorForward: true,
+        item: null, itemTimer: 0, stunned: 0,
+        color: Renderer.KART_COLORS[i],
+        name: name, isPlayer: i===0, isRemote: false,
+        netId: i===0?this.myId:`ai${i}`,
+        pos: i+1, aiTargetIdx: sIdx
       };
     });
   }
 
-  // ── NETWORK LISTENER ────────────────────────────────────────
   setupNetListener() {
-    this.fbOnValue(this.fbRef(this.db,`rooms/${this.roomCode}/players`), snap=>{
-      const data=snap.val()||{};
-      Object.entries(data).forEach(([pid,pdata])=>{
-        if(pid===this.myId) return;
-        let rk=this.karts.find(k=>k.netId===pid);
-        if(!rk){
-          rk=this.karts.find(k=>!k.isPlayer&&!k.isRemote);
-          if(rk){
-            rk.isRemote=true; rk.netId=pid;
-            rk.name=(pdata.nick||pid).slice(0,10).toUpperCase();
-            rk.color=Renderer.KART_COLORS[pdata.color||1];
+    this.fbOnValue(this.fbRef(this.db, `rooms/${this.roomCode}/players`), snap => {
+      const data = snap.val() || {};
+      Object.entries(data).forEach(([pid, pdata]) => {
+        if(pid === this.myId) return;
+        let rk = this.karts.find(k => k.netId === pid);
+        if(!rk) {
+          rk = this.karts.find(k => !k.isPlayer && !k.isRemote);
+          if(rk) {
+            rk.isRemote = true;
+            rk.netId = pid;
+            rk.name = (pdata.nick || pid).slice(0,10).toUpperCase();
+            rk.color = Renderer.KART_COLORS[pdata.color || 1];
           }
         }
-        if(rk&&pdata.state){
-          const s=pdata.state;
-          // Smooth interpolation for remote karts
-          rk.x    +=((s.x    ??rk.x   )-rk.x   )*0.35;
-          rk.y    +=((s.y    ??rk.y   )-rk.y   )*0.35;
-          rk.angle  = s.angle ??rk.angle;
-          rk.speed  = s.speed ??rk.speed;
-          rk.lap    = s.lap   ??rk.lap;
-          rk.item   = s.item  ||null;
-          rk.totalProgress = s.tp??rk.totalProgress;
+        if(rk && pdata.state) {
+          const s = pdata.state;
+          rk.x += ((s.x ?? rk.x) - rk.x) * 0.35;
+          rk.y += ((s.y ?? rk.y) - rk.y) * 0.35;
+          rk.angle = s.angle ?? rk.angle;
+          rk.speed = s.speed ?? rk.speed;
+          rk.lap = s.lap ?? rk.lap;
+          rk.item = s.item || null;
+          rk.totalProgress = s.tp ?? rk.totalProgress;
         }
       });
     });
   }
 
-  // ── PUSH STATE ──────────────────────────────────────────────
   pushState() {
-    if(!this.isMulti||!this.db||!this.player) return;
-    const k=this.player;
+    if(!this.isMulti || !this.db || !this.player) return;
+    const k = this.player;
     this.fbUpdate(
-      this.fbRef(this.db,`rooms/${this.roomCode}/players/${this.myId}`),
-      { state:{
-        x:Math.round(k.x*10)/10, y:Math.round(k.y*10)/10,
-        angle:Math.round(k.angle*100)/100,
-        speed:Math.round(k.speed*100)/100,
-        lap:k.lap, item:k.item||null,
-        tp:Math.round(k.totalProgress*1000)/1000
+      this.fbRef(this.db, `rooms/${this.roomCode}/players/${this.myId}`),
+      { state: {
+        x: Math.round(k.x*10)/10, y: Math.round(k.y*10)/10,
+        angle: Math.round(k.angle*100)/100,
+        speed: Math.round(k.speed*100)/100,
+        lap: k.lap, item: k.item || null,
+        tp: Math.round(k.totalProgress*1000)/1000
       }}
-    ).catch(()=>{});
+    ).catch(() => {});
   }
 
-  // ── PHYSICS ─────────────────────────────────────────────────
-  updateKart(k,dt) {
-    const MAX=4.2,ACCEL=0.12,BRAKE=0.18,FRIC=0.035,TURN=0.048;
-    if(k.isRemote) return; // state comes from firebase
+  updateKart(k, dt) {
+    const MAX = 4.2, ACCEL = 0.12, BRAKE = 0.18, FRIC = 0.035, TURN = 0.048;
+    if(k.isRemote) return;
 
-    if(k.stunned>0){
-      k.stunned-=dt; k.speed*=0.93;
-      k.x+=Math.cos(k.angle)*k.speed;
-      k.y+=Math.sin(k.angle)*k.speed;
-      this.updateLapCount(k); return;
+    if(k.stunned > 0) {
+      k.stunned -= dt;
+      k.speed *= 0.93;
+      k.x += Math.cos(k.angle) * k.speed;
+      k.y += Math.sin(k.angle) * k.speed;
+      this.updateLapCount(k);
+      return;
     }
 
-    if(k.isPlayer){
-      let steer=0;
-      if(this.keys['ArrowLeft'])  steer=-1;
-      if(this.keys['ArrowRight']) steer=1;
-      k.steer+=(steer-k.steer)*0.25;
+    if(k.isPlayer) {
+      let steer = 0;
+      if(this.keys['ArrowLeft']) steer = -1;
+      if(this.keys['ArrowRight']) steer = 1;
+      k.steer += (steer - k.steer) * 0.25;
       if(this.keys['ArrowUp'])
-        k.speed=Math.min(k.speed+ACCEL,MAX);
+        k.speed = Math.min(k.speed + ACCEL, MAX);
       else if(this.keys['ArrowDown'])
-        k.speed=Math.max(k.speed-BRAKE,-MAX*0.4);
-      else { k.speed*=(1-FRIC); if(Math.abs(k.speed)<0.05) k.speed=0; }
-      if(this.keys['Space']&&k.item&&k.itemTimer<=0){
-        this.tryUseItem(k); this.keys['Space']=false;
+        k.speed = Math.max(k.speed - BRAKE, -MAX*0.4);
+      else {
+        k.speed *= (1-FRIC);
+        if(Math.abs(k.speed) < 0.05) k.speed = 0;
+      }
+      if(this.keys['Space'] && k.item && k.itemTimer <= 0) {
+        this.tryUseItem(k);
+        this.keys['Space'] = false;
       }
     } else {
-      // AI
-      const la=Math.min(this.track.length-1,Math.floor(12+k.speed*3));
-      const tidx=(k.aiTargetIdx+la)%this.track.length;
-      const tp=this.track[tidx];
-      const desired=Math.atan2(tp.y-k.y,tp.x-k.x);
-      let diff=desired-k.angle;
-      while(diff>Math.PI)  diff-=Math.PI*2;
-      while(diff<-Math.PI) diff+=Math.PI*2;
-      k.steer=Math.max(-1,Math.min(1,diff*2));
-      const tspd=MAX*(0.82+(5-k.pos)*0.02);
-      k.speed=k.speed<tspd?Math.min(k.speed+ACCEL*0.9,tspd):k.speed*(1-FRIC);
-      if(k.item&&Math.random()<0.003) this.tryUseItem(k);
+      const la = Math.min(this.track.length-1, Math.floor(12 + k.speed*3));
+      const tidx = (k.aiTargetIdx + la) % this.track.length;
+      const tp = this.track[tidx];
+      const desired = Math.atan2(tp.y - k.y, tp.x - k.x);
+      let diff = desired - k.angle;
+      while(diff > Math.PI) diff -= Math.PI*2;
+      while(diff < -Math.PI) diff += Math.PI*2;
+      k.steer = Math.max(-1, Math.min(1, diff*2));
+      const tspd = MAX * (0.82 + (5-k.pos)*0.02);
+      k.speed = k.speed < tspd ? Math.min(k.speed + ACCEL*0.9, tspd) : k.speed*(1-FRIC);
+      if(k.item && Math.random() < 0.003) this.tryUseItem(k);
     }
 
-    if(Math.abs(k.speed)>0.1){
-      const eff=Math.min(1,Math.abs(k.speed)/2);
-      k.angle+=k.steer*TURN*eff*Math.sign(k.speed);
+    if(Math.abs(k.speed) > 0.1) {
+      const eff = Math.min(1, Math.abs(k.speed)/2);
+      k.angle += k.steer * TURN * eff * Math.sign(k.speed);
     }
 
-    // Move — always allowed (can leave track)
-    k.x+=Math.cos(k.angle)*k.speed;
-    k.y+=Math.sin(k.angle)*k.speed;
+    k.x += Math.cos(k.angle) * k.speed;
+    k.y += Math.sin(k.angle) * k.speed;
 
-    // Off-track graduated slowdown
-    const {onTrack,excess}=this.trackDist(k.x,k.y);
-    if(!onTrack){
-      // 0px off → 4% drag, 50px+ off → 22% drag
-      const penalty=0.04+Math.min(1,excess/50)*0.18;
-      k.speed*=(1-penalty);
-      Renderer.addDust(k.x,k.y,'#8B7355');
-      if(!k.isPlayer){
-        // AI steers back
-        const ni=this.nearestTrackIdx(k.x,k.y);
-        const tp=this.track[ni];
-        const back=Math.atan2(tp.y-k.y,tp.x-k.x);
-        let d2=back-k.angle;
-        while(d2>Math.PI)  d2-=Math.PI*2;
-        while(d2<-Math.PI) d2+=Math.PI*2;
-        k.steer=Math.max(-1,Math.min(1,d2*3));
+    const { onTrack, excess } = this.trackDist(k.x, k.y);
+    if(!onTrack) {
+      const penalty = 0.04 + Math.min(1, excess/50)*0.18;
+      k.speed *= (1-penalty);
+      Renderer.addDust(k.x, k.y, '#8B7355');
+      if(!k.isPlayer) {
+        const ni = this.nearestTrackIdx(k.x, k.y);
+        const tp = this.track[ni];
+        const back = Math.atan2(tp.y - k.y, tp.x - k.x);
+        let d2 = back - k.angle;
+        while(d2 > Math.PI) d2 -= Math.PI*2;
+        while(d2 < -Math.PI) d2 += Math.PI*2;
+        k.steer = Math.max(-1, Math.min(1, d2*3));
       }
-    } else if(Math.abs(k.speed)>2&&Math.random()<0.12){
-      Renderer.addDust(k.x,k.y,k.color+'88');
+    } else if(Math.abs(k.speed) > 2 && Math.random() < 0.12) {
+      Renderer.addDust(k.x, k.y, k.color+'88');
     }
 
-    k.x=Math.max(5,Math.min(this.W-5,k.x));
-    k.y=Math.max(5,Math.min(this.H-5,k.y));
-    if(!k.isPlayer) k.aiTargetIdx=this.nearestTrackIdx(k.x,k.y);
+    k.x = Math.max(5, Math.min(this.W-5, k.x));
+    k.y = Math.max(5, Math.min(this.H-5, k.y));
+    if(!k.isPlayer) k.aiTargetIdx = this.nearestTrackIdx(k.x, k.y);
 
-    // Item pickup
-    if(!k.item&&k.itemTimer<=0){
-      for(const box of this.itemBoxes){
-        if(box.active&&Math.hypot(box.x-k.x,box.y-k.y)<18){
-          k.item=this.ITEMS[Math.floor(Math.random()*this.ITEMS.length)];
-          box.active=false; box.cooldown=8; break;
+    if(!k.item && k.itemTimer <= 0) {
+      for(const box of this.itemBoxes) {
+        if(box.active && Math.hypot(box.x - k.x, box.y - k.y) < 18) {
+          k.item = this.ITEMS[Math.floor(Math.random() * this.ITEMS.length)];
+          box.active = false;
+          box.cooldown = 8;
+          break;
         }
       }
     }
-    if(k.itemTimer>0) k.itemTimer-=dt;
+    if(k.itemTimer > 0) k.itemTimer -= dt;
     this.updateLapCount(k);
   }
 
-  // ── ANTI-CHEAT LAP COUNT ────────────────────────────────────
-  // Lap only counted crossing finish going FORWARD (prevents reverse exploit)
-  updateLapCount(k){
-    const prog=this.trackProgress(k.x,k.y);
-    const curIdx=this.nearestTrackIdx(k.x,k.y);
-    let delta=curIdx-k.lastSectorIdx;
-    if(delta>this.track.length/2)  delta-=this.track.length;
-    if(delta<-this.track.length/2) delta+=this.track.length;
-    if(Math.abs(delta)>0) k.sectorForward=(delta>0);
-    k.lastSectorIdx=curIdx;
+  updateLapCount(k) {
+    const prog = this.trackProgress(k.x, k.y);
+    const curIdx = this.nearestTrackIdx(k.x, k.y);
+    let delta = curIdx - k.lastSectorIdx;
+    if(delta > this.track.length/2) delta -= this.track.length;
+    if(delta < -this.track.length/2) delta += this.track.length;
+    if(Math.abs(delta) > 0) k.sectorForward = (delta > 0);
+    k.lastSectorIdx = curIdx;
 
-    if(k.lastProgress>0.85&&prog<0.15&&k.speed>0.1&&k.sectorForward){
+    if(k.lastProgress > 0.85 && prog < 0.15 && k.speed > 0.1 && k.sectorForward) {
       k.lapsDone++;
-      k.lap=Math.min(k.lapsDone+1,this.MAX_LAPS+1);
-      if(k.lapsDone>=this.MAX_LAPS&&!this.finishOrder.includes(k)){
+      k.lap = Math.min(k.lapsDone+1, this.MAX_LAPS+1);
+      if(k.lapsDone >= this.MAX_LAPS && !this.finishOrder.includes(k)) {
         this.finishOrder.push(k);
-        if(k.isPlayer) this.gameState='finished';
+        if(k.isPlayer) this.gameState = 'finished';
       }
-      if(k.isPlayer) Renderer.addBoom(k.x,k.y);
+      if(k.isPlayer) Renderer.addBoom(k.x, k.y);
     }
-    k.lastProgress=prog;
-    k.totalProgress=k.lapsDone+(k.sectorForward?prog:0);
+    k.lastProgress = prog;
+    k.totalProgress = k.lapsDone + (k.sectorForward ? prog : 0);
   }
 
-  // ── ITEMS ───────────────────────────────────────────────────
-  tryUseItem(k){
-    if(!k||!k.item||k.itemTimer>0) return;
-    const item=k.item; k.item=null; k.itemTimer=0.5;
-    if(item==='🍄'){ k.speed=Math.min(4.2*1.5,k.speed+2.5); Renderer.addBoom(k.x,k.y); }
-    else if(item==='⚡'){
-      for(const o of this.karts){
-        if(o!==k&&Math.hypot(o.x-k.x,o.y-k.y)<130){ o.stunned=1.5; Renderer.addBoom(o.x,o.y); }
+  tryUseItem(k) {
+    if(!k || !k.item || k.itemTimer > 0) return;
+    const item = k.item;
+    k.item = null;
+    k.itemTimer = 0.5;
+    if(item === '🍄') { 
+      k.speed = Math.min(4.2*1.5, k.speed+2.5); 
+      Renderer.addBoom(k.x, k.y); 
+    }
+    else if(item === '⚡') {
+      for(const o of this.karts) {
+        if(o !== k && Math.hypot(o.x - k.x, o.y - k.y) < 130) { 
+          o.stunned = 1.5; 
+          Renderer.addBoom(o.x, o.y); 
+        }
       }
-    } else if(item==='⭐'){ k.speed=Math.min(4.2*1.3,k.speed+1.5); Renderer.addBoom(k.x,k.y); }
-  }
-
-  updateRankings(){
-    [...this.karts].sort((a,b)=>b.totalProgress-a.totalProgress).forEach((k,i)=>k.pos=i+1);
-  }
-
-  // ── LOOP ────────────────────────────────────────────────────
-  loop(ts){
-    const dt=Math.min((ts-this.lastTime)/1000,0.033);
-    this.lastTime=ts; this.frame++;
-
-    if(this.gameState==='countdown'){
-      this.countTimer-=dt;
-      if(this.countTimer<=0){ this.countdown--; this.countTimer=1; if(this.countdown<0) this.gameState='racing'; }
+    } 
+    else if(item === '⭐') { 
+      k.speed = Math.min(4.2*1.3, k.speed+1.5); 
+      Renderer.addBoom(k.x, k.y); 
     }
-    if(this.gameState==='racing'){
-      this.karts.forEach(k=>this.updateKart(k,dt));
+  }
+
+  updateRankings() {
+    [...this.karts].sort((a,b) => b.totalProgress - a.totalProgress).forEach((k,i) => k.pos = i+1);
+  }
+
+  loop(ts) {
+    const dt = Math.min((ts - this.lastTime)/1000, 0.033);
+    this.lastTime = ts;
+    this.frame++;
+
+    if(this.gameState === 'countdown') {
+      this.countTimer -= dt;
+      if(this.countTimer <= 0) {
+        this.countdown--;
+        this.countTimer = 1;
+        if(this.countdown < 0) this.gameState = 'racing';
+      }
+    }
+    
+    if(this.gameState === 'racing') {
+      this.karts.forEach(k => this.updateKart(k, dt));
       this.updateRankings();
-      for(const b of this.itemBoxes){ if(!b.active){b.cooldown-=dt; if(b.cooldown<=0) b.active=true;} }
-      if(this.isMulti){ this.netSyncTimer+=dt; if(this.netSyncTimer>0.1){this.netSyncTimer=0;this.pushState();} }
+      for(const b of this.itemBoxes) {
+        if(!b.active) {
+          b.cooldown -= dt;
+          if(b.cooldown <= 0) b.active = true;
+        }
+      }
+      if(this.isMulti) {
+        this.netSyncTimer += dt;
+        if(this.netSyncTimer > 0.1) {
+          this.netSyncTimer = 0;
+          this.pushState();
+        }
+      }
     }
 
     Renderer.updateParticles();
-    const ctx=this.ctx;
-    ctx.drawImage(this.trackCanvas,0,0);
-    Renderer.drawItemBoxes(ctx,this.itemBoxes,this.frame);
+    const ctx = this.ctx;
+    ctx.drawImage(this.trackCanvas, 0, 0);
+    Renderer.drawItemBoxes(ctx, this.itemBoxes, this.frame);
     Renderer.drawParticles(ctx);
-    [...this.karts].sort((a,b)=>a.y-b.y).forEach(k=>Renderer.drawKart(ctx,k,this.frame));
-    Renderer.drawHUD(ctx,this.W,this.H,this.player,this.MAX_LAPS);
+    [...this.karts].sort((a,b) => a.y - b.y).forEach(k => Renderer.drawKart(ctx, k, this.frame));
+    Renderer.drawHUD(ctx, this.W, this.H, this.player, this.MAX_LAPS);
 
-    // Top HUD bar
-    ctx.fillStyle='rgba(0,0,0,0.55)';
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.beginPath();
-    ctx.roundRect(this.W/2-115,8,230,30,8);
+    ctx.roundRect(this.W/2-115, 8, 230, 30, 8);
     ctx.fill();
-    ctx.fillStyle='#ffd166';
-    ctx.font='bold 13px monospace';
-    ctx.textAlign='center';
+    ctx.fillStyle = '#ffd166';
+    ctx.font = 'bold 13px monospace';
+    ctx.textAlign = 'center';
     ctx.fillText(
-      `Vuelta ${Math.min(this.player.lap,this.MAX_LAPS)}/${this.MAX_LAPS}   Pos ${this.player.pos}/${this.karts.length}${this.isMulti?' 🌐':''}`,
-      this.W/2,28
+      `Vuelta ${Math.min(this.player.lap, this.MAX_LAPS)}/${this.MAX_LAPS}   Pos ${this.player.pos}/${this.karts.length}${this.isMulti ? ' 🌐' : ''}`,
+      this.W/2, 28
     );
 
-    if(this.gameState==='countdown') Renderer.drawCountdown(ctx,this.W,this.H,this.countdown);
-    if(this.gameState==='finished')  Renderer.drawFinish(ctx,this.W,this.H,this.finishOrder,this.karts);
+    if(this.gameState === 'countdown') Renderer.drawCountdown(ctx, this.W, this.H, this.countdown);
+    if(this.gameState === 'finished') Renderer.drawFinish(ctx, this.W, this.H, this.finishOrder, this.karts);
 
-    requestAnimationFrame(ts=>this.loop(ts));
+    requestAnimationFrame(ts => this.loop(ts));
   }
 }
 </script>
